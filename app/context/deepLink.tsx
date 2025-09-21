@@ -6,7 +6,7 @@ export type DeepLinkContextType = {};
 
 const DeepLinkContext = createContext<DeepLinkContextType | null>(null);
 
-export default function DeepLinkProvider({
+export default function DeeplinkProvider({
   children,
 }: {
   children: ReactNode;

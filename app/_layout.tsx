@@ -1,8 +1,8 @@
 import { Stack } from "expo-router";
 import { View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import DeepLinkProvider from "./context/deepLink";
-import DescopeProvider from "./descope/descopeProvider";
+import DeeplinkProvider from "./context/deeplink";
+import DescopeProvider from "./context/descope";
 
 export default function RootLayout() {
   return (
@@ -11,7 +11,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }}>
           {/* DeepLink */}
-          <DeepLinkProvider>
+          <DeeplinkProvider>
             {/* Descope */}
             <DescopeProvider>
               {/* Router */}
@@ -25,7 +25,7 @@ export default function RootLayout() {
               {/* Router - END */}
             </DescopeProvider>
             {/* Descope - END */}
-          </DeepLinkProvider>
+          </DeeplinkProvider>
           {/* DeepLink - END */}
         </SafeAreaView>
       </SafeAreaProvider>

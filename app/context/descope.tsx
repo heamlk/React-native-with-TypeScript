@@ -42,7 +42,7 @@ export default function DescopeProvider({ children }: DescopeProviderProps) {
       usePKCE: true,
       scopes: ["openid", "profile", "email"],
       extraParams: {
-        flow: "sign-up-or-in-native",
+        flow: "sign-up-or-in",
       },
     },
     discovery
