@@ -1,27 +1,35 @@
 import { Stack } from "expo-router";
 import { View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import DeepLinkProvider from "./context/deepLink";
+import DescopeProvider from "./descope/descopeProvider";
 
 export default function RootLayout() {
   return (
-    // <AutoLayout>
     <View style={{ flex: 1, backgroundColor: "black" }}>
-      {/* Descope */}
-      {/* <AuthProvider projectId='P2fawBqqYZBLazNBF0lZ03UdzLQB'> */}
       {/* Safe Area */}
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }}>
-          {/* Router */}
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index"></Stack.Screen>
-          </Stack>
-          {/* Router - END */}
+          {/* DeepLink */}
+          <DeepLinkProvider>
+            {/* Descope */}
+            <DescopeProvider>
+              {/* Router */}
+              <Stack
+                screenOptions={{ headerShown: true }}
+                initialRouteName="index"
+              >
+                <Stack.Screen name="index"></Stack.Screen>
+                <Stack.Screen name="auth"></Stack.Screen>
+              </Stack>
+              {/* Router - END */}
+            </DescopeProvider>
+            {/* Descope - END */}
+          </DeepLinkProvider>
+          {/* DeepLink - END */}
         </SafeAreaView>
       </SafeAreaProvider>
       {/* Safe Area - END */}
-      {/* </AuthProvider> */}
-      {/* Descope - END */}
     </View>
-    // </AutoLayout>
   );
 }
