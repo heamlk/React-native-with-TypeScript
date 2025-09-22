@@ -1,11 +1,16 @@
-import { Link } from "expo-router";
-import { Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { useTheme } from "./context/theme";
+import useBreakpoints from "./hooks/breakpoints";
 
 export default function Index() {
-  return (
-    <View>
-      <Text>Test</Text>
-      <Link href="/auth">Auth</Link>
-    </View>
-  );
+  const { theme } = useTheme();
+  const breakpoints = useBreakpoints();
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+  });
+
+  return <View style={styles.container}></View>;
 }

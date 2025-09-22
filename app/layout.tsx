@@ -11,6 +11,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   const styles = StyleSheet.create({
     root: {
+      height: 100,
       flex: 1,
       fontFamily: vars.fontText,
       fontSize: 16,

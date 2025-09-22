@@ -2,7 +2,7 @@ import * as AuthSession from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { jwtDecode } from "jwt-decode";
 import { ReactNode, useEffect, useState } from "react";
-import { Alert, Button, Text, View } from "react-native";
+import { Alert, View } from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -135,7 +135,7 @@ export default function DescopeProvider({ children }: DescopeProviderProps) {
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ height: "auto" }}>
+      {/* <View style={{ height: "auto" }}>
         <Button
           disabled={!request}
           title="Login"
@@ -145,7 +145,7 @@ export default function DescopeProvider({ children }: DescopeProviderProps) {
       </View>
       {userInfo && (
         <Text style={{ color: "red" }}>{JSON.stringify(userInfo)}</Text>
-      )}
+      )} */}
       <View style={{ flex: 1 }}>{children}</View>
     </View>
   );

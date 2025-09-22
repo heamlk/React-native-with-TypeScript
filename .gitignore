@@ -38,11 +38,12 @@ yarn-error.*
 
 app-example
 
+# Local Netlify folder
+.netlify
+
 # generated native folders
 /ios
 /android
 
 # custom
 private.txt
-# Local Netlify folder
-.netlify

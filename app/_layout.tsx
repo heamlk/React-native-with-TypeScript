@@ -1,4 +1,4 @@
-import { Stack } from "expo-router";
+import { Slot } from "expo-router";
 import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import DeeplinkProvider from "./context/deeplink";
@@ -14,15 +14,7 @@ export default function RootLayout() {
           <DeeplinkProvider>
             <DescopeProvider>
               <Layout>
-                {/* Router */}
-                <Stack
-                  screenOptions={{ headerShown: false }}
-                  initialRouteName="index"
-                >
-                  <Stack.Screen name="index"></Stack.Screen>
-                  <Stack.Screen name="auth"></Stack.Screen>
-                </Stack>
-                {/* Router - END */}
+                <Slot />
               </Layout>
             </DescopeProvider>
           </DeeplinkProvider>

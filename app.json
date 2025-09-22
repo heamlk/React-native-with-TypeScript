@@ -24,6 +24,7 @@
     },
     "web": {
       "output": "static",
+      "bundler": "metro",
       "favicon": "app/assets/images/favicon.png"
     },
     "plugins": [
@@ -33,11 +34,7 @@
         {
           "image": "app/assets/images/splash-icon.png",
           "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "resizeMode": "contain"
         }
       ]
     ],
