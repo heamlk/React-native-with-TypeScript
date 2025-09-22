@@ -29,7 +29,7 @@ const vars = {
   grey5: "#cdd2de",
   grey6: "#e8e9ed",
 
-  text: `"Dosis Variable", sans-serif`,
+  fontText: `"Dosis Variable", sans-serif`,
 };
 
 export default vars;

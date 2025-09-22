@@ -44,3 +44,5 @@ app-example
 
 # custom
 private.txt
+# Local Netlify folder
+.netlify
