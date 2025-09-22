@@ -1,50 +1,31 @@
-# Welcome to your Expo app 👋
+Instructions
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+1. Clone the repo into a folder
+   git clone [repository link] .
 
-## Get started
+2. Install node_modules
+   npm i
 
-1. Install dependencies
+3. Setup Java
+   Install java with version 17.0.16 from https://adoptium.net/temurin/releases/?version=17
+   Add envidomental variable to your windows system
+   Variable name: JAVA_HOME
+   Variable value: [your path to Eclipse Adoptium\jdk-17.0.16.8-hotspot]
+   Open "Path" and add Java path with \bin
 
-   ```bash
-   npm install
-   ```
+4. Create android build
+   npx expo build:android
 
-2. Start the app
+5. Setup local.properties for android
+   Create local.properties file inside android/ folder
+   Add you android sdk path (example: sdk.dir=C:\\Users\\Win11\\AppData\\Local\\Android\\Sdk)
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+6. Setup deeplink for android
+   Open android/app/src/main/AndroidManifest.xml file
+   Add the following code inside <activity> tag
+   <intent-filter>
+   <action android:name="android.intent.action.VIEW"/>
+   <category android:name="android.intent.category.DEFAULT"/>
+   <category android:name="android.intent.category.BROWSABLE"/>
+   <data android:scheme="bfflai"/>
+   </intent-filter>
