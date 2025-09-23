@@ -20,6 +20,9 @@ const vars = {
   green1: "#0fab4b",
   yellow1: "#febe44",
 
+  opacity20: "33",
+  opacity40: "66",
+
   white: "#ffffff",
   black: "#000000",
   grey1: "#424753",
@@ -28,6 +31,8 @@ const vars = {
   grey4: "#979ba5",
   grey5: "#cdd2de",
   grey6: "#e8e9ed",
+
+  borderMd: 24,
 
   fontText: `"Dosis Variable", sans-serif`,
 };

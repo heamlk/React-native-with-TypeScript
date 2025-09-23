@@ -1,3 +1,5 @@
+import FontDosisVariable from "@/app/assets/fonts/Dosis-VariableFont_wght.ttf";
+import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
 import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -7,6 +9,10 @@ import ThemeProvider from "./context/theme";
 import Layout from "./layout";
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    "Dosis Variable": FontDosisVariable,
+  });
+
   return (
     <View style={{ flex: 1 }}>
       <ThemeProvider>

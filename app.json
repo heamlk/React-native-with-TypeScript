@@ -30,13 +30,21 @@
     "plugins": [
       "expo-router",
       [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": true,
+          "supportsPictureInPicture": true
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "app/assets/project/favicon.png",
           "imageWidth": 200,
           "resizeMode": "contain"
         }
-      ]
+      ],
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,
