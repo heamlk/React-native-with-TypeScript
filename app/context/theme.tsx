@@ -7,7 +7,7 @@ import React, {
   type ReactNode,
   type SetStateAction,
 } from "react";
-import { MMKV } from "react-native-mmkv";
+import storage from "../shared/storage/storage";
 export type ThemeType = "light" | "dark";
 export type ThemeContextType = {
   theme: ThemeType;
@@ -17,8 +17,6 @@ export type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export default function ThemeProvider({ children }: { children: ReactNode }) {
-  const storage = new MMKV();
-
   const defaultTheme = "dark";
   const [theme, setTheme] = useState<ThemeType>(
     (storage.getString("app-theme") as ThemeType) || defaultTheme

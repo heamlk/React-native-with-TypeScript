@@ -106,7 +106,12 @@ export default function Index() {
     },
   });
 
-  const carouselItems = [
+  type CarouselItemsType = {
+    videoUrl: any;
+    title: string;
+  }[];
+
+  const carouselItems: CarouselItemsType = [
     {
       videoUrl: VideoCarousel1,
       title: "Fully integrated AI chat, speech, imagery, and animation.",
@@ -156,7 +161,7 @@ export default function Index() {
             style={styles.arrow}
             onPress={() => carouselRef.current?.prev()}
           >
-            <IconArrow style={{ transform: "rotate(180deg)" }} />
+            <IconArrow style={{ transform: [{ rotate: "180deg" }] }} />
           </Pressable>
           <Pressable
             style={styles.arrow}
@@ -179,9 +184,7 @@ export default function Index() {
               <Video
                 style={styles.carouselVideoElement}
                 videoStyle={styles.carouselVideoElement}
-                source={{
-                  uri: item.videoUrl,
-                }}
+                source={item.videoUrl}
                 useNativeControls={false}
                 resizeMode={ResizeMode.COVER}
                 isLooping
@@ -194,9 +197,6 @@ export default function Index() {
           style={styles.carouselVideoContainer}
           containerStyle={styles.carouselVideoContainer}
         />
-        {/* <Text style={styles.carouselText}>
-          Explore your friend's unique universe and backstory
-        </Text> */}
       </View>
       <View style={styles.login}></View>
     </View>
