@@ -1,31 +1,32 @@
-import FontDosisVariable from "@/app/assets/fonts/Dosis-VariableFont_wght.ttf";
-import { useFonts } from "expo-font";
-import { Slot } from "expo-router";
-import { View } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import DeeplinkProvider from "./context/deeplink";
-import DescopeProvider from "./context/descope";
-import ThemeProvider from "./context/theme";
-import Layout from "./layout";
+import FontDosisVariable from '@/app/assets/fonts/Dosis-VariableFont_wght.ttf'
+import { useFonts } from 'expo-font'
+import { Slot } from 'expo-router'
+import { View } from 'react-native'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import DeeplinkProvider from './context/deeplink'
+import DescopeProvider from './context/descope'
+import ThemeProvider from './context/theme'
+import Layout from './layout'
+import './styles/global.css'
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    "Dosis Variable": FontDosisVariable,
-  });
+    'Dosis Variable': FontDosisVariable,
+  })
 
   return (
     <View style={{ flex: 1 }}>
       <ThemeProvider>
         <SafeAreaProvider>
-          <DeeplinkProvider>
-            <DescopeProvider>
+          <DescopeProvider>
+            <DeeplinkProvider>
               <Layout>
                 <Slot />
               </Layout>
-            </DescopeProvider>
-          </DeeplinkProvider>
+            </DeeplinkProvider>
+          </DescopeProvider>
         </SafeAreaProvider>
       </ThemeProvider>
     </View>
-  );
+  )
 }

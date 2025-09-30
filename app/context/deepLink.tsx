@@ -1,41 +1,40 @@
-import * as Linking from "expo-linking";
-import { ReactNode, createContext, useContext, useEffect } from "react";
-import { Alert } from "react-native";
+import * as Linking from 'expo-linking'
+import { ReactNode, createContext, useContext, useEffect } from 'react'
+import { useAuth } from './descope'
 
-export type DeepLinkContextType = {};
+export type DeepLinkContextType = {}
+export type DeeplinkProviderProps = { children: ReactNode }
 
-const DeepLinkContext = createContext<DeepLinkContextType | null>(null);
+const DeepLinkContext = createContext<DeepLinkContextType | null>(null)
 
-export default function DeeplinkProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function DeeplinkProvider({ children }: DeeplinkProviderProps) {
+  const auth = useAuth()
+
   useEffect(() => {
-    // Handle the initial URL if the app was opened via deep link
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        Alert.alert("Initial Deep Link", url);
+    const handleDeepLink = async ({ url }: { url: string }) => {
+      const { queryParams } = Linking.parse(url)
+      if (queryParams?.code) {
+        auth.oAuthCodeExchange({ code: String(queryParams?.code) })
       }
-    });
+    }
 
-    // Listen for incoming URLs while the app is open
-    const subscription = Linking.addEventListener("url", (event) => {
-      Alert.alert("Deep Link Received", event.url);
-    });
+    const subscription = Linking.addEventListener('url', handleDeepLink)
+
+    // Check initial URL if app is opened via deep link
+    Linking.getInitialURL().then((url) => {
+      if (url) handleDeepLink({ url })
+    })
 
     return () => {
-      subscription.remove();
-    };
-  }, []);
+      subscription.remove()
+    }
+  }, [])
 
-  return (
-    <DeepLinkContext.Provider value={{}}>{children}</DeepLinkContext.Provider>
-  );
+  return <DeepLinkContext.Provider value={{}}>{children}</DeepLinkContext.Provider>
 }
 
 export const useDeepLink = () => {
-  const context = useContext(DeepLinkContext);
-  if (!context) throw new Error("useDeepLink can't be null");
-  return context;
-};
+  const context = useContext(DeepLinkContext)
+  if (!context) throw new Error("useDeepLink can't be null")
+  return context
+}

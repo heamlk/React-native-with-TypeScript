@@ -1,152 +1,51 @@
-import * as AuthSession from "expo-auth-session";
-import * as WebBrowser from "expo-web-browser";
-import { jwtDecode } from "jwt-decode";
-import { ReactNode, useEffect, useState } from "react";
-import { Alert, View } from "react-native";
+import * as AuthSession from 'expo-auth-session'
+import * as WebBrowser from 'expo-web-browser'
+import { createContext, ReactNode, useContext } from 'react'
+import axios from 'axios'
+import * as Linking from 'expo-linking'
+import { useRouter } from 'expo-router'
 
-WebBrowser.maybeCompleteAuthSession();
+WebBrowser.maybeCompleteAuthSession()
 
-const descopeProjectId = process.env.EXPO_PUBLIC_DESCOPE_PROJECT_ID!;
-const descopeUrl = `https://api.descope.com/${descopeProjectId}`;
+export type AuthContextType = {
+  oAuth: ({ provider }: { provider: 'google' | 'microsoft' }) => Promise<void>
+  oAuthCodeExchange: ({ code }: { code: string }) => void
+}
+export type AuthProviderProps = { children: ReactNode }
 
-const redirectUri = AuthSession.makeRedirectUri({
-  scheme: "bfflai",
-  path: "auth",
-});
+const AuthContext = createContext<AuthContextType | null>(null)
 
-type AuthTokens = {
-  access_token: string;
-  refresh_token?: string;
-  [key: string]: any;
-};
+export default function AuthProvider({ children }: AuthProviderProps) {
+  const router = useRouter()
+  const descopeProjectId = process.env.EXPO_PUBLIC_DESCOPE_PROJECT_ID!
 
-type UserInfo = {
-  [key: string]: any;
-};
+  const oAuth = async ({ provider }: { provider: 'google' | 'microsoft' }) => {
+    axios.post(`https://api.descope.com/v1/auth/oauth/authorize?provider=${provider}&redirectUrl=${encodeURIComponent(AuthSession.makeRedirectUri({ scheme: 'bfflai' }))}`, {}, { headers: { Authorization: `Bearer ${descopeProjectId}` } }).then((res) => {
+      Linking.openURL(res.data?.url)
+    })
+  }
 
-type DescopeProviderProps = {
-  children?: ReactNode;
-};
+  const oAuthCodeExchange = ({ code }: { code: string }) => {
+    axios
+      .post('https://api.descope.com/v1/auth/oauth/exchange', { code }, { headers: { Authorization: `Bearer ${descopeProjectId}` } })
+      .then((res) => {
+        const data = res?.data
+        router.navigate('/')
+        console.log('data: ', data)
+      })
+      .catch((error) => {
+        console.log(error)
+        router.navigate('/')
+      })
+  }
 
-export default function DescopeProvider({ children }: DescopeProviderProps) {
-  const [authTokens, setAuthTokens] = useState<AuthTokens | null>(null);
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const value = { oAuth, oAuthCodeExchange }
 
-  const discovery = AuthSession.useAutoDiscovery(descopeUrl);
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
 
-  const [request, response, promptAsync] = AuthSession.useAuthRequest(
-    {
-      clientId: descopeProjectId,
-      responseType: AuthSession.ResponseType.Code,
-      redirectUri,
-      usePKCE: true,
-      scopes: ["openid", "profile", "email"],
-      extraParams: {
-        flow: "sign-up-or-in",
-      },
-    },
-    discovery
-  );
-
-  useEffect(() => {
-    const exchangeFn = async () => {
-      if (
-        !response ||
-        response.type !== "success" ||
-        !response.params?.code ||
-        !request?.codeVerifier ||
-        !discovery?.tokenEndpoint
-      )
-        return;
-
-      try {
-        const tokenResponse = await AuthSession.exchangeCodeAsync(
-          {
-            clientId: descopeProjectId,
-            code: response.params.code,
-            redirectUri,
-            extraParams: {
-              code_verifier: request.codeVerifier,
-            },
-          },
-          discovery || null
-        );
-
-        const tokens: AuthTokens = {
-          access_token: tokenResponse.accessToken,
-          refresh_token: tokenResponse.refreshToken,
-          ...tokenResponse,
-        };
-        setAuthTokens(tokens);
-      } catch (error) {
-        console.error("Token exchange failed:", error);
-      }
-    };
-
-    if (response?.type === "success") {
-      exchangeFn();
-    } else if (response?.type === "error") {
-      Alert.alert(
-        "Authentication error",
-        (
-          response as AuthSession.AuthSessionResult & {
-            params?: { error_description?: string };
-          }
-        ).params?.error_description || "Something went wrong"
-      );
-    }
-  }, [discovery, request, response]);
-
-  useEffect(() => {
-    if (authTokens?.access_token) {
-      const decoded = jwtDecode<UserInfo>(authTokens.access_token);
-      setUserInfo(decoded);
-    }
-  }, [authTokens]);
-
-  const logout = async () => {
-    if (!authTokens?.refresh_token || !discovery?.revocationEndpoint) return;
-
-    try {
-      await AuthSession.revokeAsync(
-        {
-          clientId: descopeProjectId,
-          token: authTokens.refresh_token,
-        },
-        discovery || null
-      );
-      setAuthTokens(null);
-      setUserInfo(null);
-    } catch (error) {
-      console.error("Failed to revoke token:", error);
-    }
-  };
-
-  // return (
-  //   <View style={{ flex: 1 }}>
-  //     <Text style={{ color: "white" }}>{redirectUri}</Text>
-  //     {authTokens ? (
-  //       <Dashboard userInfo={userInfo} onLogout={logout} />
-  //     ) : (
-  //       <LoginScreen onLogin={() => promptAsync()} request={request} />
-  //     )}
-  //   </View>
-  // );
-
-  return (
-    <View style={{ flex: 1 }}>
-      {/* <View style={{ height: "auto" }}>
-        <Button
-          disabled={!request}
-          title="Login"
-          onPress={() => promptAsync()}
-          color="#841584"
-        />
-      </View>
-      {userInfo && (
-        <Text style={{ color: "red" }}>{JSON.stringify(userInfo)}</Text>
-      )} */}
-      <View style={{ flex: 1 }}>{children}</View>
-    </View>
-  );
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (!context) throw new Error("useAuth can't be null")
+  return context
 }
