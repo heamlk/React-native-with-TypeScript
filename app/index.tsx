@@ -18,7 +18,6 @@ import useBreakpoints from './hooks/breakpoints'
 import { Text } from './shared/components/reusable'
 import vars from './styles/vars'
 import { BlurView } from 'expo-blur'
-import elements from './styles/elements'
 import IconLogo from '@/app/assets/icons/logo'
 import IconGoogle from '@/app/assets/icons/google'
 import IconMicrosoft from '@/app/assets/icons/microsoft'
@@ -89,15 +88,6 @@ export default function Index() {
       left: 0,
       borderRadius: vars.borderMd,
     },
-    carouselVideoContent: {
-      width: '100%',
-      height: '100%',
-      position: 'absolute',
-      zIndex: 11,
-      top: 0,
-      left: 0,
-      borderRadius: vars.borderMd,
-    },
     carouselVideoElement: {
       position: 'absolute',
       left: 0,
@@ -105,19 +95,13 @@ export default function Index() {
       width: '100%',
       height: '100%',
     },
-    carouselVideoText: {
-      fontSize: 32,
-      fontWeight: 600,
-      color: vars.white,
-      position: 'absolute',
-      bottom: 40,
-      left: 40,
-    },
   })
 
   return (
     <View className='flex-1 flex-row items-center justify-center'>
+      {/* Left */}
       <View className='w-[768] h-[576] p-[40] justify-between relative border-purple2/20 border-[2px] rounded-md'>
+        {/* Carousel controls */}
         <View className='w-fit flex-row gap-[16] relative z-[50]'>
           <Pressable className='w-[64] h-[64] items-center justify-center border-light1/40 border-[1px] rounded-[99999] pointer' onPress={() => carouselRef.current?.prev()}>
             <IconArrow style={{ transform: [{ rotate: '180deg' }] }} />
@@ -126,6 +110,9 @@ export default function Index() {
             <IconArrow />
           </Pressable>
         </View>
+        {/* Carousel controls - END */}
+
+        {/* Carousel */}
         <Carousel
           ref={carouselRef}
           loop
@@ -136,16 +123,19 @@ export default function Index() {
           autoPlayInterval={9995000}
           scrollAnimationDuration={1000}
           renderItem={({ item }) => (
-            <View style={styles.carouselVideoContent}>
+            <View className='w-[100%] h-[100%] absolute z-[11] top-[0] left-[0] rounded-md'>
               <Video style={styles.carouselVideoElement} videoStyle={styles.carouselVideoElement} source={item.videoUrl} useNativeControls={false} resizeMode={ResizeMode.COVER} isLooping shouldPlay isMuted />
-              <Text style={styles.carouselVideoText}>{item.title}</Text>
+              <Text className='text-[32px] font-[600] text-white absolute bottom-[40] left-[40] pr-[50]'>{item.title}</Text>
             </View>
           )}
           style={styles.carouselVideoContainer}
           containerStyle={styles.carouselVideoContainer}
         />
+        {/* Carousel - END */}
       </View>
+      {/* Left - END */}
 
+      {/* Right */}
       <BlurView tint={'dark'} className='w-[540] pt-[72] pb-[64] px-[64] items-center border-[2px] border-purple2/20 rounded-md relative left-[-50] pr-[50]'>
         <IconLogo width={140} height={27} />
         <Text className='text-xl font-[600] mt-[40]' style={{ color: theme === 'dark' ? vars.light1 : vars.grey1 }}>
@@ -155,7 +145,9 @@ export default function Index() {
           Where AI goes to meet humanity
         </Text>
 
+        {/* Authentication */}
         <View className='w-[408] gap-[20] mt-[40] items-center'>
+          {/* OTP */}
           <View className='gap-[16]'>
             <View className='gap-[7]'>
               <Text className='text-sm text-[#bec4ca]'>Email *</Text>
@@ -176,6 +168,7 @@ export default function Index() {
           <Pressable className='w-full h-[50]'>
             <Text className='w-full h-[50] text-md font-[600] text-center flex items-center justify-center bg-[#860fef] rounded-sm cursor-pointer'>Continue</Text>
           </Pressable>
+          {/* OTP - END */}
 
           <View className='w-full flex-row items-center justify-center'>
             <View className='flex-1 h-[1] bg-[#555f68]'></View>
@@ -183,6 +176,7 @@ export default function Index() {
             <View className='flex-1 h-[1] bg-[#555f68]'></View>
           </View>
 
+          {/* OAuth */}
           <View className='w-full gap-[6]'>
             <Pressable
               className='w-full h-[46] flex-row items-center justify-center gap-[10] border-[1px] border-purple1 rounded-sm'
@@ -203,8 +197,11 @@ export default function Index() {
               <Text className='text-md font-[600] text-purple1'>Continue with Microsoft</Text>
             </Pressable>
           </View>
+          {/* OAuth - END */}
         </View>
+        {/* Authentication - END */}
       </BlurView>
+      {/* Right - END */}
     </View>
   )
 }
