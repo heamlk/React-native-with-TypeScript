@@ -10,8 +10,8 @@ WebBrowser.maybeCompleteAuthSession()
 export type AuthContextType = {
   oAuth: ({ provider }: { provider: 'google' | 'microsoft' }) => Promise<void>
   oAuthCodeExchange: ({ code }: { code: string }) => Promise<{ successful: boolean; data: any }>
-  otp: ({ email }: { email: string }) => Promise<{ successful: boolean; data: any }>
-  otpVerify: ({ email, code }: { email: string; code: string }) => Promise<{ successful: boolean; data: any }>
+  otp: ({ email }: { email: string }) => Promise<{ successful: boolean; data: any; error: null } | { successful: boolean; data: null; error: any }>
+  otpVerify: ({ email, code }: { email: string; code: string }) => Promise<{ successful: boolean; data: any; error: null } | { successful: boolean; data: null; error: any }>
   authenticate: ({ name, email, picture }: { name: string; email: string; picture: string }) => void
   logout: () => void
   user: UserType | null
@@ -86,12 +86,14 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       return {
         successful,
         data: data,
+        error: null,
       }
     } catch (error) {
       console.warn(error)
       return {
         successful: false,
         data: null,
+        error: error,
       }
     }
   }
@@ -109,12 +111,14 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       return {
         successful,
         data: data,
+        error: null,
       }
     } catch (error) {
       console.warn(error)
       return {
         successful: false,
         data: null,
+        error: error,
       }
     }
   }

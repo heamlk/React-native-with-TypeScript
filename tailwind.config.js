@@ -42,18 +42,19 @@ module.exports = {
     },
 
     fontSize: {
-      xs: 12,
-      sm: 14,
-      md: 16,
-      lg: 20,
-      xl: '26',
-      '2xl': 1,
-      '3xl': 1,
-      '4xl': 1,
-      '5xl': 1,
+      xs: '12px',
+      sm: '14px',
+      md: '16px',
+      lg: '20px',
+      xl: '26px',
+      '2xl': '1px',
+      '3xl': '1px',
+      '4xl': '1px',
+      '5xl': '1px',
     },
 
     borderRadius: {
+      xs: 6,
       sm: 10,
       md: 24,
     },
