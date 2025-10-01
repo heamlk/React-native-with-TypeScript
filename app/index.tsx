@@ -22,6 +22,7 @@ import IconLogo from '@/app/assets/icons/logo'
 import IconGoogle from '@/app/assets/icons/google'
 import IconMicrosoft from '@/app/assets/icons/microsoft'
 import { validateEmail } from './shared/validation'
+import ThemeToggle from './shared/components/themeToggle'
 
 export type HomeCarouselItemType = {
   videoUrl: string
@@ -201,147 +202,183 @@ export default function Index() {
   }
 
   return (
-    <View className='flex-1 flex-row items-center justify-center'>
-      {/* Left */}
-      <View className='w-[768] h-[576] p-[40] justify-between relative border-purple2/20 border-[2px] rounded-md'>
-        {/* Carousel controls */}
-        <View className='w-fit flex-row gap-[16] relative z-[50]'>
-          <Pressable className='w-[64] h-[64] items-center justify-center border-light1/40 border-[1px] rounded-[99999] pointer' onPress={() => carouselRef.current?.prev()}>
-            <IconArrow style={{ transform: [{ rotate: '180deg' }] }} />
-          </Pressable>
-          <Pressable className='w-[64] h-[64] items-center justify-center border-light1/40 border-[1px] rounded-[99999] pointer' onPress={() => carouselRef.current?.next()}>
-            <IconArrow />
-          </Pressable>
+    <View className='flex-1 relative'>
+      <View className='flex-1 flex-row items-center justify-center'>
+        {/* Left */}
+        <View className='w-[768] h-[576] p-[40] justify-between relative border-purple2/20 border-[2px] rounded-md'>
+          {/* Carousel controls */}
+          <View className='w-fit flex-row gap-[16] relative z-[50]'>
+            <Pressable className='w-[64] h-[64] items-center justify-center border-light1/40 border-[1px] rounded-[99999] pointer' onPress={() => carouselRef.current?.prev()}>
+              <IconArrow style={{ transform: [{ rotate: '180deg' }] }} />
+            </Pressable>
+            <Pressable className='w-[64] h-[64] items-center justify-center border-light1/40 border-[1px] rounded-[99999] pointer' onPress={() => carouselRef.current?.next()}>
+              <IconArrow />
+            </Pressable>
+          </View>
+          {/* Carousel controls - END */}
+
+          {/* Carousel */}
+          <Carousel
+            ref={carouselRef}
+            loop
+            width={768}
+            height={576}
+            autoPlay={true}
+            data={carouselItems}
+            autoPlayInterval={9995000}
+            scrollAnimationDuration={1000}
+            renderItem={({ item }) => (
+              <View className='w-[100%] h-[100%] absolute z-[11] top-[0] left-[0] rounded-md'>
+                <Video style={styles.carouselVideoElement} videoStyle={styles.carouselVideoElement} source={item.videoUrl} useNativeControls={false} resizeMode={ResizeMode.COVER} isLooping shouldPlay isMuted />
+                <Text className='text-[32px] font-[600] text-white absolute bottom-[40] left-[40] pr-[50]'>{item.title}</Text>
+              </View>
+            )}
+            style={styles.carouselVideoContainer}
+            containerStyle={styles.carouselVideoContainer}
+          />
+          {/* Carousel - END */}
         </View>
-        {/* Carousel controls - END */}
+        {/* Left - END */}
 
-        {/* Carousel */}
-        <Carousel
-          ref={carouselRef}
-          loop
-          width={768}
-          height={576}
-          autoPlay={true}
-          data={carouselItems}
-          autoPlayInterval={9995000}
-          scrollAnimationDuration={1000}
-          renderItem={({ item }) => (
-            <View className='w-[100%] h-[100%] absolute z-[11] top-[0] left-[0] rounded-md'>
-              <Video style={styles.carouselVideoElement} videoStyle={styles.carouselVideoElement} source={item.videoUrl} useNativeControls={false} resizeMode={ResizeMode.COVER} isLooping shouldPlay isMuted />
-              <Text className='text-[32px] font-[600] text-white absolute bottom-[40] left-[40] pr-[50]'>{item.title}</Text>
-            </View>
-          )}
-          style={styles.carouselVideoContainer}
-          containerStyle={styles.carouselVideoContainer}
-        />
-        {/* Carousel - END */}
-      </View>
-      {/* Left - END */}
+        {/* Right */}
+        <BlurView tint={'dark'} className='w-[540] pt-[72] pb-[64] px-[64] items-center border-[2px] border-purple2/20 rounded-md relative left-[-50] pr-[50]'>
+          <IconLogo width={140} height={27} />
+          <Text className='text-xl font-[600] mt-[40]' style={{ color: theme === 'dark' ? vars.light1 : vars.grey1 }}>
+            Welcome to BFFL.AI
+          </Text>
+          <Text className='text-md mt-[16]' style={{ color: theme === 'dark' ? vars.light3 + vars.opacity70 : vars.grey2 }}>
+            Where AI goes to meet humanity
+          </Text>
 
-      {/* Right */}
-      <BlurView tint={'dark'} className='w-[540] pt-[72] pb-[64] px-[64] items-center border-[2px] border-purple2/20 rounded-md relative left-[-50] pr-[50]'>
-        <IconLogo width={140} height={27} />
-        <Text className='text-xl font-[600] mt-[40]' style={{ color: theme === 'dark' ? vars.light1 : vars.grey1 }}>
-          Welcome to BFFL.AI
-        </Text>
-        <Text className='text-md mt-[16]' style={{ color: theme === 'dark' ? vars.light3 + vars.opacity70 : vars.grey2 }}>
-          Where AI goes to meet humanity
-        </Text>
+          {/* Authentication */}
+          <View className='w-[408] gap-[20] mt-[40] items-center'>
+            {/* OTP */}
+            {otpStage === 0 ? (
+              <>
+                <View className='gap-[16]'>
+                  <View className='gap-[7]'>
+                    <Text className='text-sm text-[#bec4ca]'>Email *</Text>
+                    <TextInput className='w-full h-[48] border-[2px] border-[#bec4ca]/40 rounded-[6] px-[8] !bg-[#181a1c] !text-[#bec4ca]' style={emailInputError ? { borderColor: vars.red1 } : {}} placeholder='Email' autoComplete='email' value={emailInput} onChangeText={handleOtpEmailTextChange} />
+                    {emailInputError ? <Text className='text-sm font-[600] text-red1'>{emailInputError}</Text> : <></>}
+                  </View>
 
-        {/* Authentication */}
-        <View className='w-[408] gap-[20] mt-[40] items-center'>
-          {/* OTP */}
-          {otpStage === 0 ? (
-            <>
-              <View className='gap-[16]'>
-                <View className='gap-[7]'>
-                  <Text className='text-sm text-[#bec4ca]'>Email *</Text>
-                  <TextInput className='w-full h-[48] border-[2px] border-[#bec4ca]/40 rounded-[6] px-[8] !bg-[#181a1c] !text-[#bec4ca]' style={emailInputError ? { borderColor: vars.red1 } : {}} placeholder='Email' autoComplete='email' value={emailInput} onChangeText={handleOtpEmailTextChange} />
-                  {emailInputError ? <Text className='text-sm font-[600] text-red1'>{emailInputError}</Text> : <></>}
+                  <Text className='text-sm text-center text-white'>
+                    By continuing, I agree to the Company's
+                    <Pressable>
+                      <Text className='text-[#1f80ff] cursor-pointer'> Privacy Statement </Text>
+                    </Pressable>
+                    and
+                    <Pressable>
+                      <Text className='text-[#1f80ff] cursor-pointer'> Terms of Service</Text>
+                    </Pressable>
+                  </Text>
                 </View>
 
-                <Text className='text-sm text-center text-white'>
-                  By continuing, I agree to the Company's
-                  <Pressable>
-                    <Text className='text-[#1f80ff] cursor-pointer'> Privacy Statement </Text>
-                  </Pressable>
-                  and
-                  <Pressable>
-                    <Text className='text-[#1f80ff] cursor-pointer'> Terms of Service</Text>
-                  </Pressable>
-                </Text>
-              </View>
-
-              <Pressable className='w-full h-[50]' onPress={handleOtpPress}>
-                <Text className='w-full h-[50] text-md font-[600] text-center flex items-center justify-center bg-[#860fef] rounded-sm cursor-pointer'>Continue</Text>
-              </Pressable>
-
-              <View className='w-full flex-row items-center justify-center'>
-                <View className='flex-1 h-[1] bg-[#555f68]'></View>
-                <Text className='text-sm text-white px-[10]'>OR</Text>
-                <View className='flex-1 h-[1] bg-[#555f68]'></View>
-              </View>
-
-              {/* OAuth */}
-              <View className='w-full gap-[6]'>
-                <Pressable
-                  className='w-full h-[46] flex-row items-center justify-center gap-[10] border-[1px] border-purple1 rounded-sm'
-                  onPress={() => {
-                    auth.oAuth({ provider: 'google' })
-                  }}
-                >
-                  <IconGoogle width={24} height={24} />
-                  <Text className='text-md font-[600] text-purple1'>Continue with Google</Text>
+                <Pressable className='w-full h-[50]' onPress={handleOtpPress}>
+                  <Text className='w-full h-[50] text-md font-[600] text-center flex items-center justify-center bg-[#860fef] rounded-sm cursor-pointer'>Continue</Text>
                 </Pressable>
-                <Pressable
-                  className='w-full h-[46] flex-row items-center justify-center gap-[10] border-[1px] border-purple1 rounded-sm'
-                  onPress={() => {
-                    auth.oAuth({ provider: 'microsoft' })
-                  }}
-                >
-                  <IconMicrosoft width={24} height={24} />
-                  <Text className='text-md font-[600] text-purple1'>Continue with Microsoft</Text>
-                </Pressable>
-              </View>
-              {/* OAuth - END */}
-            </>
-          ) : (
-            <View className='gap-[16] items-center'>
-              <Text className='text text-xl text-white font-[500] text-center'>We've sent a message containing a 6-digit code to {emailInput}</Text>
-              <Text className='text text-lg text-white font-[500] text-center mb-[20px]'>Enter Code</Text>
-              <View className='w-fit flex-row items-center justify-center gap-[4] relative'>
-                {otpCode.map((value, index) => (
-                  <TextInput
-                    key={index}
-                    ref={(ref) => {
-                      inputsRef.current[index] = ref
+
+                <View className='w-full flex-row items-center justify-center'>
+                  <View className='flex-1 h-[1] bg-[#555f68]'></View>
+                  <Text className='text-sm text-white px-[10]'>OR</Text>
+                  <View className='flex-1 h-[1] bg-[#555f68]'></View>
+                </View>
+
+                {/* OAuth */}
+                <View className='w-full gap-[6]'>
+                  <Pressable
+                    className='w-full h-[46] flex-row items-center justify-center gap-[10] border-[1px] border-purple1 rounded-sm'
+                    onPress={() => {
+                      auth.oAuth({ provider: 'google' })
                     }}
-                    value={value}
-                    onChangeText={(text) => handleOtpNumberChange(text, index)}
-                    onKeyPress={(e) => handleOtpKeyPress(e, index)}
-                    className='w-[50px] h-[50px] bg-[#181a1c] border-[1px] border-[#555f68] rounded-sm text-center text-white caret-white focus:outline-none'
-                    style={otpFetching ? { opacity: 0.15, pointerEvents: 'none' } : {}}
-                    keyboardType='number-pad'
-                    maxLength={1}
-                    inputMode='numeric'
-                  />
-                ))}
-                {otpFetching && <ActivityIndicator className='absolute' size='small' color={vars.purple1} />}
+                  >
+                    <IconGoogle width={24} height={24} />
+                    <Text className='text-md font-[600] text-purple1'>Continue with Google</Text>
+                  </Pressable>
+                  <Pressable
+                    className='w-full h-[46] flex-row items-center justify-center gap-[10] border-[1px] border-purple1 rounded-sm'
+                    onPress={() => {
+                      auth.oAuth({ provider: 'microsoft' })
+                    }}
+                  >
+                    <IconMicrosoft width={24} height={24} />
+                    <Text className='text-md font-[600] text-purple1'>Continue with Microsoft</Text>
+                  </Pressable>
+                </View>
+                {/* OAuth - END */}
+              </>
+            ) : (
+              <View className='gap-[16] items-center'>
+                <Text className='text text-xl text-white font-[500] text-center'>We've sent a message containing a 6-digit code to {emailInput}</Text>
+                <Text className='text text-lg text-white font-[500] text-center mb-[20px]'>Enter Code</Text>
+                <View className='w-fit flex-row items-center justify-center gap-[4] relative'>
+                  {otpCode.map((value, index) => (
+                    <TextInput
+                      key={index}
+                      ref={(ref) => {
+                        inputsRef.current[index] = ref
+                      }}
+                      value={value}
+                      onChangeText={(text) => handleOtpNumberChange(text, index)}
+                      onKeyPress={(e) => handleOtpKeyPress(e, index)}
+                      className='w-[50px] h-[50px] bg-[#181a1c] border-[1px] border-[#555f68] rounded-sm text-center text-white caret-white focus:outline-none'
+                      style={otpFetching ? { opacity: 0.15, pointerEvents: 'none' } : {}}
+                      keyboardType='number-pad'
+                      maxLength={1}
+                      inputMode='numeric'
+                    />
+                  ))}
+                  {otpFetching && <ActivityIndicator className='absolute' size='small' color={vars.purple1} />}
+                </View>
+                {otpError ? <Text className='text-sm font-[600] text-red1'>{otpError}</Text> : <></>}
+                <Pressable onPress={handleOtpPress}>
+                  <Text className='text-sm font-[600] text-purple1'>Send Again</Text>
+                </Pressable>
+                <Pressable onPress={handleGoBack}>
+                  <Text className='text-sm font-[600] text-purple1'>Choose another authentication method</Text>
+                </Pressable>
               </View>
-              {otpError ? <Text className='text-sm font-[600] text-red1'>{otpError}</Text> : <></>}
-              <Pressable onPress={handleOtpPress}>
-                <Text className='text-sm font-[600] text-purple1'>Send Again</Text>
-              </Pressable>
-              <Pressable onPress={handleGoBack}>
-                <Text className='text-sm font-[600] text-purple1'>Choose another authentication method</Text>
-              </Pressable>
-            </View>
-          )}
-          {/* OTP - END */}
-        </View>
-        {/* Authentication - END */}
-      </BlurView>
-      {/* Right - END */}
+            )}
+            {/* OTP - END */}
+          </View>
+          {/* Authentication - END */}
+        </BlurView>
+        {/* Right - END */}
+      </View>
+
+      {/* Footer */}
+      <View className='w-[100%] h-[80px] absolute left-[0] bottom-[0] items-center justify-center flex-row gap-[32]'>
+        <ThemeToggle />
+        <Text className='text-md' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
+          About Us
+        </Text>
+        <Text className='text-md' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
+          Terms of Service
+        </Text>
+        <Text className='text-md' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
+          Privacy Policy
+        </Text>
+        <Text className='text-md' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
+          Cookies Policy
+        </Text>
+      </View>
+      {/* Footer - END */}
     </View>
   )
 }
+
+// .dark & {
+//     color: $light-3;
+
+//     &:hover {
+//         color: $light-1;
+//     }
+// }
+
+// .light & {
+//     color: $grey-2;
+
+//     &:hover {
+//         color: $grey-1;
+//     }
+// }
