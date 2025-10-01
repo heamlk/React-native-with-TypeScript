@@ -260,7 +260,7 @@ export default function Index() {
                   {emailInputError ? <Text className='text-sm font-[600] text-red1'>{emailInputError}</Text> : <></>}
                 </View>
 
-                <Text className='text-dm text-center text-white'>
+                <Text className='text-sm text-center text-white'>
                   By continuing, I agree to the Company's
                   <Pressable>
                     <Text className='text-[#1f80ff] cursor-pointer'> Privacy Statement </Text>
