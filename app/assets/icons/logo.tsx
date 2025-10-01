@@ -1,4 +1,4 @@
-import { type SvgIconType, svgIconDefaultProps } from './_props'
+import svgIconDefaultProps, { type SvgIconType } from './_props'
 
 const SvgComponent = ({ width = svgIconDefaultProps.width, height = svgIconDefaultProps.height, color = svgIconDefaultProps.color, ...props }: SvgIconType) => (
   <svg {...props} width={width} height={height} fill='none' xmlns='http://www.w3.org/2000/svg'>
