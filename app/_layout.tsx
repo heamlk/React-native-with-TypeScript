@@ -8,6 +8,7 @@ import DescopeProvider from './context/descope'
 import ThemeProvider from './context/theme'
 import Layout from './layout'
 import './styles/global.css'
+import PopupProvider from './context/popup'
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -20,9 +21,11 @@ export default function RootLayout() {
         <SafeAreaProvider>
           <DescopeProvider>
             <DeeplinkProvider>
-              <Layout>
-                <Slot />
-              </Layout>
+              <PopupProvider>
+                <Layout>
+                  <Slot />
+                </Layout>
+              </PopupProvider>
             </DeeplinkProvider>
           </DescopeProvider>
         </SafeAreaProvider>

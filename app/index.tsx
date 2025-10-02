@@ -23,6 +23,12 @@ import IconGoogle from '@/app/assets/icons/google'
 import IconMicrosoft from '@/app/assets/icons/microsoft'
 import { validateEmail } from './shared/validation'
 import ThemeToggle from './shared/components/themeToggle'
+import { usePopup } from './context/popup'
+
+import AboutUs from './shared/policy/aboutUs'
+import Terms from './shared/policy/terms'
+import PrivacyPolicy from './shared/policy/privacyPolicy'
+import Cookies from './shared/policy/cookies'
 
 export type HomeCarouselItemType = {
   videoUrl: string
@@ -79,6 +85,7 @@ export default function Index() {
   const { theme } = useTheme()
   const auth = useAuth()
   const breakpoints = useBreakpoints()
+  const { setPopup } = usePopup()
 
   const styles = StyleSheet.create({
     carouselVideoContainer: {
@@ -199,6 +206,20 @@ export default function Index() {
     setOtpCode(['', '', '', '', '', ''])
     setOtpFetching(false)
     setOtpStage(0)
+  }
+
+  const handleFooterPopup = async ({ target }: { target: 'about' | 'terms' | 'privacy' | 'cookies' }) => {
+    const targetContent = {
+      about: <AboutUs />,
+      terms: <Terms />,
+      privacy: <PrivacyPolicy />,
+      cookies: <Cookies />,
+    }
+
+    setPopup({
+      open: true,
+      content: <View className='w-full h-fit'>{targetContent[target]}</View>,
+    })
   }
 
   return (
@@ -349,36 +370,46 @@ export default function Index() {
       {/* Footer */}
       <View className='w-[100%] h-[80px] absolute left-[0] bottom-[0] items-center justify-center flex-row gap-[32]'>
         <ThemeToggle />
-        <Text className='text-md' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
-          About Us
-        </Text>
-        <Text className='text-md' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
-          Terms of Service
-        </Text>
-        <Text className='text-md' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
-          Privacy Policy
-        </Text>
-        <Text className='text-md' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
-          Cookies Policy
-        </Text>
+
+        <Pressable
+          onPress={() => {
+            handleFooterPopup({ target: 'about' })
+          }}
+        >
+          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
+            About Us
+          </Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => {
+            handleFooterPopup({ target: 'terms' })
+          }}
+        >
+          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
+            Terms of Service
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            handleFooterPopup({ target: 'privacy' })
+          }}
+        >
+          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
+            Privacy Policy
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            handleFooterPopup({ target: 'cookies' })
+          }}
+        >
+          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
+            Cookies Policy
+          </Text>
+        </Pressable>
       </View>
       {/* Footer - END */}
     </View>
   )
 }
-
-// .dark & {
-//     color: $light-3;
-
-//     &:hover {
-//         color: $light-1;
-//     }
-// }
-
-// .light & {
-//     color: $grey-2;
-
-//     &:hover {
-//         color: $grey-1;
-//     }
-// }
