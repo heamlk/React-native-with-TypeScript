@@ -16,7 +16,7 @@ import { useAuth } from './context/descope'
 import { useTheme } from './context/theme'
 import useBreakpoints from './hooks/breakpoints'
 import { Text } from './shared/components/reusable'
-import vars from './styles/vars'
+import themeVars from './styles/theme/themeVars'
 import { BlurView } from 'expo-blur'
 import IconLogo from '@/app/assets/icons/logo'
 import IconGoogle from '@/app/assets/icons/google'
@@ -95,7 +95,7 @@ export default function Index() {
       zIndex: 10,
       top: 0,
       left: 0,
-      borderRadius: vars.borderMd,
+      borderRadius: themeVars.borderRadius.md,
     },
     carouselVideoElement: {
       position: 'absolute',
@@ -264,10 +264,10 @@ export default function Index() {
         {/* Right */}
         <BlurView tint={'dark'} className='w-[540] pt-[72] pb-[64] px-[64] items-center border-[2px] border-purple2/20 rounded-md relative left-[-50] pr-[50]'>
           <IconLogo width={140} height={27} />
-          <Text className='text-xl font-[600] mt-[40]' style={{ color: theme === 'dark' ? vars.light1 : vars.grey1 }}>
+          <Text className='text-xl font-[600] mt-[40]' style={{ color: theme === 'dark' ? themeVars.colors.light1 : themeVars.colors.grey1 }}>
             Welcome to BFFL.AI
           </Text>
-          <Text className='text-md mt-[16]' style={{ color: theme === 'dark' ? vars.light3 + vars.opacity70 : vars.grey2 }}>
+          <Text className='text-md mt-[16]' style={{ color: theme === 'dark' ? themeVars.colors.light3 + themeVars.colors.opacity70 : themeVars.colors.grey2 }}>
             Where AI goes to meet humanity
           </Text>
 
@@ -279,7 +279,7 @@ export default function Index() {
                 <View className='gap-[16]'>
                   <View className='gap-[7]'>
                     <Text className='text-sm text-[#bec4ca]'>Email *</Text>
-                    <TextInput className='w-full h-[48] border-[2px] border-[#bec4ca]/40 rounded-[6] px-[8] !bg-[#181a1c] !text-[#bec4ca]' style={emailInputError ? { borderColor: vars.red1 } : {}} placeholder='Email' autoComplete='email' value={emailInput} onChangeText={handleOtpEmailTextChange} />
+                    <TextInput className='w-full h-[48] border-[2px] border-[#bec4ca]/40 rounded-[6] px-[8] !bg-[#181a1c] !text-[#bec4ca]' style={emailInputError ? { borderColor: themeVars.colors.red1 } : {}} placeholder='Email' autoComplete='email' value={emailInput} onChangeText={handleOtpEmailTextChange} />
                     {emailInputError ? <Text className='text-sm font-[600] text-red1'>{emailInputError}</Text> : <></>}
                   </View>
 
@@ -349,7 +349,7 @@ export default function Index() {
                       inputMode='numeric'
                     />
                   ))}
-                  {otpFetching && <ActivityIndicator className='absolute' size='small' color={vars.purple1} />}
+                  {otpFetching && <ActivityIndicator className='absolute' size='small' color={themeVars.colors.purple1} />}
                 </View>
                 {otpError ? <Text className='text-sm font-[600] text-red1'>{otpError}</Text> : <></>}
                 <Pressable onPress={handleOtpPress}>
@@ -376,7 +376,7 @@ export default function Index() {
             handleFooterPopup({ target: 'about' })
           }}
         >
-          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
+          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
             About Us
           </Text>
         </Pressable>
@@ -386,7 +386,7 @@ export default function Index() {
             handleFooterPopup({ target: 'terms' })
           }}
         >
-          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
+          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
             Terms of Service
           </Text>
         </Pressable>
@@ -395,7 +395,7 @@ export default function Index() {
             handleFooterPopup({ target: 'privacy' })
           }}
         >
-          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
+          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
             Privacy Policy
           </Text>
         </Pressable>
@@ -404,7 +404,7 @@ export default function Index() {
             handleFooterPopup({ target: 'cookies' })
           }}
         >
-          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: vars.grey2 } : { color: vars.light3 }}>
+          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
             Cookies Policy
           </Text>
         </Pressable>

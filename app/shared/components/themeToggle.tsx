@@ -3,7 +3,7 @@ import { Pressable, Image, Animated, Easing } from 'react-native'
 import { useEffect, useRef } from 'react'
 import IconMoon from '@/app/assets/icons/moon.png'
 import IconSun from '@/app/assets/icons/sun.png'
-import vars from '@/app/styles/vars'
+import themeVars from '@/app/styles/theme/themeVars'
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -24,7 +24,7 @@ export default function ThemeToggle() {
 
   const backgroundColor = anim.interpolate({
     inputRange: [0, 1],
-    outputRange: [vars.grey3, vars.purple3],
+    outputRange: [themeVars.colors.grey3, themeVars.colors.purple3],
   })
 
   const translateX = anim.interpolate({
@@ -38,7 +38,7 @@ export default function ThemeToggle() {
         style={{
           flex: 1,
           backgroundColor,
-          borderRadius: vars.borderMd,
+          borderRadius: themeVars.borderRadius.md,
           justifyContent: 'center',
           paddingHorizontal: 3,
         }}

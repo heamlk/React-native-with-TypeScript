@@ -1,4 +1,3 @@
-import vars from './vars'
 import type { TextStyle } from 'react-native'
 
 const elements: { [style: string]: TextStyle } = {
