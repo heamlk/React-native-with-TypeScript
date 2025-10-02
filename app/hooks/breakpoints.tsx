@@ -1,14 +1,10 @@
-import useDimensions from "./dimensions";
-
-export const breakpoints = {
-  phone: 719,
-  tablet: 1280,
-};
+import { breakpointsNative } from '../styles/theme/breakpoints'
+import useDimensions from './dimensions'
 
 export default function useBreakpoints() {
-  const { deviceWidth } = useDimensions();
+  const { deviceWidth } = useDimensions()
 
-  if (deviceWidth < breakpoints.phone) return "phone";
-  if (deviceWidth < breakpoints.tablet) return "tablet";
-  return "desktop";
+  if (deviceWidth < breakpointsNative.phone) return 'phone'
+  if (deviceWidth < breakpointsNative.tablet) return 'tablet'
+  return 'desktop'
 }

@@ -10,7 +10,7 @@ import VideoCarousel8 from '@/app/assets/media/carousel8.mp4'
 import VideoCarousel9 from '@/app/assets/media/carousel9.mp4'
 import { ResizeMode, Video } from 'expo-av'
 import { useRef, useState } from 'react'
-import { NativeSyntheticEvent, Pressable, StyleSheet, TextInput, TextInputKeyPressEventData, View, ActivityIndicator } from 'react-native'
+import { NativeSyntheticEvent, Pressable, StyleSheet, TextInput, TextInputKeyPressEventData, View, ActivityIndicator, Dimensions } from 'react-native'
 import Carousel, { type ICarouselInstance } from 'react-native-reanimated-carousel'
 import { useAuth } from './context/descope'
 import { useTheme } from './context/theme'
@@ -29,6 +29,8 @@ import AboutUs from './shared/policy/aboutUs'
 import Terms from './shared/policy/terms'
 import PrivacyPolicy from './shared/policy/privacyPolicy'
 import Cookies from './shared/policy/cookies'
+import useDimensions from './hooks/dimensions'
+import { LinearGradient } from 'expo-linear-gradient'
 
 export type HomeCarouselItemType = {
   videoUrl: string
@@ -85,6 +87,7 @@ export default function Index() {
   const { theme } = useTheme()
   const auth = useAuth()
   const breakpoints = useBreakpoints()
+  const dimentions = useDimensions()
   const { setPopup } = usePopup()
 
   const styles = StyleSheet.create({
@@ -95,14 +98,14 @@ export default function Index() {
       zIndex: 10,
       top: 0,
       left: 0,
-      borderRadius: themeVars.borderRadius.md,
+      borderRadius: breakpoints === 'desktop' ? themeVars.borderRadius.md : 0,
     },
     carouselVideoElement: {
+      width: '100%',
+      height: '100%',
       position: 'absolute',
       left: 0,
       right: 0,
-      width: '100%',
-      height: '100%',
     },
   })
 
@@ -223,10 +226,10 @@ export default function Index() {
   }
 
   return (
-    <View className='flex-1 relative'>
-      <View className='flex-1 flex-row items-center justify-center'>
+    <View className='relative flex-1'>
+      <View className='tablet:flex-1 base:flex-col tablet:flex-row items-center tablet:justify-center base:gap-[20px] tablet:gap-[0]'>
         {/* Left */}
-        <View className='w-[768] h-[576] p-[40] justify-between relative border-purple2/20 border-[2px] rounded-md'>
+        <View className='base:w-full tablet:w-[768] base:h-[290px] tablet:h-[576] p-[40] justify-between relative tablet:border-purple2/20 tablet:border-[2px] tablet:rounded-md'>
           {/* Carousel controls */}
           <View className='w-fit flex-row gap-[16] relative z-[50]'>
             <Pressable className='w-[64] h-[64] items-center justify-center border-light1/40 border-[1px] rounded-[99999] pointer' onPress={() => carouselRef.current?.prev()}>
@@ -242,8 +245,8 @@ export default function Index() {
           <Carousel
             ref={carouselRef}
             loop
-            width={768}
-            height={576}
+            width={breakpoints === 'desktop' ? 768 : dimentions.deviceWidth}
+            height={breakpoints === 'desktop' ? 576 : 290}
             autoPlay={true}
             data={carouselItems}
             autoPlayInterval={9995000}
@@ -251,57 +254,93 @@ export default function Index() {
             renderItem={({ item }) => (
               <View className='w-[100%] h-[100%] absolute z-[11] top-[0] left-[0] rounded-md'>
                 <Video style={styles.carouselVideoElement} videoStyle={styles.carouselVideoElement} source={item.videoUrl} useNativeControls={false} resizeMode={ResizeMode.COVER} isLooping shouldPlay isMuted />
-                <Text className='text-[32px] font-[600] text-white absolute bottom-[40] left-[40] pr-[50]'>{item.title}</Text>
+                <Text className='font-[600] text-white absolute bottom-[40] left-[40] pr-[50]' size='2xl'>
+                  {item.title}
+                </Text>
               </View>
             )}
             style={styles.carouselVideoContainer}
             containerStyle={styles.carouselVideoContainer}
           />
           {/* Carousel - END */}
+
+          {breakpoints !== 'desktop' ? (
+            <LinearGradient
+              colors={['transparent', theme === 'light' ? themeVars.colors.white : breakpoints === 'phone' ? themeVars.colors.dark1 : themeVars.colors.dark2]}
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: 50,
+                zIndex: 12,
+              }}
+            />
+          ) : (
+            <></>
+          )}
         </View>
         {/* Left - END */}
 
         {/* Right */}
-        <BlurView tint={'dark'} className='w-[540] pt-[72] pb-[64] px-[64] items-center border-[2px] border-purple2/20 rounded-md relative left-[-50] pr-[50]'>
+        <BlurView tint={'dark'} className='base:w-[calc(100%_-_32px)] tablet:w-[540] max-w-[540] base:px-[24px] tablet:px-[64] base:py-[56px] tablet:pt-[72] tablet:pb-[64] items-center border-[2px] border-purple2/20 rounded-md relative tablet:left-[-50] tablet:mr-[-50] tablet:pr-[50]'>
           <IconLogo width={140} height={27} />
-          <Text className='text-xl font-[600] mt-[40]' style={{ color: theme === 'dark' ? themeVars.colors.light1 : themeVars.colors.grey1 }}>
+          <Text className='font-[600] mt-[40]' style={{ color: theme === 'dark' ? themeVars.colors.light1 : themeVars.colors.grey1 }} size='xl'>
             Welcome to BFFL.AI
           </Text>
-          <Text className='text-md mt-[16]' style={{ color: theme === 'dark' ? themeVars.colors.light3 + themeVars.colors.opacity70 : themeVars.colors.grey2 }}>
+          <Text className='mt-[16]' style={{ color: theme === 'dark' ? themeVars.colors.light3 + themeVars.colors.opacity70 : themeVars.colors.grey2 }} size='md'>
             Where AI goes to meet humanity
           </Text>
 
           {/* Authentication */}
-          <View className='w-[408] gap-[20] mt-[40] items-center'>
+          <View className='gap-[20] mt-[40] items-center'>
             {/* OTP */}
             {otpStage === 0 ? (
               <>
                 <View className='gap-[16]'>
                   <View className='gap-[7]'>
-                    <Text className='text-sm text-[#bec4ca]'>Email *</Text>
+                    <Text className='text-[#bec4ca]' size='sm'>
+                      Email *
+                    </Text>
                     <TextInput className='w-full h-[48] border-[2px] border-[#bec4ca]/40 rounded-[6] px-[8] !bg-[#181a1c] !text-[#bec4ca]' style={emailInputError ? { borderColor: themeVars.colors.red1 } : {}} placeholder='Email' autoComplete='email' value={emailInput} onChangeText={handleOtpEmailTextChange} />
-                    {emailInputError ? <Text className='text-sm font-[600] text-red1'>{emailInputError}</Text> : <></>}
+                    {emailInputError ? (
+                      <Text className='font-[600] text-red1' size='sm'>
+                        {emailInputError}
+                      </Text>
+                    ) : (
+                      <></>
+                    )}
                   </View>
 
-                  <Text className='text-sm text-center text-white'>
+                  <Text className='text-center text-white' size='sm'>
                     By continuing, I agree to the Company's
                     <Pressable>
-                      <Text className='text-[#1f80ff] cursor-pointer'> Privacy Statement </Text>
+                      <Text className='text-[#1f80ff] cursor-pointer' size='sm'>
+                        {' '}
+                        Privacy Statement{' '}
+                      </Text>
                     </Pressable>
                     and
                     <Pressable>
-                      <Text className='text-[#1f80ff] cursor-pointer'> Terms of Service</Text>
+                      <Text className='text-[#1f80ff] cursor-pointer' size='sm'>
+                        {' '}
+                        Terms of Service
+                      </Text>
                     </Pressable>
                   </Text>
                 </View>
 
                 <Pressable className='w-full h-[50]' onPress={handleOtpPress}>
-                  <Text className='w-full h-[50] text-md font-[600] text-center flex items-center justify-center bg-[#860fef] rounded-sm cursor-pointer'>Continue</Text>
+                  <Text className='w-full h-[50] font-[600] text-center flex items-center justify-center bg-[#860fef] rounded-sm cursor-pointer' size='md'>
+                    Continue
+                  </Text>
                 </Pressable>
 
                 <View className='w-full flex-row items-center justify-center'>
                   <View className='flex-1 h-[1] bg-[#555f68]'></View>
-                  <Text className='text-sm text-white px-[10]'>OR</Text>
+                  <Text className='text-white px-[10]' size='sm'>
+                    OR
+                  </Text>
                   <View className='flex-1 h-[1] bg-[#555f68]'></View>
                 </View>
 
@@ -314,7 +353,9 @@ export default function Index() {
                     }}
                   >
                     <IconGoogle width={24} height={24} />
-                    <Text className='text-md font-[600] text-purple1'>Continue with Google</Text>
+                    <Text className='font-[600] text-purple1' size='md'>
+                      Continue with Google
+                    </Text>
                   </Pressable>
                   <Pressable
                     className='w-full h-[46] flex-row items-center justify-center gap-[10] border-[1px] border-purple1 rounded-sm'
@@ -323,15 +364,21 @@ export default function Index() {
                     }}
                   >
                     <IconMicrosoft width={24} height={24} />
-                    <Text className='text-md font-[600] text-purple1'>Continue with Microsoft</Text>
+                    <Text className='font-[600] text-purple1' size='md'>
+                      Continue with Microsoft
+                    </Text>
                   </Pressable>
                 </View>
                 {/* OAuth - END */}
               </>
             ) : (
               <View className='gap-[16] items-center'>
-                <Text className='text text-xl text-white font-[500] text-center'>We've sent a message containing a 6-digit code to {emailInput}</Text>
-                <Text className='text text-lg text-white font-[500] text-center mb-[20px]'>Enter Code</Text>
+                <Text className='text text-white font-[500] text-center' size='xl'>
+                  We've sent a message containing a 6-digit code to {emailInput}
+                </Text>
+                <Text className='text text-white font-[500] text-center mb-[20px]' size='lg'>
+                  Enter Code
+                </Text>
                 <View className='w-fit flex-row items-center justify-center gap-[4] relative'>
                   {otpCode.map((value, index) => (
                     <TextInput
@@ -351,12 +398,22 @@ export default function Index() {
                   ))}
                   {otpFetching && <ActivityIndicator className='absolute' size='small' color={themeVars.colors.purple1} />}
                 </View>
-                {otpError ? <Text className='text-sm font-[600] text-red1'>{otpError}</Text> : <></>}
+                {otpError ? (
+                  <Text className='font-[600] text-red1' size='sm'>
+                    {otpError}
+                  </Text>
+                ) : (
+                  <></>
+                )}
                 <Pressable onPress={handleOtpPress}>
-                  <Text className='text-sm font-[600] text-purple1'>Send Again</Text>
+                  <Text className='font-[600] text-purple1' size='sm'>
+                    Send Again
+                  </Text>
                 </Pressable>
                 <Pressable onPress={handleGoBack}>
-                  <Text className='text-sm font-[600] text-purple1'>Choose another authentication method</Text>
+                  <Text className='font-[600] text-purple1' size='sm'>
+                    Choose another authentication method
+                  </Text>
                 </Pressable>
               </View>
             )}
@@ -368,7 +425,7 @@ export default function Index() {
       </View>
 
       {/* Footer */}
-      <View className='w-[100%] h-[80px] absolute left-[0] bottom-[0] items-center justify-center flex-row gap-[32]'>
+      <View className='w-[100%] tablet:absolute tablet:left-[0] tablet:bottom-[0] base:flex-col tablet:flex-row items-center justify-center flex-row gap-[32] py-[40px]'>
         <ThemeToggle />
 
         <Pressable
@@ -376,7 +433,7 @@ export default function Index() {
             handleFooterPopup({ target: 'about' })
           }}
         >
-          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
+          <Text className='cursor-pointer' size='md' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
             About Us
           </Text>
         </Pressable>
@@ -386,7 +443,7 @@ export default function Index() {
             handleFooterPopup({ target: 'terms' })
           }}
         >
-          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
+          <Text className='cursor-pointer' size='md' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
             Terms of Service
           </Text>
         </Pressable>
@@ -395,7 +452,7 @@ export default function Index() {
             handleFooterPopup({ target: 'privacy' })
           }}
         >
-          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
+          <Text className='cursor-pointer' size='md' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
             Privacy Policy
           </Text>
         </Pressable>
@@ -404,7 +461,7 @@ export default function Index() {
             handleFooterPopup({ target: 'cookies' })
           }}
         >
-          <Text className='text-md cursor-pointer' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
+          <Text className='cursor-pointer' size='md' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
             Cookies Policy
           </Text>
         </Pressable>

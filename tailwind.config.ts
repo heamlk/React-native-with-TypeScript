@@ -1,15 +1,17 @@
-import themeVars from './app/styles/theme/themeVars.ts'
+import { Config } from 'tailwindcss'
+import themeVars from './app/styles/theme/themeVars'
 
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  // NOTE: Update this to include the paths to all files that contain Nativewind classes.
+const config: Config = {
   content: ['./app/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
     colors: themeVars.colors,
     fontSize: themeVars.fontSize,
     borderRadius: themeVars.borderRadius,
+    screens: themeVars.screens,
     extend: {},
   },
-  plugins: [],
+  plugins: [require('tailwind-scrollbar-hide')],
 }
+
+export default config

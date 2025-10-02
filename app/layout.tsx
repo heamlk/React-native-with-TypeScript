@@ -4,15 +4,16 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTheme } from './context/theme'
 import useBreakpoints from './hooks/breakpoints'
 import themeVars from './styles/theme/themeVars'
+import useDimensions from './hooks/dimensions'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { theme } = useTheme()
+  const dimentions = useDimensions()
   const breakpoints = useBreakpoints()
 
   const styles = StyleSheet.create({
+    scroll: {},
     root: {
-      height: 100,
-      flex: 1,
       fontFamily: themeVars.fonts.dosis,
       fontSize: 16,
 
@@ -29,10 +30,10 @@ export default function Layout({ children }: { children: ReactNode }) {
   })
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} style={{ flex: 1 }}>
-        <View style={styles.root}>{children}</View>
-      </ScrollView>
-    </SafeAreaView>
+    <div className='overflow-y-auto scrollbar-hide' style={{ width: dimentions.deviceWidth, height: dimentions.deviceHeight }}>
+      <div className='w-[100%] h-[fit-content] min-h-[100%] flex' style={styles.root}>
+        {children}
+      </div>
+    </div>
   )
 }
