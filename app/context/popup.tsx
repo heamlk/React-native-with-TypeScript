@@ -27,7 +27,7 @@ export default function PopupProvider({ children }: PopupProviderProps) {
   const Popup = () => {
     return (
       <BlurView className='w-full h-full bg-[pink] fixed z-[9999999] top-[0] left-[0] items-center justify-center p-[30]' style={popup.open ? { display: 'flex' } : { display: 'none' }}>
-        <View className='w-[800] h-fit max-h-full bg-dark6 border-[1px] border-dark3 rounded-lg p-[50] relative'>
+        <View className='base:w-[100%] tablet:w-[800px] h-fit max-h-full bg-dark6 border-[1px] border-dark3 rounded-lg p-[50] relative'>
           <Pressable
             className='absolute right-[20] top-[20]'
             onPress={() => {

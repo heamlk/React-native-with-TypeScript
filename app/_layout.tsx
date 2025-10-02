@@ -15,13 +15,9 @@ export default function RootLayout() {
     'Dosis Variable': FontDosisVariable,
   })
 
-  // return (
-  //   <div className='w-[100%] h-[100vh] overflow-y-auto'>
-  //     <View className='w-[100%] h-[100px] bg-[#ffffff]'></View>
-  //     <View className='w-[100%] h-[10000px] bg-[#000000]'></View>
-  //     <View className='w-[100%] h-[100px] bg-[#ffffff]'></View>
-  //   </div>
-  // )
+  if (!fontsLoaded) {
+    return
+  }
 
   return (
     <View style={{ flex: 1 }}>
