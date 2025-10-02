@@ -23,7 +23,7 @@
       "package": "com.anonymous.bfflai_native"
     },
     "web": {
-      "output": "static",
+      "output": "single",
       "bundler": "metro",
       "favicon": "app/assets/project/favicon.png"
     },
