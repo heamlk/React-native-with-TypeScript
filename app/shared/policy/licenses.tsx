@@ -4,9 +4,11 @@ import { Text } from '../components/reusable'
 export default function Licenses() {
   return (
     <View className='gap-[24px]'>
-      <Text className='text-[32px] text-white'>Open Source Licenses</Text>
+      <Text className='text-white' size='2xl'>
+        Open Source Licenses
+      </Text>
 
-      <Text className='text-[18px] text-white'>
+      <Text className='text-white' size='lg'>
         <ul>
           <li>
             <a href='https://github.com/comfyanonymous/ComfyUI/' target='_blank'>
