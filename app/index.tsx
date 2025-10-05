@@ -10,21 +10,19 @@ import VideoCarousel8 from '@/app/assets/media/carousel8.mp4'
 import VideoCarousel9 from '@/app/assets/media/carousel9.mp4'
 import { ResizeMode, Video } from 'expo-av'
 import { useRef, useState } from 'react'
-import { NativeSyntheticEvent, Pressable, StyleSheet, TextInput, TextInputKeyPressEventData, View, ActivityIndicator, Dimensions } from 'react-native'
+import { NativeSyntheticEvent, StyleSheet, TextInput, TextInputKeyPressEventData, ActivityIndicator, Dimensions } from 'react-native'
 import Carousel, { type ICarouselInstance } from 'react-native-reanimated-carousel'
 import { useAuth } from './context/descope'
 import { useTheme } from './context/theme'
 import useBreakpoints from './hooks/breakpoints'
-import { Text } from './shared/components/reusable'
+import { getThemeBackground, getThemeBorder, getThemeColor, Logo, Text, View, Pressable } from './shared/components/reusable'
 import themeVars from './styles/theme/themeVars'
 import { BlurView } from 'expo-blur'
-import IconLogo from '@/app/assets/icons/logo'
 import IconGoogle from '@/app/assets/icons/google'
 import IconMicrosoft from '@/app/assets/icons/microsoft'
 import { validateEmail } from './shared/validation'
 import ThemeToggle from './shared/components/themeToggle'
 import { usePopup } from './context/popup'
-
 import AboutUs from './shared/policy/aboutUs'
 import Terms from './shared/policy/terms'
 import PrivacyPolicy from './shared/policy/privacyPolicy'
@@ -254,7 +252,7 @@ export default function Index() {
             renderItem={({ item }) => (
               <View className='w-[100%] h-[100%] absolute z-[11] top-[0] left-[0] rounded-md'>
                 <Video style={styles.carouselVideoElement} videoStyle={styles.carouselVideoElement} source={item.videoUrl} useNativeControls={false} resizeMode={ResizeMode.COVER} isLooping shouldPlay isMuted />
-                <Text className='font-[600] text-white absolute bottom-[40] left-[40] pr-[50]' size='2xl'>
+                <Text className='font-[600] text-light1 absolute bottom-[40] left-[40] pr-[50]' size='2xl'>
                   {item.title}
                 </Text>
               </View>
@@ -264,160 +262,173 @@ export default function Index() {
           />
           {/* Carousel - END */}
 
-          {breakpoints !== 'desktop' ? (
-            <LinearGradient
-              colors={['transparent', theme === 'light' ? themeVars.colors.white : breakpoints === 'phone' ? themeVars.colors.dark1 : themeVars.colors.dark2]}
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: 50,
-                zIndex: 12,
-              }}
-            />
-          ) : (
-            <></>
-          )}
+          <LinearGradient
+            colors={['transparent', getThemeBackground({ theme, breakpoints, background: 'primary' })]}
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 50,
+              zIndex: 12,
+            }}
+          />
         </View>
         {/* Left - END */}
 
         {/* Right */}
-        <BlurView tint={'dark'} className='base:w-[calc(100%_-_32px)] tablet:w-[540] max-w-[540] base:px-[24px] tablet:px-[64] base:py-[56px] tablet:pt-[72] tablet:pb-[64] items-center border-[2px] border-purple2/20 rounded-md relative tablet:left-[-50] tablet:mr-[-50] tablet:pr-[50]'>
-          <IconLogo width={140} height={27} />
-          <Text className='font-[600] mt-[40]' style={{ color: theme === 'dark' ? themeVars.colors.light1 : themeVars.colors.grey1 }} size='xl'>
-            Welcome to BFFL.AI
-          </Text>
-          <Text className='mt-[16]' style={{ color: theme === 'dark' ? themeVars.colors.light3 + themeVars.colors.opacity70 : themeVars.colors.grey2 }} size='md'>
-            Where AI goes to meet humanity
-          </Text>
+        <BlurView tint={'dark'} className='base:w-[calc(100%_-_32px)] tablet:w-[540] max-w-[540] tablet:left-[-50] tablet:mr-[-50] rounded-md'>
+          <View className='w-[100%] h-[100%] base:px-[24px] tablet:px-[64] base:py-[56px] tablet:pt-[72] tablet:pb-[64] items-center border-[2px] rounded-md relative' style={{ backgroundColor: getThemeBackground({ theme, breakpoints, background: 'form' }), borderColor: getThemeBorder({ theme, border: 'form' }) }}>
+            <Logo width={140} height={27} theme={theme} />
+            <Text className='font-[600] mt-[40]' size='xl' color='light1'>
+              Welcome to BFFL.AI
+            </Text>
+            <Text className='mt-[16]' size='md' color='light3'>
+              Where AI goes to meet humanity
+            </Text>
 
-          {/* Authentication */}
-          <View className='gap-[20] mt-[40] items-center'>
-            {/* OTP */}
-            {otpStage === 0 ? (
-              <>
-                <View className='gap-[16]'>
-                  <View className='gap-[7]'>
-                    <Text className='text-[#bec4ca]' size='sm'>
-                      Email *
-                    </Text>
-                    <TextInput className='w-full h-[48] border-[2px] border-[#bec4ca]/40 rounded-[6] px-[8] !bg-[#181a1c] !text-[#bec4ca]' style={emailInputError ? { borderColor: themeVars.colors.red1 } : {}} placeholder='Email' autoComplete='email' value={emailInput} onChangeText={handleOtpEmailTextChange} />
-                    {emailInputError ? (
-                      <Text className='font-[600] text-red1' size='sm'>
-                        {emailInputError}
+            {/* Authentication */}
+            <View className='gap-[20] mt-[40] items-center'>
+              {/* OTP */}
+              {otpStage === 0 ? (
+                <>
+                  <View className='gap-[16]'>
+                    <View className='gap-[7]'>
+                      <Text className='text-[#bec4ca]' size='sm' color='light3'>
+                        Email *
                       </Text>
-                    ) : (
-                      <></>
-                    )}
+                      <TextInput
+                        className='w-full h-[48] border-[2px] border-[#bec4ca]/40 rounded-[6] px-[8]'
+                        style={{
+                          ...(emailInputError ? { borderColor: themeVars.colors.red1 } : {}),
+                          color: getThemeColor({ theme, color: 'light1' }),
+                          backgroundColor: getThemeBackground({ theme, breakpoints, background: 'input' }),
+                        }}
+                        placeholder='Email'
+                        autoComplete='email'
+                        value={emailInput}
+                        onChangeText={handleOtpEmailTextChange}
+                      />
+                      {emailInputError ? (
+                        <Text className='font-[600] text-red1' size='sm'>
+                          {emailInputError}
+                        </Text>
+                      ) : (
+                        <></>
+                      )}
+                    </View>
+
+                    <Text className='max-w-[80%] mx-auto text-center' size='sm' color='light1'>
+                      By continuing, I agree to the Company's
+                      <Pressable>
+                        <Text className='text-[#1f80ff] cursor-pointer' size='sm'>
+                          {' '}
+                          Privacy Statement{' '}
+                        </Text>
+                      </Pressable>
+                      and
+                      <Pressable>
+                        <Text className='text-[#1f80ff] cursor-pointer' size='sm'>
+                          {' '}
+                          Terms of Service
+                        </Text>
+                      </Pressable>
+                    </Text>
                   </View>
 
-                  <Text className='text-center text-white' size='sm'>
-                    By continuing, I agree to the Company's
-                    <Pressable>
-                      <Text className='text-[#1f80ff] cursor-pointer' size='sm'>
-                        {' '}
-                        Privacy Statement{' '}
-                      </Text>
-                    </Pressable>
-                    and
-                    <Pressable>
-                      <Text className='text-[#1f80ff] cursor-pointer' size='sm'>
-                        {' '}
-                        Terms of Service
-                      </Text>
-                    </Pressable>
-                  </Text>
-                </View>
-
-                <Pressable className='w-full h-[50]' onPress={handleOtpPress}>
-                  <Text className='w-full h-[50] font-[600] text-center flex items-center justify-center bg-[#860fef] rounded-sm cursor-pointer' size='md'>
-                    Continue
-                  </Text>
-                </Pressable>
-
-                <View className='w-full flex-row items-center justify-center'>
-                  <View className='flex-1 h-[1] bg-[#555f68]'></View>
-                  <Text className='text-white px-[10]' size='sm'>
-                    OR
-                  </Text>
-                  <View className='flex-1 h-[1] bg-[#555f68]'></View>
-                </View>
-
-                {/* OAuth */}
-                <View className='w-full gap-[6]'>
-                  <Pressable
-                    className='w-full h-[46] flex-row items-center justify-center gap-[10] border-[1px] border-purple1 rounded-sm'
-                    onPress={() => {
-                      auth.oAuth({ provider: 'google' })
-                    }}
-                  >
-                    <IconGoogle width={24} height={24} />
-                    <Text className='font-[600] text-purple1' size='md'>
-                      Continue with Google
+                  <Pressable className='w-full h-[50]' onPress={handleOtpPress}>
+                    <Text className='w-full h-[50] font-[600] text-center flex items-center justify-center rounded-sm cursor-pointer' size='md' color='button' background='button'>
+                      Continue
                     </Text>
                   </Pressable>
-                  <Pressable
-                    className='w-full h-[46] flex-row items-center justify-center gap-[10] border-[1px] border-purple1 rounded-sm'
-                    onPress={() => {
-                      auth.oAuth({ provider: 'microsoft' })
-                    }}
-                  >
-                    <IconMicrosoft width={24} height={24} />
-                    <Text className='font-[600] text-purple1' size='md'>
-                      Continue with Microsoft
+
+                  <View className='w-full flex-row items-center justify-center'>
+                    <View className='flex-1 h-[1] bg-[#555f68]'></View>
+                    <Text className='px-[10]' size='sm' color='light1'>
+                      OR
                     </Text>
-                  </Pressable>
-                </View>
-                {/* OAuth - END */}
-              </>
-            ) : (
-              <View className='gap-[16] items-center'>
-                <Text className='text text-white font-[500] text-center' size='xl'>
-                  We've sent a message containing a 6-digit code to {emailInput}
-                </Text>
-                <Text className='text text-white font-[500] text-center mb-[20px]' size='lg'>
-                  Enter Code
-                </Text>
-                <View className='w-fit flex-row items-center justify-center gap-[4] relative'>
-                  {otpCode.map((value, index) => (
-                    <TextInput
-                      key={index}
-                      ref={(ref) => {
-                        inputsRef.current[index] = ref
+                    <View className='flex-1 h-[1] bg-[#555f68]'></View>
+                  </View>
+
+                  {/* OAuth */}
+                  <View className='w-full gap-[6]'>
+                    <Pressable
+                      background='buttonOutline'
+                      border='buttonOutline'
+                      className='w-full h-[46] flex-row items-center justify-center gap-[10] border-[1px] rounded-sm'
+                      onPress={() => {
+                        auth.oAuth({ provider: 'google' })
                       }}
-                      value={value}
-                      onChangeText={(text) => handleOtpNumberChange(text, index)}
-                      onKeyPress={(e) => handleOtpKeyPress(e, index)}
-                      className='w-[50px] h-[50px] bg-[#181a1c] border-[1px] border-[#555f68] rounded-sm text-center text-white caret-white focus:outline-none'
-                      style={otpFetching ? { opacity: 0.15, pointerEvents: 'none' } : {}}
-                      keyboardType='number-pad'
-                      maxLength={1}
-                      inputMode='numeric'
-                    />
-                  ))}
-                  {otpFetching && <ActivityIndicator className='absolute' size='small' color={themeVars.colors.purple1} />}
+                    >
+                      <IconGoogle width={24} height={24} />
+                      <Text className='font-[600] text-purple1' size='md' color='buttonOutline'>
+                        Continue with Google
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      background='buttonOutline'
+                      border='buttonOutline'
+                      className='w-full h-[46] flex-row items-center justify-center gap-[10] border-[1px] rounded-sm'
+                      onPress={() => {
+                        auth.oAuth({ provider: 'microsoft' })
+                      }}
+                    >
+                      <IconMicrosoft width={24} height={24} />
+                      <Text className='font-[600]' size='md' color='buttonOutline'>
+                        Continue with Microsoft
+                      </Text>
+                    </Pressable>
+                  </View>
+                  {/* OAuth - END */}
+                </>
+              ) : (
+                <View className='gap-[16] items-center'>
+                  <Text className='text font-[500] text-center' size='xl' color='light1'>
+                    We've sent a message containing a 6-digit code to {emailInput}
+                  </Text>
+                  <Text className='text font-[500] text-center mb-[20px]' size='lg' color='light1'>
+                    Enter Code
+                  </Text>
+                  <View className='w-fit flex-row items-center justify-center gap-[4] relative'>
+                    {otpCode.map((value, index) => (
+                      <TextInput
+                        key={index}
+                        ref={(ref) => {
+                          inputsRef.current[index] = ref
+                        }}
+                        value={value}
+                        onChangeText={(text) => handleOtpNumberChange(text, index)}
+                        onKeyPress={(e) => handleOtpKeyPress(e, index)}
+                        className='w-[50px] h-[50px] bg-[#181a1c] border-[1px] border-[#555f68] rounded-sm text-center text-white caret-white focus:outline-none'
+                        style={otpFetching ? { opacity: 0.15, pointerEvents: 'none' } : {}}
+                        keyboardType='number-pad'
+                        maxLength={1}
+                        inputMode='numeric'
+                      />
+                    ))}
+                    {otpFetching && <ActivityIndicator className='absolute' size='small' color={themeVars.colors.purple1} />}
+                  </View>
+                  {otpError ? (
+                    <Text className='font-[600] text-red1' size='sm'>
+                      {otpError}
+                    </Text>
+                  ) : (
+                    <></>
+                  )}
+                  <Pressable onPress={handleOtpPress}>
+                    <Text className='font-[600] text-purple1' size='sm'>
+                      Send Again
+                    </Text>
+                  </Pressable>
+                  <Pressable onPress={handleGoBack}>
+                    <Text className='font-[600] text-purple1' size='sm'>
+                      Choose another authentication method
+                    </Text>
+                  </Pressable>
                 </View>
-                {otpError ? (
-                  <Text className='font-[600] text-red1' size='sm'>
-                    {otpError}
-                  </Text>
-                ) : (
-                  <></>
-                )}
-                <Pressable onPress={handleOtpPress}>
-                  <Text className='font-[600] text-purple1' size='sm'>
-                    Send Again
-                  </Text>
-                </Pressable>
-                <Pressable onPress={handleGoBack}>
-                  <Text className='font-[600] text-purple1' size='sm'>
-                    Choose another authentication method
-                  </Text>
-                </Pressable>
-              </View>
-            )}
-            {/* OTP - END */}
+              )}
+              {/* OTP - END */}
+            </View>
           </View>
           {/* Authentication - END */}
         </BlurView>
@@ -433,7 +444,7 @@ export default function Index() {
             handleFooterPopup({ target: 'about' })
           }}
         >
-          <Text className='cursor-pointer' size='md' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
+          <Text className='cursor-pointer' size='md' color='light3'>
             About Us
           </Text>
         </Pressable>
@@ -443,7 +454,7 @@ export default function Index() {
             handleFooterPopup({ target: 'terms' })
           }}
         >
-          <Text className='cursor-pointer' size='md' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
+          <Text className='cursor-pointer' size='md' color='light3'>
             Terms of Service
           </Text>
         </Pressable>
@@ -452,7 +463,7 @@ export default function Index() {
             handleFooterPopup({ target: 'privacy' })
           }}
         >
-          <Text className='cursor-pointer' size='md' style={theme === 'light' ? { color: themeVars.colors.grey2 } : { color: themeVars.colors.light3 }}>
+          <Text className='cursor-pointer' size='md' color='light3'>
             Privacy Policy
           </Text>
         </Pressable>

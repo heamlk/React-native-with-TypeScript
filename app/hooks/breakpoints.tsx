@@ -1,6 +1,8 @@
 import { breakpointsNative } from '../styles/theme/breakpoints'
 import useDimensions from './dimensions'
 
+export type BreakpointsType = 'phone' | 'tablet' | 'desktop'
+
 export default function useBreakpoints() {
   const { deviceWidth } = useDimensions()
 

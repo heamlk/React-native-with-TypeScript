@@ -1,4 +1,9 @@
 const colors = {
+  opacity20: '33',
+  opacity40: '66',
+  opacity70: 'b3',
+  opacity80: 'cc',
+
   dark1: '#1a1425',
   dark2: '#281f36',
   dark3: '#3e2f57',
@@ -20,10 +25,7 @@ const colors = {
   green1: '#0fab4b',
   yellow1: '#febe44',
 
-  opacity20: '33',
-  opacity40: '66',
-  opacity70: 'b3',
-  opacity80: 'cc',
+  input: '#181a1c',
 
   white: '#ffffff',
   black: '#000000',
