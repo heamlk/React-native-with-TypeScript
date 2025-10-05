@@ -1,6 +1,6 @@
 import * as Linking from 'expo-linking'
 import { ReactNode, createContext, useContext, useEffect } from 'react'
-import { useAuth } from './descope'
+import { useAuth } from './auth'
 import { useRouter } from 'expo-router'
 
 export type DeeplinkContextType = {}
