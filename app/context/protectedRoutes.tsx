@@ -34,13 +34,13 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
     }
   }, [])
 
-  useEffect(() => {
-    if (pathname !== '/onboarding') {
-      setTimeout(() => {
-        router.navigate('/onboarding')
-      }, 500)
-    }
-  }, [])
+  // useEffect(() => {
+  //   if (pathname !== '/onboarding') {
+  //     setTimeout(() => {
+  //       router.navigate('/onboarding')
+  //     }, 500)
+  //   }
+  // }, [])
 
   return <ProtectedRoutesContext.Provider value={value}>{allowRoute ? children : <ProtectedScreen />}</ProtectedRoutesContext.Provider>
 }

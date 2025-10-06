@@ -169,9 +169,11 @@ export function Pressable({ background = null, border = null, style, className, 
 
 export type CustomGradientPressableProps = PressableProps & {
   type: 'primary'
+  combinedStyle?: ViewStyle
+  combinedClassname?: string
 }
 
-export function GradientPressable({ type, style, className, ...props }: CustomGradientPressableProps) {
+export function GradientPressable({ type, style, combinedStyle, combinedClassname, className, ...props }: CustomGradientPressableProps) {
   const { theme } = useTheme()
 
   const [hover, setHover] = useState(false)
@@ -216,13 +218,13 @@ export function GradientPressable({ type, style, className, ...props }: CustomGr
   const hoverGradient: any = theme === 'light' ? [themeVars.colors.grey2, themeVars.colors.grey2] : ['#d09aff', '#860fef']
 
   return (
-    <RNView className='relative'>
-      <LinearGradient className='' colors={hover ? hoverGradient : gradient} start={{ x: 0, y: 0.5 }} end={{ x: 0, y: 40 }} style={styles.primary.gradient} />
+    <RNView className={clsx('relative', combinedClassname)} style={[combinedStyle]}>
+      <LinearGradient className={clsx('')} colors={hover ? hoverGradient : gradient} start={{ x: 0, y: 0.5 }} end={{ x: 0, y: 40 }} style={[styles.primary.gradient]} />
 
       <RNPressable
         {...props}
-        className={clsx('', className)}
-        style={typeof style === 'function' ? style : [{}, styles[type]['normal'], style]}
+        className={clsx('', combinedClassname, className)}
+        style={typeof style === 'function' ? style : [{}, combinedStyle, styles[type]['normal'], style]}
         onHoverIn={() => {
           setHover(true)
         }}

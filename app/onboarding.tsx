@@ -13,7 +13,7 @@ export default function Onboarding() {
   const dimentions = useDimensions()
   const breakpoints = useBreakpoints()
 
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(1)
 
   const {
     control,
@@ -274,6 +274,7 @@ export default function Onboarding() {
               <GradientPressable
                 type='primary'
                 className='w-[fit-content] h-[36px] items-center justicy-center rounded-[99999px]'
+                combinedClassname='w-[fit-content]'
                 onPress={() => {
                   trigger()
                   onStepChange({ step: 1 })
