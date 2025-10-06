@@ -10,9 +10,9 @@ export default function All() {
     const isAuthenticated = !!auth.user?.email
 
     if (isAuthenticated) {
-      router.push('/')
+      router.navigate('/')
     } else {
-      router.push('/')
+      router.navigate('/')
     }
   }, [])
 

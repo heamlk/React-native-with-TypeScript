@@ -30,7 +30,15 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
     if (newAllowRoute) {
       setAllowRoute(newAllowRoute)
     } else {
-      router.push('/')
+      router.navigate('/')
+    }
+  }, [])
+
+  useEffect(() => {
+    if (pathname !== '/onboarding') {
+      setTimeout(() => {
+        router.navigate('/onboarding')
+      }, 500)
     }
   }, [])
 

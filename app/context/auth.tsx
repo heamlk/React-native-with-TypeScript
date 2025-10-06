@@ -4,6 +4,7 @@ import { createContext, type Dispatch, type ReactNode, type SetStateAction, useC
 import axios from 'axios'
 import * as Linking from 'expo-linking'
 import storage from '@/app/shared/storage/storage'
+import { useRouter } from 'expo-router'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -44,6 +45,7 @@ const getStoredUser = (): UserType | null => {
 }
 
 export default function AuthProvider({ children }: AuthProviderProps) {
+  const router = useRouter()
   const descopeProjectId = process.env.EXPO_PUBLIC_DESCOPE_PROJECT_ID!
 
   const [user, setUser] = useState<UserType | null>(getStoredUser())
@@ -126,11 +128,13 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const authenticate = ({ name, email, picture }: { name: string; email: string; picture: string }) => {
     storage.set('user', JSON.stringify({ name, email, picture }))
     setUser({ name, email, picture })
+    router.navigate('/onboarding')
   }
 
   const logout = () => {
     setUser(null)
     storage.delete('user')
+    router.navigate('/')
   }
 
   // useEffect(() => {

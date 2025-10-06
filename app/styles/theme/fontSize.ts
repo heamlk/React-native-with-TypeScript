@@ -5,6 +5,7 @@ const fontSize = {
   lg: '20px',
   xl: '26px',
   '2xl': '32px',
+  '3xl': '40px',
 }
 
 export const fontSizeNative = {
@@ -14,6 +15,7 @@ export const fontSizeNative = {
   lg: 20,
   xl: 26,
   '2xl': 32,
+  '3xl': 40,
 }
 
 export default fontSize

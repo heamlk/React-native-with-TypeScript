@@ -1,14 +1,18 @@
 import useBreakpoints, { type BreakpointsType } from '@/app/hooks/breakpoints'
 import themeVars from '@/app/styles/theme/themeVars'
-import { Text as RNText, View as RNView, Pressable as RNPressable, type TextProps, type ViewProps, type PressableProps } from 'react-native'
+import { StyleSheet, Text as RNText, View as RNView, Pressable as RNPressable, TextInput as RNTextInput, type TextProps, type ViewProps, type PressableProps, type TextInputProps, ViewStyle, PressableStateCallbackType } from 'react-native'
 import { fontSizeNative } from '@/app/styles/theme/fontSize'
 import { type ThemeType, useTheme } from '@/app/context/theme'
 import svgIconDefaultProps from '@/app/assets/icons/_props'
+import { useState } from 'react'
+import clsx from 'clsx'
+import { LinearGradient } from 'expo-linear-gradient'
+import { borderRadiusNative } from '@/app/styles/theme/borderRadius'
 
 // Background
 export type GetThemeBackgroundProps = {
   theme: ThemeType
-  background: 'primary' | 'form' | 'input' | 'button' | 'buttonOutline'
+  background: 'primary' | 'form' | 'input' | 'input2' | 'button' | 'buttonOutline'
   breakpoints: BreakpointsType
 }
 
@@ -17,6 +21,7 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
     primary: theme === 'light' ? themeVars.colors.light1 : breakpoints === 'phone' ? themeVars.colors.dark1 : themeVars.colors.dark2,
     form: theme === 'light' ? themeVars.colors.grey6 : 'none',
     input: theme === 'light' ? themeVars.colors.light1 : themeVars.colors.input,
+    input2: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark1,
     button: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.purple1,
     buttonOutline: theme === 'light' ? themeVars.colors.grey5 : 'transparent',
   }
@@ -28,13 +33,15 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
 // Border
 export type GetThemeBorderProps = {
   theme: ThemeType
-  border: 'form' | 'buttonOutline'
+  border: 'form' | 'input2' | 'buttonOutline' | 'input2Focus'
 }
 
 export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
   const borderColors = {
     form: theme === 'light' ? 'transparent' : themeVars.colors.purple2 + themeVars.colors.opacity20,
     buttonOutline: theme === 'light' ? 'transparent' : themeVars.colors.purple1,
+    input2: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark4,
+    input2Focus: theme === 'light' ? themeVars.colors.grey4 : themeVars.colors.purple3,
   }
 
   return borderColors[border]
@@ -44,7 +51,7 @@ export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
 // Color
 export type GetThemeColorProps = {
   theme: ThemeType
-  color: 'light1' | 'light3' | 'button' | 'buttonOutline'
+  color: 'light1' | 'light3' | 'button' | 'buttonOutline' | 'input2'
 }
 
 export const getThemeColor = ({ theme, color }: GetThemeColorProps) => {
@@ -53,11 +60,27 @@ export const getThemeColor = ({ theme, color }: GetThemeColorProps) => {
     light3: theme === 'light' ? themeVars.colors.grey2 : themeVars.colors.light3,
     button: theme === 'light' ? themeVars.colors.white : themeVars.colors.black,
     buttonOutline: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.purple1,
+    input2: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.light2,
   }
 
   return colors[color]
 }
 // Color - END
+
+// Placeholder color
+export type GetThemePlaceholderColorProps = {
+  theme: ThemeType
+  placeholderColor: 'input2Placeholder'
+}
+
+export const getThemePlaceholderColor = ({ theme, placeholderColor }: GetThemePlaceholderColorProps) => {
+  const placeholderColors = {
+    input2Placeholder: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.purple4,
+  }
+
+  return placeholderColors[placeholderColor]
+}
+// Placeholder color - END
 
 // Logo
 export type LogoProps = React.SVGProps<SVGSVGElement> & {
@@ -98,12 +121,12 @@ export const Logo = ({ theme, width = svgIconDefaultProps.width, height = svgIco
 // Logo - END
 
 export type CustomTextProps = TextProps & {
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+  size?: keyof typeof themeVars.fontSize
   color?: GetThemeColorProps['color'] | null
   background?: GetThemeBackgroundProps['background'] | null
 }
 
-export function Text({ size = 'md', color = null, background = null, style, ...props }: CustomTextProps) {
+export function Text({ size = 'md', color = null, background = null, style, className, ...props }: CustomTextProps) {
   const { theme } = useTheme()
   const breakpoints = useBreakpoints()
 
@@ -114,9 +137,10 @@ export function Text({ size = 'md', color = null, background = null, style, ...p
     lg: breakpoints === 'phone' ? fontSizeNative.lg : breakpoints === 'tablet' ? fontSizeNative.lg : fontSizeNative.lg,
     xl: breakpoints === 'phone' ? fontSizeNative.xl : breakpoints === 'tablet' ? fontSizeNative.xl : fontSizeNative.xl,
     '2xl': breakpoints === 'phone' ? fontSizeNative.lg : breakpoints === 'tablet' ? fontSizeNative.xl : fontSizeNative['2xl'],
+    '3xl': breakpoints === 'phone' ? fontSizeNative.xl : breakpoints === 'tablet' ? fontSizeNative['2xl'] : fontSizeNative['3xl'],
   }
 
-  return <RNText {...props} style={[{ fontFamily: themeVars.fonts.dosis, fontSize: responsiveSizes[size] }, color ? { color: getThemeColor({ theme, color }) } : null, background ? { backgroundColor: getThemeBackground({ theme, breakpoints, background }) } : null, style]} />
+  return <RNText {...props} className={clsx('', className)} style={[{ fontFamily: themeVars.fonts.dosis, fontSize: responsiveSizes[size] }, color ? { color: getThemeColor({ theme, color }) } : null, background ? { backgroundColor: getThemeBackground({ theme, breakpoints, background }) } : null, style]} />
 }
 
 export type CustomViewProps = ViewProps & {
@@ -124,11 +148,11 @@ export type CustomViewProps = ViewProps & {
   border?: GetThemeBorderProps['border'] | null
 }
 
-export function View({ background = null, border = null, style, ...props }: CustomViewProps) {
+export function View({ background = null, border = null, style, className, ...props }: CustomViewProps) {
   const { theme } = useTheme()
   const breakpoints = useBreakpoints()
 
-  return <RNView {...props} style={[{}, background ? { backgroundColor: getThemeBackground({ theme, breakpoints, background }) } : null, border ? { borderColor: getThemeBorder({ theme, border }) } : null, style]} />
+  return <RNView {...props} className={clsx('', className)} style={[{}, background ? { backgroundColor: getThemeBackground({ theme, breakpoints, background }) } : null, border ? { borderColor: getThemeBorder({ theme, border }) } : null, style]} />
 }
 
 export type CustomPressableProps = PressableProps & {
@@ -136,12 +160,126 @@ export type CustomPressableProps = PressableProps & {
   border?: GetThemeBorderProps['border'] | null
 }
 
-export function Pressable({ background = null, border = null, style, ...props }: CustomPressableProps) {
+export function Pressable({ background = null, border = null, style, className, ...props }: CustomPressableProps) {
   const { theme } = useTheme()
   const breakpoints = useBreakpoints()
 
-  // @ts-ignore
-  return <RNPressable {...props} style={[{}, background ? { backgroundColor: getThemeBackground({ theme, breakpoints, background }) } : null, border ? { borderColor: getThemeBorder({ theme, border }) } : null, style]} />
+  return <RNPressable {...props} className={clsx('', className)} style={typeof style === 'function' ? style : [{}, background ? { backgroundColor: getThemeBackground({ theme, breakpoints, background }) } : null, border ? { borderColor: getThemeBorder({ theme, border }) } : null, style]} />
+}
+
+export type CustomGradientPressableProps = PressableProps & {
+  type: 'primary'
+}
+
+export function GradientPressable({ type, style, className, ...props }: CustomGradientPressableProps) {
+  const { theme } = useTheme()
+
+  const [hover, setHover] = useState(false)
+
+  const styles = {
+    primary: StyleSheet.create({
+      gradient: {
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        borderRadius: borderRadiusNative.md,
+      },
+      normal: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        fontSize: fontSizeNative.md,
+        fontWeight: 600,
+        borderRadius: borderRadiusNative.md,
+
+        ...(theme === 'light'
+          ? {
+              color: themeVars.colors.white,
+
+              shadowColor: themeVars.colors.light2 + themeVars.colors.opacity20,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 4,
+              elevation: 4,
+            }
+          : {
+              color: themeVars.colors.white,
+            }),
+      },
+      hover: {},
+    }),
+  }
+
+  const gradient: any = theme === 'light' ? [themeVars.colors.grey3, themeVars.colors.grey3] : ['#aa4aff', '#860fef']
+  const hoverGradient: any = theme === 'light' ? [themeVars.colors.grey2, themeVars.colors.grey2] : ['#d09aff', '#860fef']
+
+  return (
+    <RNView className='relative'>
+      <LinearGradient className='' colors={hover ? hoverGradient : gradient} start={{ x: 0, y: 0.5 }} end={{ x: 0, y: 40 }} style={styles.primary.gradient} />
+
+      <RNPressable
+        {...props}
+        className={clsx('', className)}
+        style={typeof style === 'function' ? style : [{}, styles[type]['normal'], style]}
+        onHoverIn={() => {
+          setHover(true)
+        }}
+        onHoverOut={() => {
+          setHover(false)
+        }}
+      >
+        {props?.children === 'string' ? (
+          <Text>
+            <>{props?.children}</>
+          </Text>
+        ) : (
+          <>{props?.children}</>
+        )}
+      </RNPressable>
+    </RNView>
+  )
+}
+
+export type CustomTextInputProps = TextInputProps & {
+  background?: GetThemeBackgroundProps['background'] | null
+  border?: GetThemeBorderProps['border'] | null
+  borderFocus?: GetThemeBorderProps['border'] | null
+  color?: GetThemeColorProps['color'] | null
+  placeholderColor?: GetThemePlaceholderColorProps['placeholderColor'] | null
+}
+
+export function TextInput({ background = null, border = null, borderFocus = null, color = null, placeholderColor = null, style, className, ...props }: CustomTextInputProps) {
+  const { theme } = useTheme()
+  const breakpoints = useBreakpoints()
+
+  const [focused, setFocused] = useState(false)
+
+  return (
+    <RNTextInput
+      {...props}
+      className={clsx('w-[100%] h-[56px] px-[24px] rounded-[999999] outline-none', className)}
+      style={[
+        {
+          fontFamily: themeVars.fonts.dosis,
+        },
+        background ? { backgroundColor: getThemeBackground({ theme, breakpoints, background }) } : null,
+        border ? { borderColor: focused && borderFocus ? getThemeBorder({ theme, border: borderFocus }) : getThemeBorder({ theme, border }) } : null,
+        color ? { color: getThemeColor({ theme, color }) } : null,
+        style,
+      ]}
+      placeholderTextColor={placeholderColor ? getThemePlaceholderColor({ theme, placeholderColor: 'input2Placeholder' }) : ''}
+      onFocus={(event) => {
+        props?.onFocus && props?.onFocus(event)
+        setFocused(true)
+      }}
+      onBlur={(event) => {
+        props?.onBlur && props?.onBlur(event)
+        setFocused(false)
+      }}
+    />
+  )
 }
 
 export default function Blank() {}

@@ -6,12 +6,6 @@ import { useRouter } from 'expo-router'
 export type DeeplinkContextType = {}
 export type DeeplinkProviderProps = { children: ReactNode }
 
-// export const pageSettings = {
-//   '/' : {
-//     allowRegistered
-//   }
-// }
-
 const DeeplinkContext = createContext<DeeplinkContextType | null>(null)
 
 export default function DeeplinkProvider({ children }: DeeplinkProviderProps) {
@@ -23,7 +17,7 @@ export default function DeeplinkProvider({ children }: DeeplinkProviderProps) {
       const { queryParams } = Linking.parse(url)
       if (queryParams?.code) {
         const result = await auth.oAuthCodeExchange({ code: String(queryParams?.code) })
-        router.navigate('/')
+        router.navigate('/onboarding')
       }
     }
 
