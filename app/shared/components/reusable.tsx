@@ -12,13 +12,14 @@ import { borderRadiusNative } from '@/app/styles/theme/borderRadius'
 // Background
 export type GetThemeBackgroundProps = {
   theme: ThemeType
-  background: 'primary' | 'form' | 'input' | 'input2' | 'button' | 'buttonOutline'
+  background: 'primary' | 'primaryAuthenticated' | 'form' | 'input' | 'input2' | 'button' | 'buttonOutline'
   breakpoints: BreakpointsType
 }
 
 export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeBackgroundProps) => {
   const backgroundColors = {
     primary: theme === 'light' ? themeVars.colors.light1 : breakpoints === 'phone' ? themeVars.colors.dark1 : themeVars.colors.dark2,
+    primaryAuthenticated: theme === 'light' ? themeVars.colors.light1 : breakpoints === 'phone' ? themeVars.colors.dark6 : themeVars.colors.dark5,
     form: theme === 'light' ? themeVars.colors.grey6 : 'none',
     input: theme === 'light' ? themeVars.colors.light1 : themeVars.colors.input,
     input2: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark1,
@@ -168,7 +169,7 @@ export function Pressable({ background = null, border = null, style, className, 
 }
 
 export type CustomGradientPressableProps = PressableProps & {
-  type: 'primary'
+  type: 'primary' | 'secondary' | 'dark' | 'selected'
   combinedStyle?: ViewStyle
   combinedClassname?: string
 }
@@ -192,34 +193,78 @@ export function GradientPressable({ type, style, combinedStyle, combinedClassnam
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: 20,
-        fontSize: fontSizeNative.md,
-        fontWeight: 600,
         borderRadius: borderRadiusNative.md,
-
-        ...(theme === 'light'
-          ? {
-              color: themeVars.colors.white,
-
-              shadowColor: themeVars.colors.light2 + themeVars.colors.opacity20,
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.2,
-              shadowRadius: 4,
-              elevation: 4,
-            }
-          : {
-              color: themeVars.colors.white,
-            }),
       },
-      hover: {},
+    }),
+    secondary: StyleSheet.create({
+      gradient: {
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        borderRadius: borderRadiusNative.md,
+      },
+      normal: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        borderRadius: borderRadiusNative.md,
+      },
+    }),
+    dark: StyleSheet.create({
+      gradient: {
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        borderRadius: borderRadiusNative.md,
+      },
+      normal: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        borderRadius: borderRadiusNative.md,
+      },
+    }),
+    selected: StyleSheet.create({
+      gradient: {
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        borderRadius: borderRadiusNative.md,
+      },
+      normal: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        borderRadius: borderRadiusNative.md,
+      },
     }),
   }
 
-  const gradient: any = theme === 'light' ? [themeVars.colors.grey3, themeVars.colors.grey3] : ['#aa4aff', '#860fef']
-  const hoverGradient: any = theme === 'light' ? [themeVars.colors.grey2, themeVars.colors.grey2] : ['#d09aff', '#860fef']
+  const gradientPrimary: any = theme === 'light' ? [themeVars.colors.grey3, themeVars.colors.grey3] : ['#aa4aff', '#860fef']
+  const hoverGradientPrimary: any = theme === 'light' ? [themeVars.colors.grey2, themeVars.colors.grey2] : ['#d09aff', '#860fef']
+
+  const gradientSecondary: any = theme === 'light' ? [themeVars.colors.grey3, themeVars.colors.grey3] : ['#392853ff', themeVars.colors.dark2]
+
+  const gradientDark: any = theme === 'light' ? [themeVars.colors.grey3, themeVars.colors.grey3] : ['#3b2858ff', themeVars.colors.dark2]
+  const hoverGradientDark: any = theme === 'light' ? [themeVars.colors.grey3, themeVars.colors.grey3] : ['#3b2858ff', themeVars.colors.dark3]
+
+  const gradientSelected: any = theme === 'light' ? [themeVars.colors.grey3, themeVars.colors.grey3] : ['#aa4aff', '#860fef']
 
   return (
     <RNView className={clsx('relative', combinedClassname)} style={[combinedStyle]}>
-      <LinearGradient className={clsx('')} colors={hover ? hoverGradient : gradient} start={{ x: 0, y: 0.5 }} end={{ x: 0, y: 40 }} style={[styles.primary.gradient]} />
+      <LinearGradient
+        className={clsx('')}
+        colors={type === 'primary' ? (hover ? hoverGradientPrimary : gradientPrimary) : type === 'secondary' ? gradientSecondary : type === 'dark' ? (hover ? hoverGradientDark : gradientDark) : gradientSelected}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={[styles[type]['gradient']]}
+      />
 
       <RNPressable
         {...props}
@@ -232,13 +277,7 @@ export function GradientPressable({ type, style, combinedStyle, combinedClassnam
           setHover(false)
         }}
       >
-        {props?.children === 'string' ? (
-          <Text>
-            <>{props?.children}</>
-          </Text>
-        ) : (
-          <>{props?.children}</>
-        )}
+        {props?.children}
       </RNPressable>
     </RNView>
   )

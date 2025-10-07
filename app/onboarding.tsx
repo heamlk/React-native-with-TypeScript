@@ -7,22 +7,27 @@ import IconPencil from '@/app/assets/icons/pencil.svg'
 import themeVars from './styles/theme/themeVars'
 import { useForm, Controller } from 'react-hook-form'
 import { useState } from 'react'
+import { useAuth } from './context/auth'
 
 export default function Onboarding() {
   const { theme } = useTheme()
+  const { user } = useAuth()
   const dimentions = useDimensions()
   const breakpoints = useBreakpoints()
 
   const [currentStep, setCurrentStep] = useState(1)
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([])
 
   const {
     control,
     handleSubmit,
     getValues,
     trigger,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm({
-    defaultValues: { username: '', firstName: '', lastName: '', dateOfBirth: '', referalCode: '' },
+    defaultValues: { username: '', firstName: '', lastName: '', dateOfBirth: '', referalCode: '', interests: [] },
     reValidateMode: 'onChange',
   })
 
@@ -38,11 +43,28 @@ export default function Onboarding() {
       return
     }
 
+    if (step === 2 && selectedInterests.length === 0) {
+      setError('interests', { message: 'At least one preference is required' })
+      return
+    }
+
+    clearErrors()
     setCurrentStep(step)
   }
 
   const handleAvatarUpload = () => {
     console.log('handleAvatarUpload')
+  }
+
+  const handleInterestTrigger = (interest: string) => {
+    setSelectedInterests((prev) => {
+      if (prev.includes(interest)) {
+        return prev.filter((item) => item !== interest)
+      } else {
+        clearErrors('interests')
+        return [...prev, interest]
+      }
+    })
   }
 
   return (
@@ -269,32 +291,56 @@ export default function Onboarding() {
                 {errors?.referalCode?.message ? <Text className='text-red1'>{errors?.referalCode?.message}</Text> : null}
               </View>
             </>
-          ) : (
-            <View className='w-[100%] gap-[8px]'>
-              <GradientPressable
-                type='primary'
-                className='w-[fit-content] h-[36px] items-center justicy-center rounded-[99999px]'
-                combinedClassname='w-[fit-content]'
-                onPress={() => {
-                  trigger()
-                  onStepChange({ step: 1 })
-                }}
-              >
-                Continue
-              </GradientPressable>
+          ) : currentStep === 1 ? (
+            <View className='w-[100%] flex flex-row flex-wrap justify-center gap-[8px]'>
+              {Object.entries(user?.interests ?? {}).map(([key, value]) => {
+                return (
+                  <GradientPressable
+                    key={key}
+                    type={selectedInterests.includes(key) ? 'selected' : 'secondary'}
+                    className='w-[fit-content] h-[36px] items-center justicy-center rounded-[99999px]'
+                    combinedClassname='w-[fit-content]'
+                    onPress={() => {
+                      handleInterestTrigger(key)
+                    }}
+                  >
+                    <Text size='lg' color='light3'>
+                      {value}
+                    </Text>
+                  </GradientPressable>
+                )
+              })}
+              {errors?.interests?.message ? <Text className='text-red1'>{errors?.interests?.message}</Text> : null}
             </View>
+          ) : (
+            <></>
           )}
 
-          <GradientPressable
-            type='primary'
-            className='h-[48px] items-center justicy-center rounded-[99999px]'
-            onPress={() => {
-              trigger()
-              onStepChange({ step: 1 })
-            }}
-          >
-            Continue
-          </GradientPressable>
+          <View className='gap-[16px]'>
+            <GradientPressable
+              type='primary'
+              className='h-[48px] items-center justicy-center rounded-[99999px]'
+              onPress={() => {
+                onStepChange({ step: currentStep + 1 })
+              }}
+            >
+              <Text className='text-md text-light2 font-[600]'>{currentStep === 0 ? 'Continue' : 'Get Started'}</Text>
+            </GradientPressable>
+
+            {currentStep === 1 ? (
+              <GradientPressable
+                type='dark'
+                className='h-[48px] items-center justicy-center rounded-[99999px]'
+                onPress={() => {
+                  onStepChange({ step: 0 })
+                }}
+              >
+                <Text className='text-md text-light2 font-[600]'>Back</Text>
+              </GradientPressable>
+            ) : (
+              <></>
+            )}
+          </View>
         </View>
         {/* Form - END */}
       </View>
