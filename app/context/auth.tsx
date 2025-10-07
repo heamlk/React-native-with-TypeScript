@@ -5,6 +5,8 @@ import axios from 'axios'
 import * as Linking from 'expo-linking'
 import storage from '@/app/shared/storage/storage'
 import { useRouter } from 'expo-router'
+import { useApi } from './api'
+import type { CompanionInfos, CustomerProfile, MarketplaceProduct } from './auth.types'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -13,7 +15,7 @@ export type AuthContextType = {
   oAuthCodeExchange: ({ code }: { code: string }) => Promise<{ successful: boolean; data: any }>
   otp: ({ email }: { email: string }) => Promise<{ successful: boolean; data: any; error: null } | { successful: boolean; data: null; error: any }>
   otpVerify: ({ email, code }: { email: string; code: string }) => Promise<{ successful: boolean; data: any; error: null } | { successful: boolean; data: null; error: any }>
-  authenticate: ({ name, email, picture }: { name: string; email: string; picture: string }) => void
+  authenticate: ({ sessionJWT }: { sessionJWT: string }) => void
   logout: () => void
   user: UserType | null
   setUser: Dispatch<SetStateAction<UserType | null>>
@@ -23,17 +25,19 @@ export type AuthProviderProps = { children: ReactNode }
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export type UserType = {
-  name: string
-  email: string
-  picture?: string
+  customerId: string
+  companions: CompanionInfos[]
+  profile: CustomerProfile
+  products: MarketplaceProduct[]
+  interests: Record<string, string>
 }
 
-const getStoredUser = (): UserType | null => {
+export const getStoredUser = (): UserType | null => {
   const data = storage.getString('user')
 
   try {
     const parsedData = JSON.parse(data as any)
-    if (parsedData?.email) {
+    if (parsedData?.customerId) {
       return parsedData
     }
 
@@ -46,6 +50,7 @@ const getStoredUser = (): UserType | null => {
 
 export default function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
+  const api = useApi()
   const descopeProjectId = process.env.EXPO_PUBLIC_DESCOPE_PROJECT_ID!
 
   const [user, setUser] = useState<UserType | null>(getStoredUser())
@@ -63,7 +68,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       const successful = !!data?.user?.email
 
       if (successful) {
-        authenticate({ email: data?.user?.email, name: data?.user?.name, picture: data?.user?.picture })
+        await authenticate({ sessionJWT: data?.sessionJwt })
       }
 
       return {
@@ -107,7 +112,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       const successful = !!data?.user?.email
 
       if (successful) {
-        authenticate({ email: data?.user?.email, name: data?.user?.name, picture: data?.user?.picture })
+        await authenticate({ sessionJWT: data?.sessionJwt })
       }
 
       return {
@@ -125,17 +130,51 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  const authenticate = ({ name, email, picture }: { name: string; email: string; picture: string }) => {
-    storage.set('user', JSON.stringify({ name, email, picture }))
-    setUser({ name, email, picture })
-    router.navigate('/onboarding')
+  const authenticate = async ({ sessionJWT }: { sessionJWT: string }) => {
+    storage.set('session', sessionJWT)
+
+    //     login,
+    // getProfile,
+    // getProducts,
+    // getAvailableInterests,
+
+    const [loginRes, getProfileRes, getProductsRes, getAvailableInterestsRes] = await Promise.all([api.login(), api.getProfile(), api.getProducts(), api.getAvailableInterests()])
+
+    const newUser: UserType = {
+      customerId: loginRes?.data?.customer_id,
+      companions: getProfileRes?.data?.companions,
+      profile: getProfileRes?.data?.customer,
+      products: getProductsRes?.data,
+      interests: getAvailableInterestsRes?.data,
+    }
+    storage.set('user', JSON.stringify(newUser))
+    setUser(newUser)
+
+    if (newUser?.profile) {
+      if (newUser?.profile?.username) {
+        // router.navigate('/main')
+      } else {
+        router.navigate('/onboarding')
+      }
+    }
   }
 
   const logout = () => {
     setUser(null)
-    storage.delete('user')
+    storage.delete('session')
     router.navigate('/')
   }
+
+  useEffect(() => {
+    console.log('user: ', user)
+  }, [user])
+
+  useEffect(() => {
+    const user = getStoredUser()
+    if (user) {
+      setUser(user)
+    }
+  }, [])
 
   // useEffect(() => {
   //   console.log('user: ', user)

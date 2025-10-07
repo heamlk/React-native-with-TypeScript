@@ -1,48 +1,39 @@
 import React, { createContext, useContext, useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
-import { useAuth } from './auth'
+import { getStoredUser, useAuth } from './auth'
 export type ProtectedRoutesType = 'light' | 'dark'
 export type ProtectedRoutesContextType = {}
-import { usePathname, useRouter } from 'expo-router'
-import ProtectedScreen from '../shared/layout/protectedScreen'
+import { usePathname, useRootNavigationState, useRouter, useSegments } from 'expo-router'
 
 const ProtectedRoutesContext = createContext<ProtectedRoutesContextType | null>(null)
 
 export default function ProtectedRoutesProvider({ children }: { children: ReactNode }) {
-  const auth = useAuth()
+  const { user: useAuthUser } = useAuth()
   const value: ProtectedRoutesContextType = {}
   const pathname = usePathname()
   const router = useRouter()
-
-  const [allowRoute, setAllowRoute] = useState(false)
-
-  const nonProtectedRoutes = ['/']
+  const rootNavigationState = useRootNavigationState()
 
   useEffect(() => {
-    const isAuthenticated = !!auth.user?.email
-    let isProtectedRoute = true
+    const user = getStoredUser()
+    if (!rootNavigationState?.key) return
 
-    if (!nonProtectedRoutes.includes(pathname)) {
-      isProtectedRoute = false
+    const isAuthenticated = !!user?.customerId
+    const isOnboardingCompleted = !!user?.profile?.username
+
+    // Forcing to finish onboarding
+    if (pathname !== '/onboarding' && isAuthenticated && !isOnboardingCompleted) {
+      setTimeout(() => router.push('/onboarding'), 0)
+      return
     }
 
-    const newAllowRoute = !isProtectedRoute || isAuthenticated
-
-    if (newAllowRoute) {
-      setAllowRoute(newAllowRoute)
-    } else {
-      router.navigate('/')
+    // Forcing to login screen if not authenticated
+    if (pathname !== '/' && !isAuthenticated) {
+      setTimeout(() => router.push('/'), 0)
+      return
     }
-  }, [])
+  }, [rootNavigationState, pathname, useAuthUser])
 
-  // useEffect(() => {
-  //   if (pathname !== '/onboarding') {
-  //     setTimeout(() => {
-  //       router.navigate('/onboarding')
-  //     }, 500)
-  //   }
-  // }, [])
-
-  return <ProtectedRoutesContext.Provider value={value}>{allowRoute ? children : <ProtectedScreen />}</ProtectedRoutesContext.Provider>
+  return <ProtectedRoutesContext.Provider value={value}>{children}</ProtectedRoutesContext.Provider>
 }
 
 export const useProtectedRoutes = () => {

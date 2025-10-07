@@ -9,9 +9,11 @@ import { getThemeBackground } from '@/app/shared/components/reusable'
 import { useFonts } from 'expo-font'
 import FontDosisVariable from '@/app/assets/fonts/Dosis-VariableFont_wght.ttf'
 import ProtectedScreen from '@/app/shared/layout/protectedScreen'
+import { useAuth } from '@/app/context/auth'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { theme } = useTheme()
+  const { user } = useAuth()
   const dimentions = useDimensions()
   const breakpoints = useBreakpoints()
 
@@ -20,7 +22,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   })
 
   if (!fontsLoaded) {
-    return <ProtectedScreen />
+    return <ProtectedScreen> </ProtectedScreen>
   }
 
   const styles = StyleSheet.create({
@@ -33,7 +35,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className='overflow-y-auto scrollbar-hide' style={{ width: dimentions.deviceWidth, height: dimentions.deviceHeight }}>
-      <div className='w-[100%] h-[fit-content] min-h-[100%] flex' style={{ ...styles.root, backgroundColor: getThemeBackground({ theme, breakpoints, background: 'primary' }) }}>
+      <div className='w-[100%] h-[fit-content] min-h-[100%] flex' style={{ ...styles.root, backgroundColor: user?.customerId ? getThemeBackground({ theme, breakpoints, background: 'primaryAuthenticated' }) : getThemeBackground({ theme, breakpoints, background: 'primary' }) }}>
         {children}
       </div>
     </div>
