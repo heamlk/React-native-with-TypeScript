@@ -68,7 +68,7 @@ export default function Onboarding() {
   }
 
   return (
-    <View className='min-h-fit items-center base:py-[70px] phone:py-[85px]' style={{ width: dimentions.deviceWidth, height: dimentions.deviceHeight }}>
+    <View className='min-h-fit items-center base:py-[48px] phone:py-[70px]' style={{ width: dimentions.deviceWidth, height: dimentions.deviceHeight }}>
       <Logo theme={theme} width={140} height={27} className='mb-[50px]' />
 
       {/* Header */}
@@ -294,17 +294,19 @@ export default function Onboarding() {
           ) : currentStep === 1 ? (
             <View className='w-[100%] flex flex-row flex-wrap justify-center gap-[8px]'>
               {Object.entries(user?.interests ?? {}).map(([key, value]) => {
+                const isSelected = selectedInterests.includes(key)
+
                 return (
                   <GradientPressable
                     key={key}
-                    type={selectedInterests.includes(key) ? 'selected' : 'secondary'}
+                    type={isSelected ? 'selected' : 'secondary'}
                     className='w-[fit-content] h-[36px] items-center justicy-center rounded-[99999px]'
                     combinedClassname='w-[fit-content]'
                     onPress={() => {
                       handleInterestTrigger(key)
                     }}
                   >
-                    <Text size='lg' color='light3'>
+                    <Text size='lg' color='light3' style={isSelected ? { color: themeVars.colors.white } : {}}>
                       {value}
                     </Text>
                   </GradientPressable>
@@ -324,7 +326,9 @@ export default function Onboarding() {
                 onStepChange({ step: currentStep + 1 })
               }}
             >
-              <Text className='text-md text-light2 font-[600]'>{currentStep === 0 ? 'Continue' : 'Get Started'}</Text>
+              <Text className='font-[600]' size='md' color='light2'>
+                {currentStep === 0 ? 'Continue' : 'Get Started'}
+              </Text>
             </GradientPressable>
 
             {currentStep === 1 ? (
@@ -335,7 +339,9 @@ export default function Onboarding() {
                   onStepChange({ step: 0 })
                 }}
               >
-                <Text className='text-md text-light2 font-[600]'>Back</Text>
+                <Text className='text-light2 font-[600]' size='md' color='light2Outline'>
+                  Back
+                </Text>
               </GradientPressable>
             ) : (
               <></>
