@@ -225,11 +225,11 @@ export default function Index() {
 
   return (
     <View className='relative flex-1'>
-      <View className='tablet:flex-1 base:flex-col tablet:flex-row items-center tablet:justify-center base:gap-[20px] tablet:gap-[0]'>
+      <View className='tablet:flex-1 base:flex-col tablet:flex-row items-center tablet:justify-center base:gap-[20px] tablet:gap-[0px]'>
         {/* Left */}
-        <View className='base:w-full tablet:w-[768] base:h-[290px] tablet:h-[576] p-[40] justify-between relative tablet:border-purple2/20 tablet:border-[2px] tablet:rounded-md'>
+        <View className='base:w-full tablet:w-[768px] base:h-[290px] tablet:h-[576px] p-[40px] justify-between relative tablet:border-purple2/20 tablet:border-[2px] tablet:rounded-md'>
           {/* Carousel controls */}
-          <View className='w-fit flex-row gap-[16] relative z-[50]'>
+          <View className='w-fit flex-row gap-[16px] relative z-[50]'>
             <Pressable className='w-[64] h-[64] items-center justify-center border-light1/40 border-[1px] rounded-[99999] pointer' onPress={() => carouselRef.current?.prev()}>
               <IconArrow style={{ transform: [{ rotate: '180deg' }] }} />
             </Pressable>
@@ -252,7 +252,7 @@ export default function Index() {
             renderItem={({ item }) => (
               <View className='w-[100%] h-[100%] absolute z-[11] top-[0] left-[0] rounded-md'>
                 <Video style={styles.carouselVideoElement} videoStyle={styles.carouselVideoElement} source={item.videoUrl} useNativeControls={false} resizeMode={ResizeMode.COVER} isLooping shouldPlay isMuted />
-                <Text className='font-[600] text-light1 absolute bottom-[40] left-[40] pr-[50]' size='2xl'>
+                <Text className='font-[600] text-light1 absolute bottom-[40px] left-[40px] pr-[50px]' size='2xl'>
                   {item.title}
                 </Text>
               </View>
@@ -277,28 +277,31 @@ export default function Index() {
         {/* Left - END */}
 
         {/* Right */}
-        <BlurView tint={'dark'} className='base:w-[calc(100%_-_32px)] tablet:w-[540] max-w-[540] tablet:left-[-50] tablet:mr-[-50] rounded-md'>
-          <View className='w-[100%] h-[100%] base:px-[24px] tablet:px-[64] base:py-[56px] tablet:pt-[72] tablet:pb-[64] items-center border-[2px] rounded-md relative' style={{ backgroundColor: getThemeBackground({ theme, breakpoints, background: 'form' }), borderColor: getThemeBorder({ theme, border: 'form' }) }}>
+        <BlurView tint={'dark'} className='base:w-[calc(100%_-_32px)] tablet:w-[540px] max-w-[540px] tablet:left-[-50px] tablet:mr-[-50px] rounded-md'>
+          <View
+            className='w-[100%] h-[100%] base:px-[24px] tablet:px-[64px] base:py-[56px] tablet:pt-[72px] tablet:pb-[64px] items-center border-[2px] rounded-md relative'
+            style={{ backgroundColor: getThemeBackground({ theme, breakpoints, background: 'form' }), borderColor: getThemeBorder({ theme, border: 'form' }) }}
+          >
             <Logo width={140} height={27} theme={theme} />
-            <Text className='font-[600] mt-[40]' size='xl' color='light1'>
+            <Text className='font-[600] mt-[40px]' size='xl' color='light1'>
               Welcome to BFFL.AI
             </Text>
-            <Text className='mt-[16]' size='md' color='light3'>
+            <Text className='mt-[16px]' size='md' color='light3'>
               Where AI goes to meet humanity
             </Text>
 
             {/* Authentication */}
-            <View className='gap-[20] mt-[40] items-center'>
+            <View className='gap-[20px] mt-[40px] items-center'>
               {/* OTP */}
               {otpStage === 0 ? (
                 <>
-                  <View className='gap-[16]'>
-                    <View className='gap-[7]'>
+                  <View className='gap-[16px]'>
+                    <View className='w-[100%] gap-[7px]'>
                       <Text className='text-[#bec4ca]' size='sm' color='light3'>
                         Email *
                       </Text>
                       <TextInput
-                        className='w-full h-[48] border-[2px] border-[#bec4ca]/40 rounded-[6] px-[8]'
+                        className='w-full h-[48px] border-[2px] border-[#bec4ca]/40 rounded-[6] px-[8]'
                         style={{
                           ...(emailInputError ? { borderColor: themeVars.colors.red1 } : {}),
                           color: getThemeColor({ theme, color: 'light1' }),
@@ -336,18 +339,18 @@ export default function Index() {
                     </Text>
                   </View>
 
-                  <Pressable className='w-full h-[50]' onPress={handleOtpPress}>
-                    <Text className='w-full h-[50] font-[600] text-center flex items-center justify-center rounded-sm cursor-pointer' size='md' color='button' background='button'>
+                  <Pressable className='w-full h-[50px]' onPress={handleOtpPress}>
+                    <Text className='w-full h-[50px] font-[600] text-center flex items-center justify-center rounded-sm cursor-pointer' size='md' color='button' background='button'>
                       Continue
                     </Text>
                   </Pressable>
 
                   <View className='w-full flex-row items-center justify-center'>
-                    <View className='flex-1 h-[1] bg-[#555f68]'></View>
+                    <View className='flex-1 h-[1px] bg-[#555f68]'></View>
                     <Text className='px-[10]' size='sm' color='light1'>
                       OR
                     </Text>
-                    <View className='flex-1 h-[1] bg-[#555f68]'></View>
+                    <View className='flex-1 h-[1px] bg-[#555f68]'></View>
                   </View>
 
                   {/* OAuth */}
@@ -355,7 +358,7 @@ export default function Index() {
                     <Pressable
                       background='buttonOutline'
                       border='buttonOutline'
-                      className='w-full h-[46] flex-row items-center justify-center gap-[10] border-[1px] rounded-sm'
+                      className='w-full h-[46px] flex-row items-center justify-center gap-[10px] border-[1px] rounded-sm'
                       onPress={() => {
                         auth.oAuth({ provider: 'google' })
                       }}
@@ -368,7 +371,7 @@ export default function Index() {
                     <Pressable
                       background='buttonOutline'
                       border='buttonOutline'
-                      className='w-full h-[46] flex-row items-center justify-center gap-[10] border-[1px] rounded-sm'
+                      className='w-full h-[46px] flex-row items-center justify-center gap-[10px] border-[1px] rounded-sm'
                       onPress={() => {
                         auth.oAuth({ provider: 'microsoft' })
                       }}
@@ -382,14 +385,14 @@ export default function Index() {
                   {/* OAuth - END */}
                 </>
               ) : (
-                <View className='gap-[16] items-center'>
+                <View className='gap-[16px] items-center'>
                   <Text className='text font-[500] text-center' size='xl' color='light1'>
                     We've sent a message containing a 6-digit code to {emailInput}
                   </Text>
                   <Text className='text font-[500] text-center mb-[20px]' size='lg' color='light1'>
                     Enter Code
                   </Text>
-                  <View className='w-fit flex-row items-center justify-center gap-[4] relative'>
+                  <View className='w-fit flex-row items-center justify-center gap-[4px] relative'>
                     {otpCode.map((value, index) => (
                       <TextInput
                         key={index}
@@ -436,7 +439,7 @@ export default function Index() {
       </View>
 
       {/* Footer */}
-      <View className='w-[100%] tablet:absolute tablet:left-[0] tablet:bottom-[0] base:flex-col tablet:flex-row items-center justify-center flex-row gap-[32] py-[40px]'>
+      <View className='w-[100%] tablet:absolute tablet:left-[0px] tablet:bottom-[0px] base:flex-col tablet:flex-row items-center justify-center flex-row gap-[32px] py-[40px]'>
         <ThemeToggle />
 
         <Pressable
