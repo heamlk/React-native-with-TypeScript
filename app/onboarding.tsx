@@ -20,7 +20,7 @@ export default function Onboarding() {
   const api = useApi()
   const router = useRouter()
 
-  const [currentStep, setCurrentStep] = useState(2)
+  const [currentStep, setCurrentStep] = useState(0)
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
   const [selectedSubscription, setSelectedSubscription] = useState(0)
 
