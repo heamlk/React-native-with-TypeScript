@@ -6,11 +6,13 @@ import IconUser from '@/app/assets/icons/user'
 import IconPencil from '@/app/assets/icons/pencil.svg'
 import themeVars from './styles/theme/themeVars'
 import { useForm, Controller } from 'react-hook-form'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth, UserType } from './context/auth'
 import { useApi } from './context/api'
 import IconCheckGreen from '@/app/assets/icons/check-green.svg'
 import { useRouter } from 'expo-router'
+import * as ImagePicker from 'expo-image-picker'
+import { Platform, Image } from 'react-native'
 
 export default function Onboarding() {
   const { theme } = useTheme()
@@ -26,6 +28,9 @@ export default function Onboarding() {
 
   const [confirmationError, setConfirmationError] = useState('')
 
+  const [preview, setPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
   const {
     control,
     handleSubmit,
@@ -38,6 +43,49 @@ export default function Onboarding() {
     defaultValues: { username: '', firstName: '', lastName: '', dateOfBirth: '', referalCode: '', interests: [] },
     reValidateMode: 'onChange',
   })
+
+  const handleNativeImagePick = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (!permissionResult.granted) {
+      alert('Permission to access media library is required!')
+      return
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+      allowsEditing: true,
+    })
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const uri = result.assets[0].uri
+      setPreview(uri)
+    }
+  }
+
+  const handleWebImagePick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleWebImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('handleWebImageChange')
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setPreview(null)
+      return
+    }
+
+    setPreview(URL.createObjectURL(file))
+  }
+
+  const handleImageChangePress = () => {
+    if (Platform.OS === 'web') {
+      handleWebImagePick()
+    } else {
+      handleNativeImagePick()
+    }
+  }
 
   const onSubmit = (data: any) => {
     console.log('onSubmit')
@@ -122,6 +170,10 @@ export default function Onboarding() {
     router.push('/friend')
   }
 
+  useEffect(() => {
+    console.log('preview: ', preview)
+  }, [preview])
+
   return (
     <View className='min-h-fit items-center base:py-[48px] phone:py-[70px]' style={{ width: dimentions.deviceWidth, height: dimentions.deviceHeight }}>
       <Logo theme={theme} width={140} height={27} className='mb-[50px]' />
@@ -142,16 +194,38 @@ export default function Onboarding() {
         {currentStep === 0 ? (
           <View className='w-[128px] h-[128px] relative'>
             <View className='w-[128px] h-[128px] items-center justify-center border-[1px] rounded-[999999px] relative overflow-hidden' style={theme === 'light' ? { backgroundColor: themeVars.colors.grey6, borderColor: 'transparent' } : { borderColor: themeVars.colors.dark4 }}>
-              <IconUser width={140} height={140} color={theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.dark4} className='absolute top-[20px]' />
-              <Pressable className='w-[128px] h-[128px] absoulte top-0 bottom-0 left-0 right-0 m-auto border-[8px] z-[1] rounded-[999999px]' style={{ borderColor: theme === 'light' ? themeVars.colors.grey6 : getThemeBackground({ theme, breakpoints, background: 'primary' }) }} onPress={handleAvatarUpload}></Pressable>
-            </View>
+              <View className='w-[128px] h-[128px] absoulte top-0 bottom-0 left-0 right-0 m-auto border-[8px] z-[1] rounded-[999999px]' style={{ borderColor: theme === 'light' ? themeVars.colors.grey6 : getThemeBackground({ theme, breakpoints, background: 'primary' }) }}></View>
 
-            <View
+              {/* Profile picture */}
+              {preview ? (
+                Platform.OS === 'web' ? (
+                  <img src={preview} width={140} height={140} className='absolute top-[20px]' />
+                ) : (
+                  <Image source={{ uri: preview }} width={140} height={140} className='absolute top-[20px]' />
+                )
+              ) : (
+                <IconUser width={140} height={140} color={theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.dark4} className='absolute top-[20px]' />
+              )}
+            </View>
+            {/* Profile picture - END */}
+
+            {/* Hidden input */}
+            {Platform.OS === 'web' && <input ref={fileInputRef} type='file' accept='image/*' style={{ display: 'none', width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 11, borderRadius: '99999px' }} onChange={handleWebImageChange} />}
+            {/* Hidden input - END */}
+
+            {/* Pencil icon */}
+            <Pressable
+              onPress={handleImageChangePress}
               className='w-[38px] h-[38px] items-center justify-center rounded-[9999999px] border-[4px] absolute bottom-0 right-0 z-[2]'
               style={theme === 'light' ? { backgroundColor: themeVars.colors.grey1, borderColor: themeVars.colors.grey1 } : { backgroundColor: themeVars.colors.purple1, borderColor: getThemeBackground({ theme, breakpoints, background: 'primary' }) }}
             >
               <IconPencil style={{ transform: 'scale(0.9)' }} />
-            </View>
+            </Pressable>
+            {/* Pencil icon - END */}
+
+            {/* Hidden overlay */}
+            <Pressable style={{ opacity: 0, width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 11, borderRadius: '99999px', backgroundColor: 'red' }} onPress={handleImageChangePress}></Pressable>
+            {/* Hidden overlay - END */}
           </View>
         ) : (
           <></>
