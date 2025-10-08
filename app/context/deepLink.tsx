@@ -17,6 +17,7 @@ export default function DeeplinkProvider({ children }: DeeplinkProviderProps) {
       const { queryParams } = Linking.parse(url)
       if (queryParams?.code) {
         const result = await auth.oAuthCodeExchange({ code: String(queryParams?.code) })
+        router.push('/')
       }
     }
 
