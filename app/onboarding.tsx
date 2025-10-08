@@ -7,16 +7,24 @@ import IconPencil from '@/app/assets/icons/pencil.svg'
 import themeVars from './styles/theme/themeVars'
 import { useForm, Controller } from 'react-hook-form'
 import { useState } from 'react'
-import { useAuth } from './context/auth'
+import { useAuth, UserType } from './context/auth'
+import { useApi } from './context/api'
+import IconCheckGreen from '@/app/assets/icons/check-green.svg'
+import { useRouter } from 'expo-router'
 
 export default function Onboarding() {
   const { theme } = useTheme()
-  const { user } = useAuth()
+  const { user, setUser } = useAuth()
   const dimentions = useDimensions()
   const breakpoints = useBreakpoints()
+  const api = useApi()
+  const router = useRouter()
 
-  const [currentStep, setCurrentStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState(2)
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
+  const [selectedSubscription, setSelectedSubscription] = useState(0)
+
+  const [confirmationError, setConfirmationError] = useState('')
 
   const {
     control,
@@ -48,6 +56,39 @@ export default function Onboarding() {
       return
     }
 
+    if (step === 2) {
+      try {
+        const splitDateOfBirth = getValues('dateOfBirth').split('/')
+        const payload = {
+          username: getValues('username'),
+          first_name: getValues('firstName'),
+          last_name: getValues('lastName'),
+          date_of_birth: [splitDateOfBirth[2] + splitDateOfBirth[0] + splitDateOfBirth[1]].join('-'),
+          referral_code: getValues('referalCode'),
+          interests: selectedInterests.join(','),
+        }
+
+        const res = await api.postConfirmAccount(payload)
+        const data = res?.data
+
+        if (data === 'OK') {
+          const [getProfileRes, getLifetimeInfoRes] = await Promise.all([api.getProfile(), api.getLifetimeInfo()])
+
+          setUser((prev) => ({
+            ...(prev as UserType),
+            profile: getProfileRes.data,
+            lifetimeInfo: getLifetimeInfoRes.data,
+          }))
+        } else {
+          setConfirmationError('An error occurred while setting up your account')
+          return
+        }
+      } catch (error) {
+        setConfirmationError('An error occurred while setting up your account')
+        return
+      }
+    }
+
     clearErrors()
     setCurrentStep(step)
   }
@@ -67,6 +108,20 @@ export default function Onboarding() {
     })
   }
 
+  const handleFreeTrial = async () => {
+    const res = await api.getAvailableAttributes()
+    const data = res.data
+
+    if (user) {
+      setUser((prev) => ({
+        ...(prev as UserType),
+        companionAttributes: data?.attributes,
+      }))
+    }
+
+    router.push('/friend')
+  }
+
   return (
     <View className='min-h-fit items-center base:py-[48px] phone:py-[70px]' style={{ width: dimentions.deviceWidth, height: dimentions.deviceHeight }}>
       <Logo theme={theme} width={140} height={27} className='mb-[50px]' />
@@ -74,10 +129,10 @@ export default function Onboarding() {
       {/* Header */}
       <View className='py-[40px]'>
         <Text className='font-[600] text-center' size='3xl' color='light1'>
-          {currentStep === 0 ? 'Thank you for signing up!' : 'Please choose your interests.'}
+          {currentStep === 0 ? 'Thank you for signing up!' : currentStep === 1 ? 'Please choose your interests.' : `You're all set to start your free trial!`}
         </Text>
         <Text className='mt-[16] text-center' size='md' color='light3'>
-          {currentStep === 0 ? 'A few more steps and you will be ready to start meeting your new friend.' : 'We will use this to tailor your experience.'}
+          {currentStep === 0 ? 'A few more steps and you will be ready to start meeting your new friend.' : currentStep === 1 ? 'We will use this to tailor your experience.' : `It's free for 20 minutes of use and then just $7.00/month.`}
         </Text>
       </View>
       {/* Header - END */}
@@ -318,35 +373,124 @@ export default function Onboarding() {
             <></>
           )}
 
-          <View className='gap-[16px]'>
-            <GradientPressable
-              type='primary'
-              className='h-[48px] items-center justicy-center rounded-[99999px]'
-              onPress={() => {
-                onStepChange({ step: currentStep + 1 })
-              }}
-            >
-              <Text className='font-[600]' size='md' color='light2'>
-                {currentStep === 0 ? 'Continue' : 'Get Started'}
-              </Text>
-            </GradientPressable>
-
-            {currentStep === 1 ? (
+          {currentStep < 2 ? (
+            <View className='gap-[16px]'>
               <GradientPressable
-                type='dark'
+                type='primary'
                 className='h-[48px] items-center justicy-center rounded-[99999px]'
                 onPress={() => {
-                  onStepChange({ step: 0 })
+                  onStepChange({ step: currentStep + 1 })
                 }}
               >
-                <Text className='text-light2 font-[600]' size='md' color='light2Outline'>
-                  Back
+                <Text className='font-[600]' size='md' color='light2'>
+                  {currentStep === 0 ? 'Continue' : 'Get Started'}
                 </Text>
               </GradientPressable>
-            ) : (
-              <></>
-            )}
-          </View>
+
+              {currentStep === 1 ? (
+                <GradientPressable
+                  type='dark'
+                  className='h-[48px] items-center justicy-center rounded-[99999px]'
+                  onPress={() => {
+                    onStepChange({ step: 0 })
+                  }}
+                >
+                  <Text className='text-light2 font-[600]' size='md' color='light2Outline'>
+                    Back
+                  </Text>
+                </GradientPressable>
+              ) : (
+                <></>
+              )}
+            </View>
+          ) : (
+            <View className='w-[100%] flex gap-[32px] items-center'>
+              <GradientPressable type='primary' className='h-[48px] items-center justicy-center rounded-[99999px]' combinedStyle={{ width: '100%' }} onPress={handleFreeTrial}>
+                <Text className='font-[600]' size='md' color='light2'>
+                  Start free trial
+                </Text>
+              </GradientPressable>
+
+              <Text size='md' color='light1'>
+                or
+              </Text>
+
+              <View className='w-[100%] p-[24px] border-[1px] rounded-sm' border='container' background='container'>
+                <View className='gap-[16px]'>
+                  <View className='flex-row items-center gap-[10px]'>
+                    <Pressable
+                      className='w-[16px] h-[16px] rounded-[9999px] border-[1px] cursor-pointer'
+                      style={{ borderColor: getThemeBackground({ theme, breakpoints, background: 'button' }), backgroundColor: selectedSubscription === 0 ? getThemeBackground({ theme, breakpoints, background: 'button' }) : 'transparent' }}
+                      onPress={() => setSelectedSubscription(0)}
+                    />
+                    <Text className='font-[600]' size='xl' color='light1'>
+                      $7.00
+                      <Text size='md' color='light1'>
+                        /month
+                      </Text>
+                    </Text>
+                  </View>
+
+                  <View className='gap-[8px]'>
+                    <View className='w-[100%] flex-row items-center justify-between'>
+                      <Text size='sm' color='light3'>
+                        Unlimited Text & upscaled friend image generation
+                      </Text>
+                      <IconCheckGreen />
+                    </View>
+                    <View className='w-[100%] flex-row items-center justify-between'>
+                      <Text size='sm' color='light3'>
+                        The option to age verify to unlock more capabilities
+                      </Text>
+                      <IconCheckGreen />
+                    </View>
+                  </View>
+                </View>
+
+                <View className='w-[100%] h-[1px] mb-[16px] mt-[20px] border-t-[1px]' border='container'></View>
+
+                <View className='gap-[16px]'>
+                  <View className='flex-row items-center gap-[10px]'>
+                    <Pressable
+                      className='w-[16px] h-[16px] rounded-[9999px] border-[1px] cursor-pointer'
+                      style={{ borderColor: getThemeBackground({ theme, breakpoints, background: 'button' }), backgroundColor: selectedSubscription === 1 ? getThemeBackground({ theme, breakpoints, background: 'button' }) : 'transparent' }}
+                      onPress={() => setSelectedSubscription(1)}
+                    />
+                    <Text className='font-[600] flex flex-col' size='xl' color='light1'>
+                      250 for life
+                      <Text className='font-[400]' size='sm' color='light5'>
+                        100 are left
+                      </Text>
+                    </Text>
+                  </View>
+
+                  <View className='gap-[8px]'>
+                    <View className='w-[100%] flex-row items-center justify-between'>
+                      <Text size='sm' color='light3'>
+                        Unlimited Text & upscaled friend image generation
+                      </Text>
+                      <IconCheckGreen />
+                    </View>
+                    <View className='w-[100%] flex-row items-center justify-between'>
+                      <Text size='sm' color='light3'>
+                        The option to age verify to unlock more capabilities
+                      </Text>
+                      <IconCheckGreen />
+                    </View>
+                  </View>
+
+                  <GradientPressable type='dark' className='h-[48px] items-center justicy-center rounded-[99999px]' combinedStyle={{ width: '100%' }}>
+                    <Text className='font-[600]' size='md' color='light2Outline'>
+                      Subscribe
+                    </Text>
+                  </GradientPressable>
+                  <Text className='opacity-70' size='md' color='light3'>
+                    Cancel anytime. Plan automatically renews until cancelled.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
         </View>
         {/* Form - END */}
       </View>

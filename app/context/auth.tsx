@@ -6,7 +6,7 @@ import * as Linking from 'expo-linking'
 import storage from '@/app/shared/storage/storage'
 import { useRouter } from 'expo-router'
 import { useApi } from './api'
-import type { CompanionInfos, CustomerProfile, MarketplaceProduct } from './auth.types'
+import type { CompanionAttributes, CompanionInfos, CustomerProfile, MarketplaceProduct } from './auth.types'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -30,6 +30,12 @@ export type UserType = {
   profile: CustomerProfile
   products: MarketplaceProduct[]
   interests: Record<string, string>
+  lifetimeInfo?: {
+    left: number
+    price: number
+    tier: number
+  }
+  companionAttributes?: CompanionAttributes
 }
 
 export const getStoredUser = (): UserType | null => {
@@ -133,11 +139,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const authenticate = async ({ sessionJWT }: { sessionJWT: string }) => {
     storage.set('session', sessionJWT)
 
-    //     login,
-    // getProfile,
-    // getProducts,
-    // getAvailableInterests,
-
     const [loginRes, getProfileRes, getProductsRes, getAvailableInterestsRes] = await Promise.all([api.login(), api.getProfile(), api.getProducts(), api.getAvailableInterests()])
 
     const newUser: UserType = {
@@ -165,9 +166,9 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     router.navigate('/')
   }
 
-  useEffect(() => {
-    console.log('user: ', user)
-  }, [user])
+  // useEffect(() => {
+  //   console.log('user: ', user)
+  // }, [user])
 
   useEffect(() => {
     const user = getStoredUser()

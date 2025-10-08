@@ -12,7 +12,7 @@ import { borderRadiusNative } from '@/app/styles/theme/borderRadius'
 // Background
 export type GetThemeBackgroundProps = {
   theme: ThemeType
-  background: 'primary' | 'primaryAuthenticated' | 'form' | 'input' | 'input2' | 'button' | 'buttonOutline'
+  background: 'primary' | 'primaryAuthenticated' | 'form' | 'input' | 'input2' | 'button' | 'buttonOutline' | 'container'
   breakpoints: BreakpointsType
 }
 
@@ -25,6 +25,7 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
     input2: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark1,
     button: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.purple1,
     buttonOutline: theme === 'light' ? themeVars.colors.grey5 : 'transparent',
+    container: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7,
   }
 
   return backgroundColors[background]
@@ -34,7 +35,7 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
 // Border
 export type GetThemeBorderProps = {
   theme: ThemeType
-  border: 'form' | 'input2' | 'buttonOutline' | 'input2Focus'
+  border: 'form' | 'input2' | 'buttonOutline' | 'input2Focus' | 'container'
 }
 
 export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
@@ -43,6 +44,7 @@ export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
     buttonOutline: theme === 'light' ? 'transparent' : themeVars.colors.purple1,
     input2: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark4,
     input2Focus: theme === 'light' ? themeVars.colors.grey4 : themeVars.colors.purple3,
+    container: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark3,
   }
 
   return borderColors[border]
@@ -52,7 +54,7 @@ export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
 // Color
 export type GetThemeColorProps = {
   theme: ThemeType
-  color: 'light1' | 'light2' | 'light2Outline' | 'light3' | 'button' | 'buttonOutline' | 'input2'
+  color: 'light1' | 'light2' | 'light2Outline' | 'light3' | 'light5' | 'button' | 'buttonOutline' | 'input2'
 }
 
 export const getThemeColor = ({ theme, color }: GetThemeColorProps) => {
@@ -61,6 +63,7 @@ export const getThemeColor = ({ theme, color }: GetThemeColorProps) => {
     light2: theme === 'light' ? themeVars.colors.white : themeVars.colors.light2,
     light2Outline: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.light2,
     light3: theme === 'light' ? themeVars.colors.grey2 : themeVars.colors.light3,
+    light5: theme === 'light' ? '#000000' : themeVars.colors.light5,
     button: theme === 'light' ? themeVars.colors.white : themeVars.colors.black,
     buttonOutline: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.purple1,
     input2: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.light2,

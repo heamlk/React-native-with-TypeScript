@@ -8,6 +8,9 @@ export type ApiContextType = {
   getProfile: () => Promise<AxiosResponse<any, any, {}>>
   getProducts: () => Promise<AxiosResponse<any, any, {}>>
   getAvailableInterests: () => Promise<AxiosResponse<any, any, {}>>
+  postConfirmAccount: ({ username, first_name, last_name, date_of_birth, interests, referral_code }: { username: string; first_name: string; last_name: string; date_of_birth: string; interests: string; referral_code: string }) => Promise<AxiosResponse<any, any, {}>>
+  getLifetimeInfo: () => Promise<AxiosResponse<any, any, {}>>
+  getAvailableAttributes: () => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -15,9 +18,9 @@ const ApiContext = createContext<ApiContextType | null>(null)
 export default function ApiProvider({ children }: { children: ReactNode }) {
   const api: AxiosInstance = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    // headers: {
+    //   'Content-Type': 'application/json',
+    // },
   })
 
   const login = async () => {
@@ -52,12 +55,47 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const postConfirmAccount = async ({ username, first_name, last_name, date_of_birth, interests, referral_code }: { username: string; first_name: string; last_name: string; date_of_birth: string; interests: string; referral_code: string }) => {
+    const formData = new FormData()
+    formData.append('username', username)
+    formData.append('first_name', first_name)
+    formData.append('last_name', last_name)
+    formData.append('date_of_birth', date_of_birth)
+    formData.append('interests', interests)
+    formData.append('referral_code', referral_code)
+
+    return await api.post('customers/confirm-account', formData, {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
+
+  const getLifetimeInfo = async () => {
+    return await api.get('marketplace/lifetime-subscription-info', {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
+
+  const getAvailableAttributes = async () => {
+    return await api.get('companions/available-attributes', {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
+
   const value = {
     api,
     login,
     getProfile,
     getProducts,
     getAvailableInterests,
+    postConfirmAccount,
+    getLifetimeInfo,
+    getAvailableAttributes,
   }
 
   useEffect(() => {
