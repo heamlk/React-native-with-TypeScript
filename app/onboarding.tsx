@@ -200,9 +200,9 @@ export default function Onboarding() {
               {/* Profile picture */}
               {preview ? (
                 Platform.OS === 'web' ? (
-                  <img src={preview} width={140} height={140} className='absolute top-[20px]' />
+                  <img src={preview} className='w-[128px] h-[128px] object-cover absolute top-0 left-0' />
                 ) : (
-                  <Image source={{ uri: preview }} width={140} height={140} className='absolute top-[20px]' />
+                  <Image source={{ uri: preview }} className='w-[128px] h-[128px] object-cover absolute top-0 left-0' />
                 )
               ) : (
                 <IconUser width={140} height={140} color={theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.dark4} className='absolute top-[20px]' />
