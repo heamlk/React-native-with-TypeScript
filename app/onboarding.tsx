@@ -111,7 +111,7 @@ export default function Onboarding() {
           username: getValues('username'),
           first_name: getValues('firstName'),
           last_name: getValues('lastName'),
-          date_of_birth: [splitDateOfBirth[2] + splitDateOfBirth[0] + splitDateOfBirth[1]].join('-'),
+          date_of_birth: [splitDateOfBirth[2], splitDateOfBirth[0], splitDateOfBirth[1]].join('-'),
           referral_code: getValues('referalCode'),
           interests: selectedInterests.join(','),
         }
@@ -127,6 +127,7 @@ export default function Onboarding() {
             profile: getProfileRes.data,
             lifetimeInfo: getLifetimeInfoRes.data,
           }))
+          setConfirmationError('')
         } else {
           setConfirmationError('An error occurred while setting up your account')
           return
@@ -421,27 +422,30 @@ export default function Onboarding() {
               </View>
             </>
           ) : currentStep === 1 ? (
-            <View className='w-[100%] flex flex-row flex-wrap justify-center gap-[8px]'>
-              {Object.entries(user?.interests ?? {}).map(([key, value]) => {
-                const isSelected = selectedInterests.includes(key)
+            <View className='flex-col gap-[4px] items-center'>
+              <View className='w-[100%] flex flex-row flex-wrap justify-center gap-[8px]'>
+                {Object.entries(user?.interests ?? {}).map(([key, value]) => {
+                  const isSelected = selectedInterests.includes(key)
 
-                return (
-                  <GradientPressable
-                    key={key}
-                    type={isSelected ? 'selected' : 'secondary'}
-                    className='w-[fit-content] h-[36px] items-center justicy-center rounded-[99999px]'
-                    combinedClassname='w-[fit-content]'
-                    onPress={() => {
-                      handleInterestTrigger(key)
-                    }}
-                  >
-                    <Text size='lg' color='light3' style={isSelected ? { color: themeVars.colors.white } : {}}>
-                      {value}
-                    </Text>
-                  </GradientPressable>
-                )
-              })}
+                  return (
+                    <GradientPressable
+                      key={key}
+                      type={isSelected ? 'selected' : 'secondary'}
+                      className='w-[fit-content] h-[36px] items-center justicy-center rounded-[99999px]'
+                      combinedClassname='w-[fit-content]'
+                      onPress={() => {
+                        handleInterestTrigger(key)
+                      }}
+                    >
+                      <Text size='lg' color='light3' style={isSelected ? { color: themeVars.colors.white } : {}}>
+                        {value}
+                      </Text>
+                    </GradientPressable>
+                  )
+                })}
+              </View>
               {errors?.interests?.message ? <Text className='text-red1'>{errors?.interests?.message}</Text> : null}
+              {confirmationError ? <Text className='text-red1'>{confirmationError}</Text> : null}
             </View>
           ) : (
             <></>
