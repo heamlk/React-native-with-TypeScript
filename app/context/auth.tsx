@@ -15,7 +15,7 @@ export type AuthContextType = {
   oAuthCodeExchange: ({ code }: { code: string }) => Promise<{ successful: boolean; data: any }>
   otp: ({ email }: { email: string }) => Promise<{ successful: boolean; data: any; error: null } | { successful: boolean; data: null; error: any }>
   otpVerify: ({ email, code }: { email: string; code: string }) => Promise<{ successful: boolean; data: any; error: null } | { successful: boolean; data: null; error: any }>
-  authenticate: ({ sessionJWT }: { sessionJWT: string }) => void
+  authenticate: () => Promise<void>
   logout: () => void
   user: UserType | null
   setUser: Dispatch<SetStateAction<UserType | null>>
@@ -62,7 +62,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<UserType | null>(getStoredUser())
 
   const oAuth = async ({ provider }: { provider: 'google' | 'microsoft' }) => {
-    axios.post(`https://api.descope.com/v1/auth/oauth/authorize?provider=${provider}&redirectUrl=${encodeURIComponent(AuthSession.makeRedirectUri({ scheme: 'bfflai' }))}`, {}, { headers: { Authorization: `Bearer ${descopeProjectId}` } }).then((res) => {
+    axios.post(`https://api.descope.com/v1/auth/oauth/authorize?provider=${provider}&redirectUrl=${encodeURIComponent(AuthSession.makeRedirectUri({ scheme: 'bfflai' }))}`, { customClaims: { userEmail: '{{user.email}}' } }, { headers: { Authorization: `Bearer ${descopeProjectId}` } }).then((res) => {
       Linking.openURL(res.data?.url)
     })
   }
@@ -74,7 +74,8 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       const successful = !!data?.user?.email
 
       if (successful) {
-        await authenticate({ sessionJWT: data?.sessionJwt })
+        storage.set('session', data?.sessionJwt)
+        await authenticate()
       }
 
       return {
@@ -92,7 +93,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
   const otp = async ({ email }: { email: string }) => {
     try {
-      const req = await axios.post(`https://api.descope.com/v1/auth/otp/signup-in/email`, { loginId: email }, { headers: { Authorization: `Bearer ${descopeProjectId}` } })
+      const req = await axios.post(`https://api.descope.com/v1/auth/otp/signup-in/email`, { loginId: email, loginOptions: { customClaims: { userEmail: '{{user.email}}' } } }, { headers: { Authorization: `Bearer ${descopeProjectId}` } })
       const data = req?.data
       const successful = !!data?.maskedEmail
 
@@ -118,7 +119,8 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       const successful = !!data?.user?.email
 
       if (successful) {
-        await authenticate({ sessionJWT: data?.sessionJwt })
+        storage.set('session', data?.sessionJwt)
+        await authenticate()
       }
 
       return {
@@ -136,9 +138,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  const authenticate = async ({ sessionJWT }: { sessionJWT: string }) => {
-    storage.set('session', sessionJWT)
-
+  const authenticate = async () => {
     const [loginRes, getProfileRes, getProductsRes, getAvailableInterestsRes] = await Promise.all([api.login(), api.getProfile(), api.getProducts(), api.getAvailableInterests()])
 
     const newUser: UserType = {
