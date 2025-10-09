@@ -55,7 +55,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  const postConfirmAccount = async ({ username, first_name, last_name, date_of_birth, interests, referral_code }: { username: string; first_name: string; last_name: string; date_of_birth: string; interests: string; referral_code: string }) => {
+  const postConfirmAccount = async ({ username, first_name, last_name, date_of_birth, interests, referral_code, avatar }: { username: string; first_name: string; last_name: string; date_of_birth: string; interests: string; referral_code: string; avatar?: File | null }) => {
     const formData = new FormData()
     formData.append('username', username)
     formData.append('first_name', first_name)
@@ -63,6 +63,10 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     formData.append('date_of_birth', date_of_birth)
     formData.append('interests', interests)
     formData.append('referral_code', referral_code)
+
+    if (avatar) {
+      formData.append('avatar', avatar, avatar.name)
+    }
 
     return await api.post('customers/confirm-account', formData, {
       headers: {

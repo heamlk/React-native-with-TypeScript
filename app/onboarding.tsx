@@ -28,6 +28,7 @@ export default function Onboarding() {
 
   const [confirmationError, setConfirmationError] = useState('')
 
+  const [avatar, setAvatar] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -58,8 +59,19 @@ export default function Onboarding() {
     })
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      const uri = result.assets[0].uri
+      const asset = result.assets[0]
+      const uri = asset.uri
+      const fileName = asset.fileName || uri.split('/').pop() || 'avatar.jpg'
+      const type = asset.mimeType || 'image/jpeg'
+
+      const file: any = {
+        uri,
+        name: fileName,
+        type,
+      }
+
       setPreview(uri)
+      setAvatar(file)
     }
   }
 
@@ -68,14 +80,16 @@ export default function Onboarding() {
   }
 
   const handleWebImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('handleWebImageChange')
     const file = e.target.files?.[0]
     if (!file) return
+
     if (!file.type.startsWith('image/')) {
       setPreview(null)
+      setAvatar(null)
       return
     }
 
+    setAvatar(file)
     setPreview(URL.createObjectURL(file))
   }
 
@@ -114,6 +128,7 @@ export default function Onboarding() {
           date_of_birth: [splitDateOfBirth[2], splitDateOfBirth[0], splitDateOfBirth[1]].join('-'),
           referral_code: getValues('referalCode'),
           interests: selectedInterests.join(','),
+          avatar,
         }
 
         const res = await api.postConfirmAccount(payload)
