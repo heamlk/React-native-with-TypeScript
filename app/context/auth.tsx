@@ -153,7 +153,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
     if (newUser?.profile) {
       if (newUser?.profile?.username) {
-        // router.navigate('/main')
+        router.navigate('/friend')
       } else {
         router.navigate('/onboarding')
       }
@@ -166,26 +166,12 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     router.navigate('/')
   }
 
-  // useEffect(() => {
-  //   console.log('user: ', user)
-  // }, [user])
-
   useEffect(() => {
     const user = getStoredUser()
     if (user) {
       setUser(user)
     }
   }, [])
-
-  // useEffect(() => {
-  //   console.log('user: ', user)
-  //   logout()
-  // }, [user])
-
-  // useEffect(() => {
-  //   // otp({ email: 'davidbalayandev@gmail.com' })
-  //   // otpVerify({ email: 'davidbalayandev@gmail.com', code: '' })
-  // }, [])
 
   const value = { oAuth, oAuthCodeExchange, otp, otpVerify, authenticate, logout, user, setUser }
 

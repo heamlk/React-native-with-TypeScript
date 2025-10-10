@@ -174,12 +174,13 @@ export function Pressable({ background = null, border = null, style, className, 
 }
 
 export type CustomGradientPressableProps = PressableProps & {
-  type: 'primary' | 'secondary' | 'dark' | 'selected'
+  type: 'primary' | 'secondary' | 'dark' | 'extraDark' | 'selected'
   combinedStyle?: ViewStyle
+  gradientClassname?: string
   combinedClassname?: string
 }
 
-export function GradientPressable({ type, style, combinedStyle, combinedClassname, className, ...props }: CustomGradientPressableProps) {
+export function GradientPressable({ type, style, combinedStyle, gradientClassname, combinedClassname, className, ...props }: CustomGradientPressableProps) {
   const { theme } = useTheme()
 
   const [hover, setHover] = useState(false)
@@ -233,6 +234,22 @@ export function GradientPressable({ type, style, combinedStyle, combinedClassnam
         borderRadius: borderRadiusNative.md,
       },
     }),
+    extraDark: StyleSheet.create({
+      gradient: {
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        borderRadius: borderRadiusNative.md,
+      },
+      normal: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        borderRadius: borderRadiusNative.md,
+      },
+    }),
     selected: StyleSheet.create({
       gradient: {
         width: '100%',
@@ -261,11 +278,13 @@ export function GradientPressable({ type, style, combinedStyle, combinedClassnam
 
   const gradientSelected: any = theme === 'light' ? [themeVars.colors.grey3, themeVars.colors.grey3] : ['#aa4aff', '#860fef']
 
+  const gradientExtraDark: any = theme === 'light' ? ['red', 'red'] : [themeVars.colors.dark1, themeVars.colors.dark1]
+
   return (
     <RNView className={clsx('relative', combinedClassname)} style={[combinedStyle]}>
       <LinearGradient
-        className={clsx('')}
-        colors={type === 'primary' ? (hover ? hoverGradientPrimary : gradientPrimary) : type === 'secondary' ? gradientSecondary : type === 'dark' ? (hover ? hoverGradientDark : gradientDark) : gradientSelected}
+        className={clsx(gradientClassname)}
+        colors={type === 'primary' ? (hover ? hoverGradientPrimary : gradientPrimary) : type === 'secondary' ? gradientSecondary : type === 'dark' ? (hover ? hoverGradientDark : gradientDark) : type === 'extraDark' ? gradientExtraDark : gradientSelected}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={[styles[type]['gradient']]}

@@ -13,6 +13,8 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
   const router = useRouter()
   const rootNavigationState = useRootNavigationState()
 
+  const authenticatedPaths = ['/friend']
+
   useEffect(() => {
     const user = getStoredUser()
     if (!rootNavigationState?.key) return
@@ -20,13 +22,19 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
     const isAuthenticated = !!user?.customerId
     const isOnboardingCompleted = !!user?.profile?.username
 
-    // Forcing to finish onboarding
+    // Redirecting to onboarding if profile is not setup
     if (pathname !== '/onboarding' && isAuthenticated && !isOnboardingCompleted) {
       setTimeout(() => router.push('/onboarding'), 0)
       return
     }
 
-    // Forcing to login screen if not authenticated
+    // Redirecting to main page if user is authenticated and profile is setup
+    if (!authenticatedPaths.includes(pathname) && isAuthenticated) {
+      setTimeout(() => router.push('/friend'), 0)
+      return
+    }
+
+    // Redirecting to login page if not authenticated
     if (pathname !== '/' && !isAuthenticated) {
       setTimeout(() => router.push('/'), 0)
       return
