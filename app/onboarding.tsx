@@ -196,10 +196,10 @@ export default function Onboarding() {
 
       {/* Header */}
       <View className='py-[40px]'>
-        <Text className='font-[600] text-center' size='3xl' color='light1'>
+        <Text className='font-[600] text-center' size='3xl' color='grey1_light1'>
           {currentStep === 0 ? 'Thank you for signing up!' : currentStep === 1 ? 'Please choose your interests.' : `You're all set to start your free trial!`}
         </Text>
-        <Text className='mt-[16] text-center' size='md' color='light3'>
+        <Text className='mt-[16] text-center' size='md' color='grey2_light3'>
           {currentStep === 0 ? 'A few more steps and you will be ready to start meeting your new friend.' : currentStep === 1 ? 'We will use this to tailor your experience.' : `It's free for 20 minutes of use and then just $7.00/month.`}
         </Text>
       </View>
@@ -253,7 +253,7 @@ export default function Onboarding() {
           {currentStep === 0 ? (
             <>
               <View className='gap-[8px]'>
-                <Text className='ml-[8px] font-[500]' size='md' color='light1'>
+                <Text className='ml-[8px] font-[500]' size='md' color='grey1_light1'>
                   Username
                 </Text>
                 <Controller
@@ -283,7 +283,7 @@ export default function Onboarding() {
               </View>
 
               <View className='gap-[8px]'>
-                <Text className='ml-[8px] font-[500]' size='md' color='light1'>
+                <Text className='ml-[8px] font-[500]' size='md' color='grey1_light1'>
                   First name
                 </Text>
                 <Controller
@@ -313,7 +313,7 @@ export default function Onboarding() {
               </View>
 
               <View className='gap-[8px]'>
-                <Text className='ml-[8px] font-[500]' size='md' color='light1'>
+                <Text className='ml-[8px] font-[500]' size='md' color='grey1_light1'>
                   Last name
                 </Text>
                 <Controller
@@ -343,7 +343,7 @@ export default function Onboarding() {
               </View>
 
               <View className='gap-[8px]'>
-                <Text className='ml-[8px] font-[500]' size='md' color='light1'>
+                <Text className='ml-[8px] font-[500]' size='md' color='grey1_light1'>
                   Date of birth
                 </Text>
                 <Controller
@@ -400,7 +400,7 @@ export default function Onboarding() {
               </View>
 
               <View className='gap-[8px]'>
-                <Text className='ml-[8px] font-[500]' size='md' color='light1'>
+                <Text className='ml-[8px] font-[500]' size='md' color='grey1_light1'>
                   Referral code
                 </Text>
                 <Controller
@@ -452,7 +452,7 @@ export default function Onboarding() {
                         handleInterestTrigger(key)
                       }}
                     >
-                      <Text size='lg' color='light3' style={isSelected ? { color: themeVars.colors.white } : {}}>
+                      <Text size='lg' color='grey2_light3' style={isSelected ? { color: themeVars.colors.white } : {}}>
                         {value}
                       </Text>
                     </GradientPressable>
@@ -475,7 +475,7 @@ export default function Onboarding() {
                   onStepChange({ step: currentStep + 1 })
                 }}
               >
-                <Text className='font-[600]' size='md' color='light2'>
+                <Text className='font-[600]' size='md' color='white_light2'>
                   {currentStep === 0 ? 'Continue' : 'Get Started'}
                 </Text>
               </GradientPressable>
@@ -488,7 +488,7 @@ export default function Onboarding() {
                     onStepChange({ step: 0 })
                   }}
                 >
-                  <Text className='text-light2 font-[600]' size='md' color='light2Outline'>
+                  <Text className='text-light2 font-[600]' size='md' color='grey1_light2'>
                     Back
                   </Text>
                 </GradientPressable>
@@ -499,16 +499,16 @@ export default function Onboarding() {
           ) : (
             <View className='w-[100%] flex gap-[32px] items-center'>
               <GradientPressable type='primary' className='h-[48px] items-center justicy-center rounded-[99999px]' combinedStyle={{ width: '100%' }} onPress={handleFreeTrial}>
-                <Text className='font-[600]' size='md' color='light2'>
+                <Text className='font-[600]' size='md' color='white_light2'>
                   Start free trial
                 </Text>
               </GradientPressable>
 
-              <Text size='md' color='light1'>
+              <Text size='md' color='grey1_light1'>
                 or
               </Text>
 
-              <View className='w-[100%] p-[24px] border-[1px] rounded-sm' border='container' background='container'>
+              <View className='w-[100%] p-[24px] border-[1px] rounded-sm' border='grey5_dark3' background='grey6_dark7'>
                 <View className='gap-[16px]'>
                   <View className='flex-row items-center gap-[10px]'>
                     <Pressable
@@ -516,9 +516,9 @@ export default function Onboarding() {
                       style={{ borderColor: getThemeBackground({ theme, breakpoints, background: 'button' }), backgroundColor: selectedSubscription === 0 ? getThemeBackground({ theme, breakpoints, background: 'button' }) : 'transparent' }}
                       onPress={() => setSelectedSubscription(0)}
                     />
-                    <Text className='font-[600]' size='xl' color='light1'>
+                    <Text className='font-[600]' size='xl' color='grey1_light1'>
                       $7.00
-                      <Text size='md' color='light1'>
+                      <Text size='md' color='grey1_light1'>
                         /month
                       </Text>
                     </Text>
@@ -526,13 +526,13 @@ export default function Onboarding() {
 
                   <View className='gap-[8px]'>
                     <View className='w-[100%] flex-row items-center justify-between'>
-                      <Text size='sm' color='light3'>
+                      <Text size='sm' color='grey2_light3'>
                         Unlimited Text & upscaled friend image generation
                       </Text>
                       <IconCheckGreen />
                     </View>
                     <View className='w-[100%] flex-row items-center justify-between'>
-                      <Text size='sm' color='light3'>
+                      <Text size='sm' color='grey2_light3'>
                         The option to age verify to unlock more capabilities
                       </Text>
                       <IconCheckGreen />
@@ -540,7 +540,7 @@ export default function Onboarding() {
                   </View>
                 </View>
 
-                <View className='w-[100%] h-[1px] mb-[16px] mt-[20px] border-t-[1px]' border='container'></View>
+                <View className='w-[100%] h-[1px] mb-[16px] mt-[20px] border-t-[1px]' border='grey5_dark3'></View>
 
                 <View className='gap-[16px]'>
                   <View className='flex-row items-center gap-[10px]'>
@@ -549,9 +549,9 @@ export default function Onboarding() {
                       style={{ borderColor: getThemeBackground({ theme, breakpoints, background: 'button' }), backgroundColor: selectedSubscription === 1 ? getThemeBackground({ theme, breakpoints, background: 'button' }) : 'transparent' }}
                       onPress={() => setSelectedSubscription(1)}
                     />
-                    <Text className='font-[600] flex flex-col' size='xl' color='light1'>
+                    <Text className='font-[600] flex flex-col' size='xl' color='grey1_light1'>
                       250 for life
-                      <Text className='font-[400]' size='sm' color='light5'>
+                      <Text className='font-[400]' size='sm' color='black_light5'>
                         100 are left
                       </Text>
                     </Text>
@@ -559,13 +559,13 @@ export default function Onboarding() {
 
                   <View className='gap-[8px]'>
                     <View className='w-[100%] flex-row items-center justify-between'>
-                      <Text size='sm' color='light3'>
+                      <Text size='sm' color='grey2_light3'>
                         Unlimited Text & upscaled friend image generation
                       </Text>
                       <IconCheckGreen />
                     </View>
                     <View className='w-[100%] flex-row items-center justify-between'>
-                      <Text size='sm' color='light3'>
+                      <Text size='sm' color='grey2_light3'>
                         The option to age verify to unlock more capabilities
                       </Text>
                       <IconCheckGreen />
@@ -573,11 +573,11 @@ export default function Onboarding() {
                   </View>
 
                   <GradientPressable type='dark' className='h-[48px] items-center justicy-center rounded-[99999px]' combinedStyle={{ width: '100%' }}>
-                    <Text className='font-[600]' size='md' color='light2Outline'>
+                    <Text className='font-[600]' size='md' color='grey1_light2'>
                       Subscribe
                     </Text>
                   </GradientPressable>
-                  <Text className='opacity-70' size='md' color='light3'>
+                  <Text className='opacity-70' size='md' color='grey2_light3'>
                     Cancel anytime. Plan automatically renews until cancelled.
                   </Text>
                 </View>

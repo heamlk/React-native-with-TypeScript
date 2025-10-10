@@ -92,11 +92,11 @@ export default function Friend() {
 
           {/* Sidebar */}
           <Animated.View style={{ height: '100%', left: leftAnim, top: 0, position: breakpoints === 'phone' ? 'absolute' : 'relative', zIndex: 12 }}>
-            <View className='h-[100%] base:p-[20px] phone:p-[0] base:mt-[0px] phone:mt-[30px] gap-[20px] base:rounded-r-md phone:rounded-[0]' background={breakpoints === 'phone' ? 'primarySidebar' : 'transparent'}>
+            <View className='h-[100%] base:p-[20px] phone:p-[0] base:mt-[0px] phone:mt-[30px] gap-[20px] base:rounded-r-md phone:rounded-[0]' background={breakpoints === 'phone' ? 'grey5_dark2' : 'transparent'}>
               {breakpoints === 'phone' ? (
                 <>
                   <IconLogo width={40} height={34} theme={theme} />
-                  <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'sidebar' }) }}></View>
+                  <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'grey4_dark4' }) }}></View>
                 </>
               ) : (
                 <></>
@@ -120,7 +120,7 @@ export default function Friend() {
               })}
               {breakpoints === 'phone' ? (
                 <>
-                  <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'sidebar' }) }}></View>
+                  <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'grey4_dark4' }) }}></View>
                   <ThemeToggle />
                 </>
               ) : (

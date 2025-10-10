@@ -280,13 +280,13 @@ export default function Index() {
         <BlurView tint={'dark'} className='base:w-[calc(100%_-_32px)] tablet:w-[540px] max-w-[540px] tablet:left-[-50px] tablet:mr-[-50px] rounded-md'>
           <View
             className='w-[100%] h-[100%] base:px-[24px] tablet:px-[64px] base:py-[56px] tablet:pt-[72px] tablet:pb-[64px] items-center border-[2px] rounded-md relative'
-            style={{ backgroundColor: getThemeBackground({ theme, breakpoints, background: 'form' }), borderColor: getThemeBorder({ theme, border: 'form' }) }}
+            style={{ backgroundColor: getThemeBackground({ theme, breakpoints, background: 'grey6_transparent' }), borderColor: getThemeBorder({ theme, border: 'form' }) }}
           >
             <Logo width={140} height={27} theme={theme} />
-            <Text className='font-[600] mt-[40px]' size='xl' color='light1'>
+            <Text className='font-[600] mt-[40px]' size='xl' color='grey1_light1'>
               Welcome to BFFL.AI
             </Text>
-            <Text className='mt-[16px]' size='md' color='light3'>
+            <Text className='mt-[16px]' size='md' color='grey2_light3'>
               Where AI goes to meet humanity
             </Text>
 
@@ -297,14 +297,14 @@ export default function Index() {
                 <>
                   <View className='gap-[16px]'>
                     <View className='w-[100%] gap-[7px]'>
-                      <Text className='text-[#bec4ca]' size='sm' color='light3'>
+                      <Text className='text-[#bec4ca]' size='sm' color='grey2_light3'>
                         Email *
                       </Text>
                       <TextInput
                         className='w-full h-[48px] border-[2px] border-[#bec4ca]/40 rounded-[6] px-[8]'
                         style={{
                           ...(emailInputError ? { borderColor: themeVars.colors.red1 } : {}),
-                          color: getThemeColor({ theme, color: 'light1' }),
+                          color: getThemeColor({ theme, color: 'grey1_light1' }),
                           backgroundColor: getThemeBackground({ theme, breakpoints, background: 'input' }),
                         }}
                         placeholder='Email'
@@ -321,7 +321,7 @@ export default function Index() {
                       )}
                     </View>
 
-                    <Text className='max-w-[80%] mx-auto text-center' size='sm' color='light1'>
+                    <Text className='max-w-[80%] mx-auto text-center' size='sm' color='grey1_light1'>
                       By continuing, I agree to the Company's
                       <Pressable>
                         <Text className='text-[#1f80ff] cursor-pointer' size='sm'>
@@ -347,7 +347,7 @@ export default function Index() {
 
                   <View className='w-full flex-row items-center justify-center'>
                     <View className='flex-1 h-[1px] bg-[#555f68]'></View>
-                    <Text className='px-[10]' size='sm' color='light1'>
+                    <Text className='px-[10]' size='sm' color='grey1_light1'>
                       OR
                     </Text>
                     <View className='flex-1 h-[1px] bg-[#555f68]'></View>
@@ -386,10 +386,10 @@ export default function Index() {
                 </>
               ) : (
                 <View className='gap-[16px] items-center'>
-                  <Text className='text font-[500] text-center' size='xl' color='light1'>
+                  <Text className='text font-[500] text-center' size='xl' color='grey1_light1'>
                     We've sent a message containing a 6-digit code to {emailInput}
                   </Text>
-                  <Text className='text font-[500] text-center mb-[20px]' size='lg' color='light1'>
+                  <Text className='text font-[500] text-center mb-[20px]' size='lg' color='grey1_light1'>
                     Enter Code
                   </Text>
                   <View className='w-fit flex-row items-center justify-center gap-[4px] relative'>
@@ -447,7 +447,7 @@ export default function Index() {
             handleFooterPopup({ target: 'about' })
           }}
         >
-          <Text className='cursor-pointer' size='md' color='light3'>
+          <Text className='cursor-pointer' size='md' color='grey2_light3'>
             About Us
           </Text>
         </Pressable>
@@ -457,7 +457,7 @@ export default function Index() {
             handleFooterPopup({ target: 'terms' })
           }}
         >
-          <Text className='cursor-pointer' size='md' color='light3'>
+          <Text className='cursor-pointer' size='md' color='grey2_light3'>
             Terms of Service
           </Text>
         </Pressable>
@@ -466,7 +466,7 @@ export default function Index() {
             handleFooterPopup({ target: 'privacy' })
           }}
         >
-          <Text className='cursor-pointer' size='md' color='light3'>
+          <Text className='cursor-pointer' size='md' color='grey2_light3'>
             Privacy Policy
           </Text>
         </Pressable>
