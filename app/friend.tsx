@@ -1,5 +1,5 @@
 import useDimensions from './hooks/dimensions'
-import { View, Text, Pressable, GradientPressable } from './shared/components/reusable'
+import { View, Text, Pressable, GradientPressable, getThemeBorder } from './shared/components/reusable'
 import IconLogo from '@/app/assets/icons/bfflLogo'
 import ThemeToggle from './shared/components/themeToggle'
 
@@ -92,11 +92,11 @@ export default function Friend() {
 
           {/* Sidebar */}
           <Animated.View style={{ height: '100%', left: leftAnim, top: 0, position: breakpoints === 'phone' ? 'absolute' : 'relative', zIndex: 12 }}>
-            <View className='h-[100%] base:bg-dark2 phone:bg-[transparent] base:p-[20px] phone:p-[0] base:mt-[0px] phone:mt-[30px] gap-[20px] base:rounded-r-md phone:rounded-[0]'>
+            <View className='h-[100%] base:p-[20px] phone:p-[0] base:mt-[0px] phone:mt-[30px] gap-[20px] base:rounded-r-md phone:rounded-[0]' background={breakpoints === 'phone' ? 'primarySidebar' : 'transparent'}>
               {breakpoints === 'phone' ? (
                 <>
                   <IconLogo width={40} height={34} theme={theme} />
-                  <View className='w-[100%] h-[1px] bg-dark4'></View>
+                  <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'sidebar' }) }}></View>
                 </>
               ) : (
                 <></>
@@ -120,7 +120,7 @@ export default function Friend() {
               })}
               {breakpoints === 'phone' ? (
                 <>
-                  <View className='w-[100%] h-[1px] bg-dark4'></View>
+                  <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'sidebar' }) }}></View>
                   <ThemeToggle />
                 </>
               ) : (
