@@ -5,7 +5,7 @@ import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
 import themeVars from '@/app/_styles/theme/themeVars'
 import useDimensions from '@/app/_hooks/dimensions'
-import { getThemeBackground } from '@/app/_shared/components/reusable'
+import { getThemeBackground, Text } from '@/app/_shared/components/reusable'
 import { useFonts } from 'expo-font'
 import FontDosisVariable from '@/app/_assets/fonts/Dosis-VariableFont_wght.ttf'
 import ProtectedScreen from '@/app/_shared/layout/protectedScreen'
@@ -22,7 +22,11 @@ export default function Layout({ children }: { children: ReactNode }) {
   })
 
   if (!fontsLoaded) {
-    return <ProtectedScreen> </ProtectedScreen>
+    return (
+      <ProtectedScreen>
+        <Text></Text>
+      </ProtectedScreen>
+    )
   }
 
   const styles = StyleSheet.create({

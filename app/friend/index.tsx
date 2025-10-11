@@ -1,7 +1,7 @@
-import useDimensions from './_hooks/dimensions'
-import { View, Text, Pressable, GradientPressable, getThemeBorder } from './_shared/components/reusable'
+import useDimensions from '@/app/_hooks/dimensions'
+import { View, Pressable, GradientPressable, getThemeBorder } from '@/app/_shared/components/reusable'
 import IconLogo from '@/app/_assets/icons/bfflLogo'
-import ThemeToggle from './_shared/components/themeToggle'
+import ThemeToggle from '@/app/_shared/components/themeToggle'
 
 import IconSmiley from '@/app/_assets/icons/smiley.svg'
 import IconSmileyFilled from '@/app/_assets/icons/smiley-filled.svg'
@@ -12,13 +12,13 @@ import IconPersonFilled from '@/app/_assets/icons/person-filled.svg'
 import IconMarket from '@/app/_assets/icons/market.svg'
 import IconMarketFilled from '@/app/_assets/icons/market-filled.svg'
 import { usePathname, useRouter } from 'expo-router'
-import { useTheme } from './_context/theme'
-import useBreakpoints from './_hooks/breakpoints'
-import { useRef, useState } from 'react'
-import { Animated, Image } from 'react-native'
+import { useTheme } from '@/app/_context/theme'
+import useBreakpoints from '@/app/_hooks/breakpoints'
+import { useRef } from 'react'
+import { Animated } from 'react-native'
 import IconMenu from '@/app/_assets/icons/menu.svg'
 
-import ImageBackground from '@/app/_assets/images/background.jpg'
+import Step0 from './_modules/step0'
 
 export default function Friend() {
   const { theme } = useTheme()
@@ -26,8 +26,6 @@ export default function Friend() {
   const dimentions = useDimensions()
   const router = useRouter()
   const breakpoints = useBreakpoints()
-
-  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30
@@ -53,7 +51,6 @@ export default function Friend() {
   const leftAnim = useRef(new Animated.Value(breakpoints === 'phone' ? -95 : 0)).current
 
   const closeSidebar = () => {
-    setSidebarOpen(false)
     Animated.timing(leftAnim, {
       toValue: -95,
       duration: 500,
@@ -62,7 +59,6 @@ export default function Friend() {
   }
 
   const openSidebar = () => {
-    setSidebarOpen(true)
     Animated.timing(leftAnim, {
       toValue: 0,
       duration: 500,
@@ -137,15 +133,14 @@ export default function Friend() {
 
           {/* Main */}
           <Pressable
-            className='flex-1 base:ml-[0px] phone:ml-[30px] base:mt-[0px] phone:mt-[30px] bg-[red]/50 base:rounded-[0px] phone:rounded-lg p-[25px] relative'
+            className='flex-1 base:ml-[0px] phone:ml-[30px] base:mt-[0px] phone:mt-[30px] base:rounded-[0px] phone:rounded-lg relative cursor-default'
             onPress={() => {
               if (breakpoints === 'phone') {
-                setSidebarOpen(false)
                 closeSidebar()
               }
             }}
           >
-            <Image source={ImageBackground} className='absolute top-[0] left-[0] base:rounded-[0px] phone:rounded-lg' resizeMode='cover' style={{ cursor: 'auto', width: containerWidth, height: containerHeight }} />
+            <Step0 containerWidth={containerWidth} containerHeight={containerHeight} />
           </Pressable>
           {/* Main - END */}
         </View>
