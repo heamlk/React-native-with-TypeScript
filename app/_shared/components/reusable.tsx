@@ -1,13 +1,13 @@
-import useBreakpoints, { type BreakpointsType } from '@/app/hooks/breakpoints'
-import themeVars from '@/app/styles/theme/themeVars'
+import useBreakpoints, { type BreakpointsType } from '@/app/_hooks/breakpoints'
+import themeVars from '@/app/_styles/theme/themeVars'
 import { StyleSheet, Text as RNText, View as RNView, Pressable as RNPressable, TextInput as RNTextInput, type TextProps, type ViewProps, type PressableProps, type TextInputProps, ViewStyle, PressableStateCallbackType } from 'react-native'
-import { fontSizeNative } from '@/app/styles/theme/fontSize'
-import { type ThemeType, useTheme } from '@/app/context/theme'
-import svgIconDefaultProps from '@/app/assets/icons/_props'
+import { fontSizeNative } from '@/app/_styles/theme/fontSize'
+import { type ThemeType, useTheme } from '@/app/_context/theme'
+import svgIconDefaultProps from '@/app/_assets/icons/_props'
 import { useState } from 'react'
 import clsx from 'clsx'
 import { LinearGradient } from 'expo-linear-gradient'
-import { borderRadiusNative } from '@/app/styles/theme/borderRadius'
+import { borderRadiusNative } from '@/app/_styles/theme/borderRadius'
 
 // Background
 export type GetThemeBackgroundProps = {

@@ -1,6 +1,6 @@
-import type { ThemeType } from '@/app/context/theme'
+import type { ThemeType } from '@/app/_context/theme'
 import svgIconDefaultProps, { type SvgIconType } from './_props'
-import themeVars from '@/app/styles/theme/themeVars'
+import themeVars from '@/app/_styles/theme/themeVars'
 
 const SvgComponent = ({ width = svgIconDefaultProps.width, height = svgIconDefaultProps.height, color = svgIconDefaultProps.color, theme, ...props }: SvgIconType & { theme: ThemeType }) => (
   <svg {...props} width={width} height={height} viewBox='0 0 40 34'>

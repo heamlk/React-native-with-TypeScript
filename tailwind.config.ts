@@ -1,5 +1,5 @@
 import { Config } from 'tailwindcss'
-import themeVars from './app/styles/theme/themeVars'
+import themeVars from './app/_styles/theme/themeVars'
 
 const config: Config = {
   content: ['./app/**/*.{js,jsx,ts,tsx}'],

@@ -1,4 +1,4 @@
-import useDimensions from '@/app/hooks/dimensions'
+import useDimensions from '@/app/_hooks/dimensions'
 import { View } from '../components/reusable'
 import { ReactNode } from 'react'
 

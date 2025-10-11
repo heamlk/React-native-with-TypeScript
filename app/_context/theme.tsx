@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
-import storage from '../shared/storage/storage'
+import storage from '../_shared/storage/storage'
 export type ThemeType = 'light' | 'dark'
 export type ThemeContextType = {
   theme: ThemeType

@@ -8,4 +8,4 @@ config.transformer.babelTransformerPath = require.resolve('react-native-svg-tran
 config.resolver.assetExts = config.resolver.assetExts.filter((ext) => ext !== 'svg')
 config.resolver.sourceExts.push('svg')
 
-module.exports = withNativeWind(config, { input: './app/styles/global.css' })
+module.exports = withNativeWind(config, { input: './app/_styles/global.css' })

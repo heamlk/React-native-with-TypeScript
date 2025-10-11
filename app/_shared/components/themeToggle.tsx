@@ -1,9 +1,9 @@
-import { useTheme } from '@/app/context/theme'
+import { useTheme } from '@/app/_context/theme'
 import { Pressable, Image, Animated, Easing } from 'react-native'
 import { useEffect, useRef } from 'react'
-import IconMoon from '@/app/assets/icons/moon.png'
-import IconSun from '@/app/assets/icons/sun.png'
-import themeVars from '@/app/styles/theme/themeVars'
+import IconMoon from '@/app/_assets/icons/moon.png'
+import IconSun from '@/app/_assets/icons/sun.png'
+import themeVars from '@/app/_styles/theme/themeVars'
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme()

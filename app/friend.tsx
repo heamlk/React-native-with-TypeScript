@@ -1,22 +1,24 @@
-import useDimensions from './hooks/dimensions'
-import { View, Text, Pressable, GradientPressable, getThemeBorder } from './shared/components/reusable'
-import IconLogo from '@/app/assets/icons/bfflLogo'
-import ThemeToggle from './shared/components/themeToggle'
+import useDimensions from './_hooks/dimensions'
+import { View, Text, Pressable, GradientPressable, getThemeBorder } from './_shared/components/reusable'
+import IconLogo from '@/app/_assets/icons/bfflLogo'
+import ThemeToggle from './_shared/components/themeToggle'
 
-import IconSmiley from '@/app/assets/icons/smiley.svg'
-import IconSmileyFilled from '@/app/assets/icons/smiley-filled.svg'
+import IconSmiley from '@/app/_assets/icons/smiley.svg'
+import IconSmileyFilled from '@/app/_assets/icons/smiley-filled.svg'
 
-import IconPerson from '@/app/assets/icons/person.svg'
-import IconPersonFilled from '@/app/assets/icons/person-filled.svg'
+import IconPerson from '@/app/_assets/icons/person.svg'
+import IconPersonFilled from '@/app/_assets/icons/person-filled.svg'
 
-import IconMarket from '@/app/assets/icons/market.svg'
-import IconMarketFilled from '@/app/assets/icons/market-filled.svg'
+import IconMarket from '@/app/_assets/icons/market.svg'
+import IconMarketFilled from '@/app/_assets/icons/market-filled.svg'
 import { usePathname, useRouter } from 'expo-router'
-import { useTheme } from './context/theme'
-import useBreakpoints from './hooks/breakpoints'
+import { useTheme } from './_context/theme'
+import useBreakpoints from './_hooks/breakpoints'
 import { useRef, useState } from 'react'
 import { Animated, Image } from 'react-native'
-import IconMenu from '@/app/assets/icons/menu.svg'
+import IconMenu from '@/app/_assets/icons/menu.svg'
+
+import ImageBackground from '@/app/_assets/images/background.jpg'
 
 export default function Friend() {
   const { theme } = useTheme()
@@ -26,6 +28,9 @@ export default function Friend() {
   const breakpoints = useBreakpoints()
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
+  const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30
 
   const pages = [
     {
@@ -132,8 +137,7 @@ export default function Friend() {
 
           {/* Main */}
           <Pressable
-            className='w-[100%] h-[100%] flex-1 base:ml-[0px] phone:ml-[30px] base:mt-[0px] phone:mt-[30px] bg-[red]/50 base:rounded-[0px] phone:rounded-lg p-[25px] base:relative'
-            style={{ cursor: 'auto' }}
+            className='flex-1 base:ml-[0px] phone:ml-[30px] base:mt-[0px] phone:mt-[30px] bg-[red]/50 base:rounded-[0px] phone:rounded-lg p-[25px] relative'
             onPress={() => {
               if (breakpoints === 'phone') {
                 setSidebarOpen(false)
@@ -141,7 +145,7 @@ export default function Friend() {
               }
             }}
           >
-            main
+            <Image source={ImageBackground} className='absolute top-[0] left-[0] base:rounded-[0px] phone:rounded-lg' resizeMode='cover' style={{ cursor: 'auto', width: containerWidth, height: containerHeight }} />
           </Pressable>
           {/* Main - END */}
         </View>

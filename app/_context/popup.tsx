@@ -3,7 +3,7 @@ import { Dispatch, JSX, ReactNode, SetStateAction, createContext, useContext, us
 import { useRouter } from 'expo-router'
 import { View, Pressable } from 'react-native'
 import { BlurView } from 'expo-blur'
-import IconClose from '@/app/assets/icons/close'
+import IconClose from '@/app/_assets/icons/close'
 
 export type PopupType = {
   open: boolean

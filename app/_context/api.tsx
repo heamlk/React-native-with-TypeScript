@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, type ReactNode } from 'react'
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios'
-import storage from '../shared/storage/storage'
+import storage from '../_shared/storage/storage'
 
 export type ApiContextType = {
   api: AxiosInstance

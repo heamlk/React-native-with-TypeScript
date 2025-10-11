@@ -1,4 +1,4 @@
-import { breakpointsNative } from '../styles/theme/breakpoints'
+import { breakpointsNative } from '../_styles/theme/breakpoints'
 import useDimensions from './dimensions'
 
 export type BreakpointsType = 'phone' | 'tablet' | 'desktop'
