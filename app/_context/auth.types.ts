@@ -198,3 +198,5 @@ export interface OwnModelParams {
   geminiApiKey: string
   grokApiKey: string
 }
+
+export default function Blank() {}

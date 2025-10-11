@@ -26,8 +26,8 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
     buttonOutline: theme === 'light' ? themeVars.colors.grey5 : 'transparent',
 
     grey3_dark1: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.dark1,
-    grey6_dark1: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark1,
     grey5_dark2: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark2,
+    grey6_dark1: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark1,
     grey6_dark7: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7,
     grey6_transparent: theme === 'light' ? themeVars.colors.grey6 : 'none',
     transparent: 'transparent',
@@ -40,7 +40,7 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
 // Border
 export type GetThemeBorderProps = {
   theme: ThemeType
-  border: 'form' | 'input2' | 'buttonOutline' | 'input2Focus' | 'grey4_dark4' | 'grey5_dark3' | 'transparent_light3'
+  border: 'form' | 'input2' | 'buttonOutline' | 'input2Focus' | 'grey4_dark4' | 'grey5_dark3' | 'transparent_light3' | 'transparent'
 }
 
 export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
@@ -53,6 +53,7 @@ export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
     grey4_dark4: theme === 'light' ? themeVars.colors.grey4 : themeVars.colors.dark4,
     grey5_dark3: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark3,
     transparent_light3: theme === 'light' ? 'transparent' : themeVars.colors.light3,
+    transparent: 'transparent',
   }
 
   return borderColors[border]
@@ -71,9 +72,9 @@ export const getThemeColor = ({ theme, color }: GetThemeColorProps) => {
     buttonOutline: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.purple1,
     input2: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.light2,
 
-    grey1_light1: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.light1,
     white_light2: theme === 'light' ? themeVars.colors.white : themeVars.colors.light2,
     white_light3: theme === 'light' ? themeVars.colors.white : themeVars.colors.light3,
+    grey1_light1: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.light1,
     grey1_light2: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.light2,
     grey2_light3: theme === 'light' ? themeVars.colors.grey2 : themeVars.colors.light3,
     black_light5: theme === 'light' ? themeVars.colors.black : themeVars.colors.light5,
