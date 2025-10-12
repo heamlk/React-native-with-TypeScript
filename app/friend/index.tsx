@@ -14,11 +14,14 @@ import IconMarketFilled from '@/app/_assets/icons/market-filled.svg'
 import { usePathname, useRouter } from 'expo-router'
 import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Animated } from 'react-native'
 import IconMenu from '@/app/_assets/icons/menu.svg'
+import { BlurView } from 'expo-blur'
 
 import Step0 from './_modules/step0'
+import Step1 from './_modules/step1'
+import themeVars from '../_styles/theme/themeVars'
 
 export default function Friend() {
   const { theme } = useTheme()
@@ -27,8 +30,12 @@ export default function Friend() {
   const router = useRouter()
   const breakpoints = useBreakpoints()
 
+  const [blurActive, setBlurActive] = useState(true)
+
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30
+
+  const [step, setStep] = useState(0)
 
   const pages = [
     {
@@ -68,6 +75,10 @@ export default function Friend() {
 
   return (
     <View className='base:p-[0] phone:p-[30px] relative' style={{ width: dimentions.deviceWidth, height: dimentions.deviceHeight }}>
+      {/* Blur background */}
+      {/* <BlurView className='w-[100%] h-[100%] absolute top-[0] left-[0] z-[999999]' style={{ display: blurActive ? 'flex' : 'none', backgroundColor: theme === 'light' ? themeVars.colors.white + themeVars.colors.opacity60 : themeVars.colors.dark2 + themeVars.colors.opacity60 }} intensity={5}></BlurView> */}
+      {/* Blur background - END */}
+
       <View className='w-[100%] h-[100%]'>
         {/* Header */}
         {breakpoints !== 'phone' ? (
@@ -140,7 +151,8 @@ export default function Friend() {
               }
             }}
           >
-            <Step0 containerWidth={containerWidth} containerHeight={containerHeight} />
+            {step === 0 ? <Step0 containerWidth={containerWidth} containerHeight={containerHeight} setStep={setStep} /> : <></>}
+            {/* {step === 1 ? <Step1 blurActive={blurActive} setBlurActive={setBlurActive} /> : <></>} */}
           </Pressable>
           {/* Main - END */}
         </View>

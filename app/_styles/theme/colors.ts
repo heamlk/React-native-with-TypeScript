@@ -1,6 +1,7 @@
 const colors = {
   opacity20: '33',
   opacity40: '66',
+  opacity60: '99',
   opacity70: 'b3',
   opacity80: 'cc',
 

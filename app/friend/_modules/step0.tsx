@@ -6,17 +6,21 @@ import { useTheme } from '@/app/_context/theme'
 import themeVars from '@/app/_styles/theme/themeVars'
 import Soul from '@/app/_shared/components/Soul'
 import useBreakpoints from '@/app/_hooks/breakpoints'
+import type { Dispatch, SetStateAction } from 'react'
 
 export type Step0Props = {
   containerWidth: number
   containerHeight: number
+  setStep: Dispatch<SetStateAction<number>>
 }
 
-export default function Step0({ containerWidth, containerHeight }: Step0Props) {
+export default function Step0({ containerWidth, containerHeight, setStep }: Step0Props) {
   const { theme } = useTheme()
   const breakpoints = useBreakpoints()
 
-  const onCreateFriend = () => {}
+  const onCreateFriend = () => {
+    setStep((prev) => prev + 1)
+  }
 
   return (
     <View className='relative p-[25px] base:rounded-[0px] phone:rounded-lg' style={{ cursor: 'auto', width: containerWidth, height: containerHeight }} background='grey6_dark1'>
