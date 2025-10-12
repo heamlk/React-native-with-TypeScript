@@ -66,22 +66,22 @@ export interface Purchase {
 
 export interface CustomerProfile {
   email: string
-  isSubscribed: boolean
+  is_subscribed: boolean
   username?: string
-  firstName?: string
-  lastName?: string
-  birthdate?: Date
+  first_name?: string
+  last_name?: string
+  date_of_birth?: string
   address?: Address
   interests?: string[]
   avatar?: string
-  lifetimeSubscription: boolean
+  lifetime_subscription: boolean
   subscription?: Subscription
   purchases?: Record<string, Purchase>
-  isAgeVerified: boolean
-  nsfwDisabledSince?: Date
-  personalReferralCode?: string
-  isStripeAccountSetup: boolean
-  animationGenerationQuota: number
+  is_age_verified: boolean
+  nsfw_disabled_since?: Date
+  personal_referral_code?: string
+  is_stripe_account_setup: boolean
+  animation_generation_quota: number
 }
 
 export interface Address {
@@ -185,10 +185,10 @@ export interface MarketplaceProduct {
 }
 
 export interface ReferralInfo {
-  nonPaidAccounts: number
-  paidAccounts: number
+  non_paid_accounts: number
+  paid_accounts: number
   redeem: number
-  previouslyRedeemed: number
+  previously_redeemed: number
 }
 
 export interface OwnModelParams {

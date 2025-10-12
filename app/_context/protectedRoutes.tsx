@@ -7,13 +7,13 @@ import { usePathname, useRootNavigationState, useRouter, useSegments } from 'exp
 const ProtectedRoutesContext = createContext<ProtectedRoutesContextType | null>(null)
 
 export default function ProtectedRoutesProvider({ children }: { children: ReactNode }) {
-  const { user: useAuthUser } = useAuth()
+  const { user } = useAuth()
   const value: ProtectedRoutesContextType = {}
   const pathname = usePathname()
   const router = useRouter()
   const rootNavigationState = useRootNavigationState()
 
-  const authenticatedPaths = ['/friend']
+  const authenticatedPaths = ['/friend', '/profile', '/profile/edit', '/referral', '/subscription']
 
   useEffect(() => {
     const user = getStoredUser()
@@ -29,7 +29,7 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
     }
 
     // Redirecting to main page if user is authenticated and profile is setup
-    if (!authenticatedPaths.includes(pathname) && isAuthenticated) {
+    if (!authenticatedPaths.includes(pathname) && isAuthenticated && isOnboardingCompleted) {
       setTimeout(() => router.push('/friend'), 0)
       return
     }
@@ -39,7 +39,7 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
       setTimeout(() => router.push('/'), 0)
       return
     }
-  }, [rootNavigationState, pathname, useAuthUser])
+  }, [pathname, user])
 
   return <ProtectedRoutesContext.Provider value={value}>{children}</ProtectedRoutesContext.Provider>
 }

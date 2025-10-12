@@ -2,14 +2,13 @@ import { Slot } from 'expo-router'
 import { View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import DeeplinkProvider from './_context/deeplink'
-import DescopeProvider from './_context/auth'
+import AuthProvider from './_context/auth'
 import ThemeProvider from './_context/theme'
 import Layout from './_shared/layout/layout'
 import './_styles/global.css'
 import PopupProvider from './_context/popup'
 import ProtectedRoutesProvider from './_context/protectedRoutes'
 import ApiProvider from './_context/api'
-import AuthProvider from './_context/auth'
 
 export default function RootLayout() {
   return (
@@ -17,19 +16,17 @@ export default function RootLayout() {
       <ThemeProvider>
         <SafeAreaProvider>
           <ApiProvider>
-            <DescopeProvider>
-              <DeeplinkProvider>
-                <AuthProvider>
+            <AuthProvider>
+              <ProtectedRoutesProvider>
+                <DeeplinkProvider>
                   <PopupProvider>
-                    <ProtectedRoutesProvider>
-                      <Layout>
-                        <Slot />
-                      </Layout>
-                    </ProtectedRoutesProvider>
+                    <Layout>
+                      <Slot />
+                    </Layout>
                   </PopupProvider>
-                </AuthProvider>
-              </DeeplinkProvider>
-            </DescopeProvider>
+                </DeeplinkProvider>
+              </ProtectedRoutesProvider>
+            </AuthProvider>
           </ApiProvider>
         </SafeAreaProvider>
       </ThemeProvider>

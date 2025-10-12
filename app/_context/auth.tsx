@@ -59,7 +59,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const api = useApi()
   const descopeProjectId = process.env.EXPO_PUBLIC_DESCOPE_PROJECT_ID!
 
-  const [user, setUser] = useState<UserType | null>(getStoredUser())
+  const [user, setUser] = useState<UserType | null>(null)
 
   const oAuth = async ({ provider }: { provider: 'google' | 'microsoft' }) => {
     axios.post(`https://api.descope.com/v1/auth/oauth/authorize?provider=${provider}&redirectUrl=${encodeURIComponent(AuthSession.makeRedirectUri({ scheme: 'bfflai' }))}`, { customClaims: { userEmail: '{{user.email}}' } }, { headers: { Authorization: `Bearer ${descopeProjectId}` } }).then((res) => {
@@ -150,20 +150,13 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
     storage.set('user', JSON.stringify(newUser))
     setUser(newUser)
-
-    if (newUser?.profile) {
-      if (newUser?.profile?.username) {
-        router.navigate('/friend')
-      } else {
-        router.navigate('/onboarding')
-      }
-    }
   }
 
   const logout = () => {
     setUser(null)
     storage.delete('session')
-    router.navigate('/')
+    storage.delete('user')
+    router.push('/')
   }
 
   useEffect(() => {

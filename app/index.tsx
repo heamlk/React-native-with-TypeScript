@@ -80,7 +80,7 @@ export const carouselItems: CarouselItemsType = [
   },
 ]
 
-export default function Index() {
+export default function IndexPage() {
   const carouselRef = useRef<ICarouselInstance>(null)
   const { theme } = useTheme()
   const auth = useAuth()

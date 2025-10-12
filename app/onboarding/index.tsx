@@ -9,12 +9,12 @@ import { useForm, Controller } from 'react-hook-form'
 import { useEffect, useRef, useState } from 'react'
 import { useAuth, UserType } from '@/app/_context/auth'
 import { useApi } from '@/app/_context/api'
-import IconCheckGreen from '@/app/_assets/icons/check-green.svg'
 import { useRouter } from 'expo-router'
 import * as ImagePicker from 'expo-image-picker'
 import { Platform, Image } from 'react-native'
+import Subscription from '../_shared/components/subscription'
 
-export default function Onboarding() {
+export default function OnboardingPage() {
   const { theme } = useTheme()
   const { user, setUser } = useAuth()
   const dimentions = useDimensions()
@@ -24,7 +24,6 @@ export default function Onboarding() {
 
   const [currentStep, setCurrentStep] = useState(0)
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
-  const [selectedSubscription, setSelectedSubscription] = useState(0)
 
   const [confirmationError, setConfirmationError] = useState('')
 
@@ -101,11 +100,6 @@ export default function Onboarding() {
     }
   }
 
-  const onSubmit = (data: any) => {
-    console.log('onSubmit')
-    // console.log(data)
-  }
-
   const onStepChange = async ({ step }: { step: number }) => {
     const isValid = await trigger()
 
@@ -157,10 +151,6 @@ export default function Onboarding() {
     setCurrentStep(step)
   }
 
-  const handleAvatarUpload = () => {
-    console.log('handleAvatarUpload')
-  }
-
   const handleInterestTrigger = (interest: string) => {
     setSelectedInterests((prev) => {
       if (prev.includes(interest)) {
@@ -185,10 +175,6 @@ export default function Onboarding() {
 
     router.push('/friend')
   }
-
-  useEffect(() => {
-    console.log('preview: ', preview)
-  }, [preview])
 
   return (
     <View className='min-h-fit items-center base:py-[48px] phone:py-[70px]' style={{ width: dimentions.deviceWidth, height: dimentions.deviceHeight }}>
@@ -508,80 +494,7 @@ export default function Onboarding() {
                 or
               </Text>
 
-              <View className='w-[100%] p-[24px] border-[1px] rounded-sm' border='grey5_dark3' background='grey6_dark7'>
-                <View className='gap-[16px]'>
-                  <View className='flex-row items-center gap-[10px]'>
-                    <Pressable
-                      className='w-[16px] h-[16px] rounded-[9999px] border-[1px] cursor-pointer'
-                      style={{ borderColor: getThemeBackground({ theme, breakpoints, background: 'button' }), backgroundColor: selectedSubscription === 0 ? getThemeBackground({ theme, breakpoints, background: 'button' }) : 'transparent' }}
-                      onPress={() => setSelectedSubscription(0)}
-                    />
-                    <Text className='font-[600]' size='xl' color='grey1_light1'>
-                      $7.00
-                      <Text size='md' color='grey1_light1'>
-                        /month
-                      </Text>
-                    </Text>
-                  </View>
-
-                  <View className='gap-[8px]'>
-                    <View className='w-[100%] flex-row items-center justify-between'>
-                      <Text size='sm' color='grey2_light3'>
-                        Unlimited Text & upscaled friend image generation
-                      </Text>
-                      <IconCheckGreen />
-                    </View>
-                    <View className='w-[100%] flex-row items-center justify-between'>
-                      <Text size='sm' color='grey2_light3'>
-                        The option to age verify to unlock more capabilities
-                      </Text>
-                      <IconCheckGreen />
-                    </View>
-                  </View>
-                </View>
-
-                <View className='w-[100%] h-[1px] mb-[16px] mt-[20px] border-t-[1px]' border='grey5_dark3'></View>
-
-                <View className='gap-[16px]'>
-                  <View className='flex-row items-center gap-[10px]'>
-                    <Pressable
-                      className='w-[16px] h-[16px] rounded-[9999px] border-[1px] cursor-pointer'
-                      style={{ borderColor: getThemeBackground({ theme, breakpoints, background: 'button' }), backgroundColor: selectedSubscription === 1 ? getThemeBackground({ theme, breakpoints, background: 'button' }) : 'transparent' }}
-                      onPress={() => setSelectedSubscription(1)}
-                    />
-                    <Text className='font-[600] flex flex-col' size='xl' color='grey1_light1'>
-                      250 for life
-                      <Text className='font-[400]' size='sm' color='black_light5'>
-                        100 are left
-                      </Text>
-                    </Text>
-                  </View>
-
-                  <View className='gap-[8px]'>
-                    <View className='w-[100%] flex-row items-center justify-between'>
-                      <Text size='sm' color='grey2_light3'>
-                        Unlimited Text & upscaled friend image generation
-                      </Text>
-                      <IconCheckGreen />
-                    </View>
-                    <View className='w-[100%] flex-row items-center justify-between'>
-                      <Text size='sm' color='grey2_light3'>
-                        The option to age verify to unlock more capabilities
-                      </Text>
-                      <IconCheckGreen />
-                    </View>
-                  </View>
-
-                  <GradientPressable type='dark' className='h-[48px] items-center justicy-center rounded-[99999px]' combinedStyle={{ width: '100%' }}>
-                    <Text className='font-[600]' size='md' color='grey1_light2'>
-                      Subscribe
-                    </Text>
-                  </GradientPressable>
-                  <Text className='opacity-70' size='md' color='grey2_light3'>
-                    Cancel anytime. Plan automatically renews until cancelled.
-                  </Text>
-                </View>
-              </View>
+              <Subscription />
             </View>
           )}
         </View>

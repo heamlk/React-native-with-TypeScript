@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, type ReactNode } from 'react'
+import React, { createContext, useContext, type ReactNode } from 'react'
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios'
 import storage from '../_shared/storage/storage'
 
@@ -9,8 +9,10 @@ export type ApiContextType = {
   getProducts: () => Promise<AxiosResponse<any, any, {}>>
   getAvailableInterests: () => Promise<AxiosResponse<any, any, {}>>
   postConfirmAccount: ({ username, first_name, last_name, date_of_birth, interests, referral_code }: { username: string; first_name: string; last_name: string; date_of_birth: string; interests: string; referral_code: string }) => Promise<AxiosResponse<any, any, {}>>
+  postUpdateProfile: ({ first_name, last_name, date_of_birth, interests, avatar }: { first_name: string; last_name: string; date_of_birth: string; interests: string; avatar?: File | null | undefined }) => Promise<AxiosResponse<any, any, {}>>
   getLifetimeInfo: () => Promise<AxiosResponse<any, any, {}>>
   getAvailableAttributes: () => Promise<AxiosResponse<any, any, {}>>
+  getReferralInfo: () => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -75,6 +77,24 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const postUpdateProfile = async ({ first_name, last_name, date_of_birth, interests, avatar }: { first_name: string; last_name: string; date_of_birth: string; interests: string; avatar?: File | null }) => {
+    const formData = new FormData()
+    formData.append('first_name', first_name)
+    formData.append('last_name', last_name)
+    formData.append('date_of_birth', date_of_birth)
+    formData.append('interests', interests)
+
+    if (avatar) {
+      formData.append('avatar', avatar, avatar.name)
+    }
+
+    return await api.post('customers/update-profile', formData, {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
+
   const getLifetimeInfo = async () => {
     return await api.get('marketplace/lifetime-subscription-info', {
       headers: {
@@ -91,6 +111,14 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const getReferralInfo = async () => {
+    return await api.get('referral/info', {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
+
   const value = {
     api,
     login,
@@ -100,14 +128,9 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     postConfirmAccount,
     getLifetimeInfo,
     getAvailableAttributes,
+    getReferralInfo,
+    postUpdateProfile,
   }
-
-  useEffect(() => {
-    // login()
-    // getProfile()
-    // getProducts()
-    // getAvailableInterests()
-  }, [])
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>
 }
