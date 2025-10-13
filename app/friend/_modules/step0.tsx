@@ -23,7 +23,7 @@ export default function Step0({ containerWidth, containerHeight, setStep }: Step
   }
 
   return (
-    <View className='relative p-[25px] base:rounded-[0px] phone:rounded-lg' style={{ cursor: 'auto', width: containerWidth, height: containerHeight }} background='grey6_dark1'>
+    <View className='relative p-[25px] base:rounded-[0px] phone:rounded-lg' style={{ cursor: 'auto', width: containerWidth, minHeight: containerHeight }} background='grey6_dark1'>
       {theme === 'dark' ? <Image source={ImageBackground} className='absolute top-[0px] left-[0px] base:rounded-[0px] phone:rounded-lg' resizeMode='cover' style={{ cursor: 'auto', width: containerWidth, height: containerHeight }} /> : <></>}
 
       <LinearGradient

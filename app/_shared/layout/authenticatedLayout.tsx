@@ -71,7 +71,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   }
 
   return (
-    <View className='base:p-[0] phone:p-[30px] relative' style={{ width: dimentions.deviceWidth, height: dimentions.deviceHeight }}>
+    <View className='base:p-[0] phone:p-[30px] relative' style={{ width: dimentions.deviceWidth, minHeight: dimentions.deviceHeight }}>
       {/* Blur background */}
       {/* <BlurView className='w-[100%] h-[100%] absolute top-[0] left-[0] z-[999999]' style={{ display: blurActive ? 'flex' : 'none', backgroundColor: theme === 'light' ? themeVars.colors.white + themeVars.colors.opacity60 : themeVars.colors.dark2 + themeVars.colors.opacity60 }} intensity={5}></BlurView> */}
       {/* Blur background - END */}
@@ -144,7 +144,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
           {/* Main */}
           <Pressable
             className='flex-1 base:ml-[0px] phone:ml-[30px] base:mt-[0px] phone:mt-[30px] base:rounded-[0px] phone:rounded-lg relative cursor-default'
-            style={{ cursor: 'auto', width: containerWidth, height: containerHeight, marginTop: keepMarginsOnMobile && breakpoints === 'phone' ? 30 + 34 + 30 : breakpoints === 'phone' ? 0 : 30, paddingHorizontal: keepSafePaddingOnMobile && breakpoints === 'phone' ? 24 : 0 }}
+            style={{ cursor: 'auto', width: containerWidth, minHeight: containerHeight, marginTop: keepMarginsOnMobile && breakpoints === 'phone' ? 30 + 34 + 30 : breakpoints === 'phone' ? 0 : 30, paddingHorizontal: keepSafePaddingOnMobile && breakpoints === 'phone' ? 24 : 0 }}
             onPress={() => {
               if (breakpoints === 'phone') {
                 closeSidebar()

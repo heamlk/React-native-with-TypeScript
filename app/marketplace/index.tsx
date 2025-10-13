@@ -41,7 +41,7 @@ export default function Marketplace() {
       <View className='w-[100%] gap-[24px]'>
         {/* Banner */}
         <View className='w-[100%] relative'>
-          <ImageBackground className='base:rounded-[0px] phone:rounded-t-lg overflow-hidden' style={{ width: containerWidth, height: breakpoints === 'phone' ? 200 : 230 }} source={ImageMarketplace} resizeMode='cover'></ImageBackground>
+          <ImageBackground className='base:rounded-[0px] phone:rounded-t-lg overflow-hidden' style={{ width: containerWidth - 2, minHeight: breakpoints === 'phone' ? 200 - 2 : 230 - 2 }} source={ImageMarketplace} resizeMode='cover'></ImageBackground>
           <LinearGradient className='w-[100%] base:h-[200px] phone:h-[230px] absolute top-[0px] left-[0px] base:rounded-[0px] phone:rounded-t-lg' colors={[theme === 'light' ? themeVars.colors.light1 : themeVars.colors.dark7, 'transparent']} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0.5 }} />
           <Text className='font-[600] absolute base:left-[0px] base:right-[0px] base:mx-auto base:text-center phone:left-[26px] bottom-[26px]' color='grey1_light1' size='xl'>
             Marketplace
@@ -49,9 +49,9 @@ export default function Marketplace() {
         </View>
         {/* Banner */}
 
-        <View className='base:flex-col tablet:flex-row px-[20px] gap-[40px]'>
+        <View className='base:flex-col tablet:flex-row px-[20px] base:pb-[20px] phone:pb-[0px] gap-[40px]'>
           {/* Filters */}
-          <View className='base:w-[100%] phone::w-[230px] base:gap-[16px] phone:gap-[24px]'>
+          <View className='base:w-[100%] phone:w-[230px] base:gap-[16px] phone:gap-[24px]'>
             <Text className='font-[600]' color='grey1_light1' size='sm'>
               FILTERS
             </Text>
@@ -117,7 +117,7 @@ export default function Marketplace() {
                           return (
                             <View key={index + 99518} className='base:h-[118px] phone:h-[146px] flex-1 flex-row relative border-[1px] rounded-md' border='transparent_dark3' background='grey6_dark7'>
                               <View className='relative rounded-l-md overflow-hidden' style={breakpoints === 'phone' ? { width: 170, height: 118 } : { width: 192, height: 144 }}>
-                                <ImageBackground className='absolute top-[0px] left-[0px]' style={breakpoints === 'phone' ? { width: 170, height: 118 } : { width: 192, height: 144 }} source={{ uri: product?.thumbnail_image || '' }} resizeMode='cover'></ImageBackground>
+                                <ImageBackground className='absolute top-[0px] left-[0px]' style={breakpoints === 'phone' ? { width: 168, height: 116 } : { width: 190, height: 142 }} source={{ uri: product?.thumbnail_image || '' }} resizeMode='cover'></ImageBackground>
                                 <LinearGradient className='w-[100%] base:h-[118px] phone:h-[146px] absolute top-[0px] left-[0px] rounded-l-md' colors={[theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7, 'transparent']} start={{ x: 1, y: 0 }} end={{ x: 0, y: 0 }} />
                               </View>
                               <View className='h-[100%] flex-1 justify-between pt-[16px] pb-[16px] px-[24px]'>
@@ -195,7 +195,7 @@ export default function Marketplace() {
                           return (
                             <View key={index + 34668} className='base:h-[118px] phone:h-[146px] flex-1 flex-row relative border-[1px] rounded-md' border='transparent_dark3' background='grey6_dark7'>
                               <View className='relative rounded-l-md overflow-hidden' style={breakpoints === 'phone' ? { width: 170, height: 118 } : { width: 192, height: 144 }}>
-                                <ImageBackground className='absolute top-[0px] left-[0px]' style={breakpoints === 'phone' ? { width: 170, height: 118 } : { width: 192, height: 144 }} source={{ uri: product?.thumbnail_image || '' }} resizeMode='cover'></ImageBackground>
+                                <ImageBackground className='absolute top-[0px] left-[0px]' style={breakpoints === 'phone' ? { width: 168, height: 116 } : { width: 190, height: 142 }} source={{ uri: product?.thumbnail_image || '' }} resizeMode='cover'></ImageBackground>
                                 <LinearGradient className='w-[100%] base:h-[118px] phone:h-[146px] absolute top-[0px] left-[0px] rounded-l-md' colors={[theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7, 'transparent']} start={{ x: 1, y: 0 }} end={{ x: 0, y: 0 }} />
                               </View>
                               <View className='h-[100%] flex-1 justify-between pt-[16px] pb-[16px] px-[24px]'>
