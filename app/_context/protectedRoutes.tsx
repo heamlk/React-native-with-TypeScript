@@ -13,7 +13,7 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
   const router = useRouter()
   const rootNavigationState = useRootNavigationState()
 
-  const authenticatedPaths = ['/friend', '/profile', '/profile/edit', '/referral', '/subscription']
+  const authenticatedPaths = ['/friend', '/profile', '/profile/edit', '/referral', '/subscription', '/marketplace']
 
   useEffect(() => {
     const user = getStoredUser()

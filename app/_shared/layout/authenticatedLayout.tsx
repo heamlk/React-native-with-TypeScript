@@ -46,7 +46,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
       iconSelected: <IconPersonFilled />,
     },
     {
-      href: '/market',
+      href: '/marketplace',
       icon: <IconMarket />,
       iconSelected: <IconMarketFilled />,
     },

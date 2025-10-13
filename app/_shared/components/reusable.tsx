@@ -12,7 +12,7 @@ import { borderRadiusNative } from '@/app/_styles/theme/borderRadius'
 // Background
 export type GetThemeBackgroundProps = {
   theme: ThemeType
-  background: 'primary' | 'primaryAuthenticated' | 'transparent' | 'input' | 'input2' | 'button' | 'buttonOutline' | 'grey5_dark2' | 'grey5_dark5' | 'grey6_transparent' | 'grey6_dark6' | 'grey6_dark7' | 'grey3_dark1' | 'grey6_dark1'
+  background: 'primary' | 'primaryAuthenticated' | 'transparent' | 'input' | 'input2' | 'button' | 'buttonOutline' | 'grey5_dark2' | 'grey5_dark3' | 'grey5_dark5' | 'grey6_transparent' | 'grey6_dark6' | 'grey6_dark7' | 'grey3_dark1' | 'grey3_purple3' | 'grey6_dark1'
   breakpoints: BreakpointsType
 }
 
@@ -26,7 +26,9 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
     buttonOutline: theme === 'light' ? themeVars.colors.grey5 : 'transparent',
 
     grey3_dark1: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.dark1,
+    grey3_purple3: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.purple3,
     grey5_dark2: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark2,
+    grey5_dark3: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark3,
     grey5_dark5: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark5,
     grey6_dark1: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark1,
     grey6_dark6: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark6,
@@ -42,7 +44,7 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
 // Border
 export type GetThemeBorderProps = {
   theme: ThemeType
-  border: 'form' | 'input2' | 'buttonOutline' | 'input2Focus' | 'grey4_dark4' | 'grey5_dark3' | 'transparent_light3' | 'transparent'
+  border: 'form' | 'input2' | 'buttonOutline' | 'input2Focus' | 'grey4_dark4' | 'grey5_dark3' | 'grey6_dark3' | 'transparent_light3' | 'transparent_dark3' | 'transparent'
 }
 
 export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
@@ -54,7 +56,9 @@ export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
 
     grey4_dark4: theme === 'light' ? themeVars.colors.grey4 : themeVars.colors.dark4,
     grey5_dark3: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark3,
+    grey6_dark3: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark3,
     transparent_light3: theme === 'light' ? 'transparent' : themeVars.colors.light3,
+    transparent_dark3: theme === 'light' ? 'transparent' : themeVars.colors.dark3,
     transparent: 'transparent',
   }
 
@@ -65,7 +69,7 @@ export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
 // Color
 export type GetThemeColorProps = {
   theme: ThemeType
-  color: 'button' | 'buttonOutline' | 'input2' | 'grey1_purple1' | 'grey1_purple3' | 'grey1_light1' | 'white_light2' | 'white_light3' | 'grey1_light2' | 'grey2_light3' | 'grey3_light3' | 'grey3_purple5' | 'black_light5' | 'yellow1_purple3'
+  color: 'button' | 'buttonOutline' | 'input2' | 'grey1_purple1' | 'grey1_purple3' | 'grey1_light1' | 'white_light2' | 'white_light3' | 'grey1_light2' | 'grey2_light2' | 'grey2_light3' | 'grey3_light3' | 'grey3_purple5' | 'black_light5' | 'yellow1_purple3'
 }
 
 export const getThemeColor = ({ theme, color }: GetThemeColorProps) => {
@@ -80,6 +84,7 @@ export const getThemeColor = ({ theme, color }: GetThemeColorProps) => {
     grey1_purple1: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.purple1,
     grey1_light1: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.light1,
     grey1_light2: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.light2,
+    grey2_light2: theme === 'light' ? themeVars.colors.grey2 : themeVars.colors.light2,
     grey2_light3: theme === 'light' ? themeVars.colors.grey2 : themeVars.colors.light3,
     grey3_light3: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.light3,
     grey3_purple5: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.purple5,
@@ -159,7 +164,7 @@ export function Text({ size = 'md', color = null, background = null, style, clas
     sm: breakpoints === 'phone' ? fontSizeNative.sm : breakpoints === 'tablet' ? fontSizeNative.sm : fontSizeNative.sm,
     md: breakpoints === 'phone' ? fontSizeNative.md : breakpoints === 'tablet' ? fontSizeNative.md : fontSizeNative.md,
     lg: breakpoints === 'phone' ? fontSizeNative.md : breakpoints === 'tablet' ? fontSizeNative.lg : fontSizeNative.lg,
-    xl: breakpoints === 'phone' ? fontSizeNative.lg : breakpoints === 'tablet' ? fontSizeNative.xl : fontSizeNative.xl,
+    xl: breakpoints === 'phone' ? fontSizeNative.xl : breakpoints === 'tablet' ? fontSizeNative.xl : fontSizeNative.xl,
     '2xl': breakpoints === 'phone' ? fontSizeNative.lg : breakpoints === 'tablet' ? fontSizeNative.xl : fontSizeNative['2xl'],
     '3xl': breakpoints === 'phone' ? fontSizeNative.xl : breakpoints === 'tablet' ? fontSizeNative['2xl'] : fontSizeNative['3xl'],
   }

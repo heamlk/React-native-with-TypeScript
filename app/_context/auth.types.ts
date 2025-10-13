@@ -173,15 +173,15 @@ export type ProductStatus = 'available' | 'coming_soon'
 export interface MarketplaceProduct {
   id: string
   name: string
-  isNSFW: boolean
+  is_nsfw: boolean
   type: ProductType
   status: ProductStatus
-  shortDescription?: string
+  short_description?: string
   description: string
   price: number
-  thumbnailImage: string
-  bannerImage: string
-  includedInLifetimeSubscription: boolean
+  thumbnail_image: string
+  banner_image: string
+  included_in_lifetime_subscription: boolean
 }
 
 export interface ReferralInfo {
