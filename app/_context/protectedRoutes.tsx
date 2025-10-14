@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
+import React, { createContext, useContext, useEffect, type ReactNode } from 'react'
 import { getStoredUser, useAuth } from './auth'
 export type ProtectedRoutesType = 'light' | 'dark'
 export type ProtectedRoutesContextType = {}
@@ -13,7 +13,7 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
   const router = useRouter()
   const rootNavigationState = useRootNavigationState()
 
-  const authenticatedPaths = ['/friend', '/profile', '/profile/edit', '/referral', '/subscription', '/marketplace']
+  const authenticatedPaths = ['/friend', '/friend/new', '/profile', '/profile/edit', '/referral', '/subscription', '/marketplace']
 
   useEffect(() => {
     const user = getStoredUser()

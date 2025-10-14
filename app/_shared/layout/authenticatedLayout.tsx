@@ -14,7 +14,7 @@ import IconMarketFilled from '@/app/_assets/icons/market-filled.svg'
 import { usePathname, useRouter } from 'expo-router'
 import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
-import { ReactNode, useRef } from 'react'
+import { type Dispatch, type ReactNode, type SetStateAction, useRef } from 'react'
 import { Animated } from 'react-native'
 import IconMenu from '@/app/_assets/icons/menu.svg'
 
@@ -22,9 +22,11 @@ export type AuthenticatedLayoutProps = {
   children: ReactNode
   keepMarginsOnMobile?: boolean
   keepSafePaddingOnMobile?: boolean
+  disableRelative?: Boolean
+  mainZIndex?: 10 | 0
 }
 
-export default function AuthenticatedLayout({ children, keepMarginsOnMobile = false, keepSafePaddingOnMobile = false }: AuthenticatedLayoutProps) {
+export default function AuthenticatedLayout({ children, keepMarginsOnMobile = false, keepSafePaddingOnMobile = false, disableRelative = false, mainZIndex = 0 }: AuthenticatedLayoutProps) {
   const { theme } = useTheme()
   const pathname = usePathname()
   const dimentions = useDimensions()
@@ -71,12 +73,8 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   }
 
   return (
-    <View className='base:p-[0] phone:p-[30px] relative' style={{ width: dimentions.deviceWidth, minHeight: dimentions.deviceHeight }}>
-      {/* Blur background */}
-      {/* <BlurView className='w-[100%] h-[100%] absolute top-[0] left-[0] z-[999999]' style={{ display: blurActive ? 'flex' : 'none', backgroundColor: theme === 'light' ? themeVars.colors.white + themeVars.colors.opacity60 : themeVars.colors.dark2 + themeVars.colors.opacity60 }} intensity={5}></BlurView> */}
-      {/* Blur background - END */}
-
-      <View className='w-[100%] h-[100%]'>
+    <View className='base:p-[0] phone:p-[30px]' style={{ width: dimentions.deviceWidth, minHeight: dimentions.deviceHeight, position: disableRelative ? 'static' : 'relative' }}>
+      <View className='w-[100%] h-[100%]' style={{ position: disableRelative ? 'static' : 'relative' }}>
         {/* Header */}
         {breakpoints !== 'phone' ? (
           <View className='w-[100%] flex-row items-center justify-between'>
@@ -88,10 +86,10 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
         )}
         {/* Header - END */}
 
-        <View className='h-[100%] flex-1 flex-row'>
+        <View className='h-[100%] flex-1 flex-row' style={{ position: disableRelative ? 'static' : 'relative' }}>
           {/* Mobile burger menu */}
           {breakpoints === 'phone' ? (
-            <Pressable className='w-[48px] h-[48px] items-center justify-center bg-dark2/60 rounded-[20px] absolute top-[24px] left-[24px] z-[11]' onPress={openSidebar}>
+            <Pressable className='w-[48px] h-[48px] items-center justify-center bg-dark2/60 rounded-[20px] absolute top-[24px] left-[24px] z-[1]' onPress={openSidebar}>
               <IconMenu />
             </Pressable>
           ) : (
@@ -100,7 +98,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
           {/* Mobile burger menu - END */}
 
           {/* Sidebar */}
-          <Animated.View style={{ height: '100%', left: leftAnim, top: 0, position: breakpoints === 'phone' ? 'absolute' : 'relative', zIndex: 12 }}>
+          <Animated.View style={{ height: '100%', left: leftAnim, top: 0, position: breakpoints === 'phone' ? 'absolute' : 'relative', zIndex: 2 }}>
             <View className='h-[100%] base:p-[20px] phone:p-[0] base:mt-[0px] phone:mt-[30px] gap-[20px] base:rounded-r-md phone:rounded-[0]' background={breakpoints === 'phone' ? 'grey5_dark2' : 'transparent'}>
               {breakpoints === 'phone' ? (
                 <>
@@ -144,7 +142,15 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
           {/* Main */}
           <Pressable
             className='flex-1 base:ml-[0px] phone:ml-[30px] base:mt-[0px] phone:mt-[30px] base:rounded-[0px] phone:rounded-lg relative cursor-default'
-            style={{ cursor: 'auto', width: containerWidth, minHeight: containerHeight, marginTop: keepMarginsOnMobile && breakpoints === 'phone' ? 30 + 34 + 30 : breakpoints === 'phone' ? 0 : 30, paddingHorizontal: keepSafePaddingOnMobile && breakpoints === 'phone' ? 24 : 0 }}
+            style={{
+              cursor: 'auto',
+              width: containerWidth,
+              minHeight: containerHeight,
+              marginTop: keepMarginsOnMobile && breakpoints === 'phone' ? 30 + 34 + 30 : breakpoints === 'phone' ? 0 : 30,
+              paddingHorizontal: keepSafePaddingOnMobile && breakpoints === 'phone' ? 24 : 0,
+              position: disableRelative ? 'static' : 'relative',
+              zIndex: mainZIndex,
+            }}
             onPress={() => {
               if (breakpoints === 'phone') {
                 closeSidebar()

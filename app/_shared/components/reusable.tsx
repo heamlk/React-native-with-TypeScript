@@ -12,7 +12,7 @@ import { borderRadiusNative } from '@/app/_styles/theme/borderRadius'
 // Background
 export type GetThemeBackgroundProps = {
   theme: ThemeType
-  background: 'primary' | 'primaryAuthenticated' | 'transparent' | 'input' | 'input2' | 'button' | 'buttonOutline' | 'grey5_dark2' | 'grey5_dark3' | 'grey5_dark5' | 'grey6_transparent' | 'grey6_dark6' | 'grey6_dark7' | 'grey3_dark1' | 'grey3_purple3' | 'grey6_dark1'
+  background: 'primary' | 'primaryAuthenticated' | 'transparent' | 'input' | 'input2' | 'button' | 'buttonOutline' | 'grey5_dark2' | 'grey5_dark3' | 'grey5_dark5' | 'grey6_transparent' | 'grey6_dark6' | 'grey6_dark7' | 'grey3_dark1' | 'grey3_purple3' | 'grey6_dark1' | 'grey5_purple2/40'
   breakpoints: BreakpointsType
 }
 
@@ -34,6 +34,7 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
     grey6_dark6: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark6,
     grey6_dark7: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7,
     grey6_transparent: theme === 'light' ? themeVars.colors.grey6 : 'none',
+    'grey5_purple2/40': theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.purple2 + themeVars.colors.opacity40,
     transparent: 'transparent',
   }
 
@@ -44,7 +45,7 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
 // Border
 export type GetThemeBorderProps = {
   theme: ThemeType
-  border: 'form' | 'input2' | 'buttonOutline' | 'input2Focus' | 'grey4_dark4' | 'grey5_dark3' | 'grey6_dark3' | 'transparent_light3' | 'transparent_dark3' | 'transparent'
+  border: 'form' | 'input2' | 'buttonOutline' | 'input2Focus' | 'grey4_dark4' | 'grey5_dark3' | 'grey6_dark3' | 'transparent_light3' | 'transparent_dark3' | 'transparent_purple2/40' | 'transparent'
 }
 
 export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
@@ -59,6 +60,7 @@ export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
     grey6_dark3: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark3,
     transparent_light3: theme === 'light' ? 'transparent' : themeVars.colors.light3,
     transparent_dark3: theme === 'light' ? 'transparent' : themeVars.colors.dark3,
+    'transparent_purple2/40': theme === 'light' ? 'transparent' : themeVars.colors.purple2 + themeVars.colors.opacity40,
     transparent: 'transparent',
   }
 
@@ -69,7 +71,27 @@ export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
 // Color
 export type GetThemeColorProps = {
   theme: ThemeType
-  color: 'button' | 'buttonOutline' | 'input2' | 'grey1_purple1' | 'grey1_purple3' | 'grey1_light1' | 'white_light2' | 'white_light3' | 'grey1_light2' | 'grey2_light2' | 'grey2_light3' | 'grey3_light3' | 'grey3_purple5' | 'black_light5' | 'yellow1_purple3'
+  color:
+    | 'button'
+    | 'buttonOutline'
+    | 'input2'
+    | 'grey1_purple1'
+    | 'grey1_purple3'
+    | 'grey1_light1'
+    | 'white_light2'
+    | 'white_light3'
+    | 'grey1_light2'
+    | 'grey1_light3'
+    | 'grey2_light2'
+    | 'grey2_light3'
+    | 'grey3_light3'
+    | 'grey3_purple5'
+    | 'grey5_light3'
+    | 'black_light5'
+    | 'yellow1_purple3'
+    | 'light1_light2'
+    | 'light1_light3'
+    | 'red1'
 }
 
 export const getThemeColor = ({ theme, color }: GetThemeColorProps) => {
@@ -84,12 +106,17 @@ export const getThemeColor = ({ theme, color }: GetThemeColorProps) => {
     grey1_purple1: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.purple1,
     grey1_light1: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.light1,
     grey1_light2: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.light2,
+    grey1_light3: theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.light3,
     grey2_light2: theme === 'light' ? themeVars.colors.grey2 : themeVars.colors.light2,
     grey2_light3: theme === 'light' ? themeVars.colors.grey2 : themeVars.colors.light3,
     grey3_light3: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.light3,
     grey3_purple5: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.purple5,
+    grey5_light3: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.light3,
     black_light5: theme === 'light' ? themeVars.colors.black : themeVars.colors.light5,
     yellow1_purple3: theme === 'light' ? themeVars.colors.yellow1 : themeVars.colors.purple3,
+    light1_light2: theme === 'light' ? themeVars.colors.light1 : themeVars.colors.light2,
+    light1_light3: theme === 'light' ? themeVars.colors.light1 : themeVars.colors.light3,
+    red1: theme === 'light' ? themeVars.colors.red1 : themeVars.colors.red1,
   }
 
   return colors[color]
@@ -155,7 +182,7 @@ export type CustomTextProps = TextProps & {
   background?: GetThemeBackgroundProps['background'] | null
 }
 
-export function Text({ size = 'md', color = null, background = null, style, className, ...props }: CustomTextProps) {
+export function Text({ size, color = null, background = null, style, className, ...props }: CustomTextProps) {
   const { theme } = useTheme()
   const breakpoints = useBreakpoints()
 
@@ -169,7 +196,9 @@ export function Text({ size = 'md', color = null, background = null, style, clas
     '3xl': breakpoints === 'phone' ? fontSizeNative.xl : breakpoints === 'tablet' ? fontSizeNative['2xl'] : fontSizeNative['3xl'],
   }
 
-  return <RNText {...props} className={clsx('', className)} style={[{ fontFamily: themeVars.fonts.dosis, fontSize: responsiveSizes[size] }, color ? { color: getThemeColor({ theme, color }) } : null, background ? { backgroundColor: getThemeBackground({ theme, breakpoints, background }) } : null, style]} />
+  return (
+    <RNText {...props} className={clsx('', className)} style={[{ fontFamily: themeVars.fonts.dosis }, size ? { fontSize: responsiveSizes[size] } : null, color ? { color: getThemeColor({ theme, color }) } : null, background ? { backgroundColor: getThemeBackground({ theme, breakpoints, background }) } : null, style]} />
+  )
 }
 
 export type CustomViewProps = ViewProps & {
@@ -186,14 +215,29 @@ export function View({ background = null, border = null, style, className, ...pr
 
 export type CustomPressableProps = PressableProps & {
   background?: GetThemeBackgroundProps['background'] | null
+  hoverBackground?: GetThemeBackgroundProps['background'] | null
   border?: GetThemeBorderProps['border'] | null
 }
 
-export function Pressable({ background = null, border = null, style, className, ...props }: CustomPressableProps) {
+export function Pressable({ background = null, hoverBackground = null, border = null, style, className, ...props }: CustomPressableProps) {
   const { theme } = useTheme()
   const breakpoints = useBreakpoints()
 
-  return <RNPressable {...props} className={clsx('', className)} style={typeof style === 'function' ? style : [{}, background ? { backgroundColor: getThemeBackground({ theme, breakpoints, background }) } : null, border ? { borderColor: getThemeBorder({ theme, border }) } : null, style]} />
+  const [isHover, setIsHover] = useState(false)
+
+  const handlHoverIn = () => {
+    if (!hoverBackground) return
+    setIsHover(true)
+  }
+  const handlHoverOut = () => {
+    if (!hoverBackground) return
+    setIsHover(false)
+  }
+
+  const currentBackground = isHover && hoverBackground ? getThemeBackground({ theme, breakpoints, background: hoverBackground }) : background ? getThemeBackground({ theme, breakpoints, background }) : null
+  const currentBorder = border ? { borderColor: getThemeBorder({ theme, border }) } : null
+
+  return <RNPressable {...props} onHoverIn={handlHoverIn} onHoverOut={handlHoverOut} className={clsx('', className)} style={typeof style === 'function' ? style : [{}, currentBackground ? { backgroundColor: currentBackground } : null, currentBorder, style]} />
 }
 
 export type CustomGradientPressableProps = PressableProps & {
@@ -201,9 +245,10 @@ export type CustomGradientPressableProps = PressableProps & {
   combinedStyle?: ViewStyle
   gradientClassname?: string
   combinedClassname?: string
+  isPressable?: boolean
 }
 
-export function GradientPressable({ type, style, combinedStyle, gradientClassname, combinedClassname, className, ...props }: CustomGradientPressableProps) {
+export function GradientPressable({ type, style, combinedStyle, gradientClassname, combinedClassname, className, isPressable = true, ...props }: CustomGradientPressableProps) {
   const { theme } = useTheme()
 
   const [hover, setHover] = useState(false)
@@ -313,19 +358,25 @@ export function GradientPressable({ type, style, combinedStyle, gradientClassnam
         style={[styles[type]['gradient']]}
       />
 
-      <RNPressable
-        {...props}
-        className={clsx('', combinedClassname, className)}
-        style={typeof style === 'function' ? style : [{}, combinedStyle, styles[type]['normal'], style]}
-        onHoverIn={() => {
-          setHover(true)
-        }}
-        onHoverOut={() => {
-          setHover(false)
-        }}
-      >
-        {props?.children}
-      </RNPressable>
+      {isPressable ? (
+        <RNView {...props} className={clsx('', combinedClassname, className)} style={[{}, combinedStyle, styles[type]['normal'], style as ViewStyle]}>
+          {props?.children as any}
+        </RNView>
+      ) : (
+        <RNPressable
+          {...props}
+          className={clsx('', combinedClassname, className)}
+          style={typeof style === 'function' ? style : [{}, combinedStyle, styles[type]['normal'], style]}
+          onHoverIn={() => {
+            setHover(true)
+          }}
+          onHoverOut={() => {
+            setHover(false)
+          }}
+        >
+          {props?.children}
+        </RNPressable>
+      )}
     </RNView>
   )
 }
