@@ -78,7 +78,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
     if (pathname === '/friend/new') {
       popup.setPopup({
         open: true,
-        maxWidth: 500,
+        maxWidth: 600,
         content: (
           <View className='gap-[24px]'>
             <Text className='text-[24px] font-[600]' color='grey1_light1'>

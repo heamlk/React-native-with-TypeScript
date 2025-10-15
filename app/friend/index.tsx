@@ -9,19 +9,60 @@ import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
 import themeVars from '../_styles/theme/themeVars'
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
+import { usePopup } from '../_context/popup'
+import { useEffect } from 'react'
+import { useAuth } from '../_context/auth'
 
 export default function FriendPage() {
+  const { user } = useAuth()
   const { theme } = useTheme()
   const dimentions = useDimensions()
   const router = useRouter()
   const breakpoints = useBreakpoints()
+  const { setPopup } = usePopup()
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30
 
   const onCreateFriend = () => {
-    router.push('/friend/new')
+    const isSubscribed = user?.profile?.is_subscribed
+    if (isSubscribed) {
+      router.push('/friend/new')
+      return
+    }
+
+    setPopup({
+      open: true,
+      maxWidth: 600,
+      content: (
+        <View className='gap-[24px]'>
+          <Text className='text-[24px] font-[600]' color='grey1_light1'>
+            Friend limit reached
+          </Text>
+          <Text className='' size='md' color='grey1_light1'>
+            Unable to create a new friend. You can either delete an existing one or purchase the Additional AI subscription in the marketplace.
+          </Text>
+          <View className='flex-row gap-[16px]'>
+            <GradientPressable
+              className='w-[150px] h-[48px]'
+              type='dark'
+              onPress={() => {
+                setPopup({ open: false })
+              }}
+            >
+              <Text className='font-[600]' size='md' color='grey1_light2'>
+                Ok
+              </Text>
+            </GradientPressable>
+          </View>
+        </View>
+      ),
+    })
   }
+
+  useEffect(() => {
+    console.log('user: ', user)
+  }, [user])
 
   return (
     <AuthenticatedLayout>

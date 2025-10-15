@@ -21,6 +21,7 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
 
     const isAuthenticated = !!user?.customerId
     const isOnboardingCompleted = !!user?.profile?.username
+    const isSubscribed = user?.profile?.is_subscribed
 
     // Redirecting to onboarding if profile is not setup
     if (pathname !== '/onboarding' && isAuthenticated && !isOnboardingCompleted) {
@@ -37,6 +38,12 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
     // Redirecting to login page if not authenticated
     if (pathname !== '/' && !isAuthenticated) {
       setTimeout(() => router.push('/'), 0)
+      return
+    }
+
+    // Redirecting to /profile if free trial has ended
+    if (pathname === '/friend/new' && !isSubscribed) {
+      setTimeout(() => router.push('/profile'), 0)
       return
     }
   }, [pathname, user])
