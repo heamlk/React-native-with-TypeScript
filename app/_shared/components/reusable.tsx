@@ -379,7 +379,7 @@ export function GradientPressable({ type, style, combinedStyle, gradientClassnam
         style={[styles[type]['gradient']]}
       />
 
-      {isPressable ? (
+      {!isPressable ? (
         <RNView {...props} className={clsx('', combinedClassname, className)} style={[{}, combinedStyle, styles[type]['normal'], style as ViewStyle]}>
           {props?.children as any}
         </RNView>

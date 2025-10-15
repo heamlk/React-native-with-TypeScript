@@ -127,7 +127,7 @@ export default function Marketplace() {
                                 {product?.status === 'available' ? (
                                   <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type='primary'>
                                     <Text className='font-[600] text-light1' size='sm'>
-                                      {product?.price}/Month
+                                      ${product?.price}/Month
                                     </Text>
                                   </GradientPressable>
                                 ) : (
@@ -205,7 +205,7 @@ export default function Marketplace() {
                                 {product?.status === 'available' ? (
                                   <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type='primary'>
                                     <Text className='font-[600] text-light1' size='sm'>
-                                      {product?.price}/Month
+                                      ${product?.price}
                                     </Text>
                                   </GradientPressable>
                                 ) : (

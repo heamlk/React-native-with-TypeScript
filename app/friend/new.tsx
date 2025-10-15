@@ -234,7 +234,7 @@ export default function NewFriendPage() {
   const GetSelectedAttribute = ({ attribute, def }: { attribute: string; def: string }) => {
     const selectedAttribute = availableAttributes?.[attribute]?.find((att: any) => att?.key === selectedAttributes?.[attribute])?.value || selectedAttributes?.[attribute] || ''
     return breakpoints === 'phone' ? (
-      <GradientPressable type='dark'>
+      <GradientPressable type='dark' isPressable={false}>
         <Text className='base:text-[20px] phone:text-[24px]' color='light1_light2'>
           {selectedAttribute || def}
         </Text>
