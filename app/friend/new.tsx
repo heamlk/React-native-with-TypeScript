@@ -12,6 +12,7 @@ import { findNodeHandle, type GestureResponderEvent, UIManager, Platform } from 
 import { useAuth, UserType } from '../_context/auth'
 import { useApi } from '../_context/api'
 import { capitalize, getRandomNumber } from '../_lib/utils'
+import IconDices from '@/app/_assets/icons/dices.svg'
 
 export type SelcetInputType = {
   open: boolean
@@ -439,8 +440,28 @@ export default function NewFriendPage() {
             ) : (
               <></>
             )}
+
+            {breakpoints === 'phone' ? (
+              <View className='px-[35px]'>
+                <GradientPressable className='w-[100%] h-[70px]' type='primary' onPress={handleGo}>
+                  <Text className='font-[600]' size='md' color='light1_light2'>
+                    Go
+                  </Text>
+                </GradientPressable>
+              </View>
+            ) : (
+              <></>
+            )}
           </View>
           {/* Form - END */}
+
+          {breakpoints === 'phone' ? (
+            <Pressable className='w-[48px] h-[48px] bg-dark2/60 items-center justify-center rounded-[20px] absolute top-[24px] right-[24px]' onPress={handleRandomize}>
+              <IconDices fill={'red'} />
+            </Pressable>
+          ) : (
+            <></>
+          )}
         </View>
       </View>
     </AuthenticatedLayout>
