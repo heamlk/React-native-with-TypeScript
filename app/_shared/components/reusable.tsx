@@ -12,7 +12,26 @@ import { borderRadiusNative } from '@/app/_styles/theme/borderRadius'
 // Background
 export type GetThemeBackgroundProps = {
   theme: ThemeType
-  background: 'primary' | 'primaryAuthenticated' | 'transparent' | 'input' | 'input2' | 'button' | 'buttonOutline' | 'grey5_dark2' | 'grey5_dark3' | 'grey5_dark5' | 'grey6_transparent' | 'grey6_dark6' | 'grey6_dark7' | 'grey3_dark1' | 'grey3_purple3' | 'grey6_dark1' | 'grey5_purple2/40'
+  background:
+    | 'primary'
+    | 'primaryAuthenticated'
+    | 'transparent'
+    | 'input'
+    | 'input2'
+    | 'button'
+    | 'buttonOutline'
+    | 'light1_dark1'
+    | 'light1_dark2'
+    | 'grey5_dark2'
+    | 'grey5_dark3'
+    | 'grey5_dark5'
+    | 'grey6_transparent'
+    | 'grey6_dark6'
+    | 'grey6_dark7'
+    | 'grey3_dark1'
+    | 'grey3_purple3'
+    | 'grey6_dark1'
+    | 'grey5_purple2/40'
   breakpoints: BreakpointsType
 }
 
@@ -25,6 +44,8 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
     button: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.purple1,
     buttonOutline: theme === 'light' ? themeVars.colors.grey5 : 'transparent',
 
+    light1_dark1: theme === 'light' ? themeVars.colors.light1 : themeVars.colors.dark1,
+    light1_dark2: theme === 'light' ? themeVars.colors.light1 : themeVars.colors.dark2,
     grey3_dark1: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.dark1,
     grey3_purple3: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.purple3,
     grey5_dark2: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark2,

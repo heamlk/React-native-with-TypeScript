@@ -37,9 +37,11 @@ export default function Layout({ children }: { children: ReactNode }) {
     },
   })
 
+  const backgroud = breakpoints === 'phone' ? getThemeBackground({ theme, breakpoints, background: 'light1_dark1' }) : getThemeBackground({ theme, breakpoints, background: 'light1_dark2' })
+
   return (
     <div className='overflow-y-auto scrollbar-hide' style={{ width: dimentions.deviceWidth, height: dimentions.deviceHeight }}>
-      <div className='w-[100%] h-[fit-content] min-h-[100%] flex' style={{ ...styles.root, backgroundColor: user?.customerId ? getThemeBackground({ theme, breakpoints, background: 'primaryAuthenticated' }) : getThemeBackground({ theme, breakpoints, background: 'primary' }) }}>
+      <div className='w-[100%] h-[fit-content] min-h-[100%] flex' style={{ ...styles.root, backgroundColor: backgroud }}>
         {children}
       </div>
     </div>
