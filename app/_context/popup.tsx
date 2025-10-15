@@ -9,7 +9,8 @@ import themeVars from '../_styles/theme/themeVars'
 
 export type PopupType = {
   open: boolean
-  content: JSX.Element
+  maxWidth?: number
+  content?: JSX.Element
 }
 
 export type PopupContextType = {
@@ -25,22 +26,23 @@ export default function PopupProvider({ children }: PopupProviderProps) {
 
   const [popup, setPopup] = useState<PopupType>({
     open: false,
+    maxWidth: 800,
     content: <></>,
   })
 
   const Popup = () => {
     return (
-      <BlurView className='w-full h-full fixed z-[9999999] top-[0] left-[0] items-center justify-center p-[30]' style={popup.open ? { display: 'flex' } : { display: 'none' }}>
-        <View className='base:w-[100%] tablet:w-[800px] h-fit max-h-full border-[1px] border-dark3 rounded-lg p-[50] relative' background='grey6_dark6'>
+      <BlurView className='w-full h-full fixed z-[9999999] top-[0px] left-[0px] items-center justify-center p-[30px]' style={popup.open ? { display: 'flex' } : { display: 'none' }}>
+        <View className='base:w-[100%] h-fit max-h-full border-[1px] border-dark3 rounded-lg p-[32px] relative' background='grey6_dark6' style={{ maxWidth: popup?.maxWidth || 800 }}>
           <Pressable
-            className='absolute right-[20] top-[20]'
+            className='absolute right-[20px] top-[20px]'
             onPress={() => {
               setPopup((prev) => ({ ...prev, open: false }))
             }}
           >
             <IconClose width={24} height={24} color={theme === 'light' ? themeVars.colors.black : themeVars.colors.white} />
           </Pressable>
-          <View className='w-full h-fit max-h-full overflow-y-auto'>{popup?.content}</View>
+          <View className='w-full h-fit max-h-full overflow-y-auto'>{popup?.content || <></>}</View>
         </View>
       </BlurView>
     )

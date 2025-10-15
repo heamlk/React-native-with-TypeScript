@@ -1,5 +1,5 @@
 import useDimensions from '@/app/_hooks/dimensions'
-import { View, Pressable, GradientPressable, getThemeBorder } from '@/app/_shared/components/reusable'
+import { View, Pressable, GradientPressable, getThemeBorder, Text } from '@/app/_shared/components/reusable'
 import IconLogo from '@/app/_assets/icons/bfflLogo'
 import ThemeToggle from '@/app/_shared/components/themeToggle'
 
@@ -17,6 +17,7 @@ import useBreakpoints from '@/app/_hooks/breakpoints'
 import { type Dispatch, type ReactNode, type SetStateAction, useRef } from 'react'
 import { Animated } from 'react-native'
 import IconMenu from '@/app/_assets/icons/menu.svg'
+import { usePopup } from '@/app/_context/popup'
 
 export type AuthenticatedLayoutProps = {
   children: ReactNode
@@ -32,6 +33,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   const dimentions = useDimensions()
   const router = useRouter()
   const breakpoints = useBreakpoints()
+  const popup = usePopup()
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30
@@ -70,6 +72,47 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
       duration: 300,
       useNativeDriver: false,
     }).start()
+  }
+
+  const handleSidebarLinkPress = ({ url }: { url: string }) => {
+    if (pathname === '/friend/new') {
+      popup.setPopup({
+        open: true,
+        maxWidth: 500,
+        content: (
+          <View className='gap-[24px]'>
+            <Text className='text-[24px] font-[600]' color='grey1_light1'>
+              Are you sure?
+            </Text>
+            <Text className='' size='md' color='grey1_light1'>
+              You have unsaved changes. Are you sure you want to leave this page?
+            </Text>
+            <View className='flex-row gap-[16px]'>
+              <GradientPressable
+                className='w-[150px] h-[48px]'
+                type='dark'
+                onPress={() => {
+                  popup.setPopup({ open: false })
+                  router.navigate(url as any)
+                }}
+              >
+                <Text className='font-[600]' size='md' color='grey1_light2'>
+                  Ok
+                </Text>
+              </GradientPressable>
+              <GradientPressable className='w-[150px] h-[48px]' type='dark' onPress={() => popup.setPopup({ open: false })}>
+                <Text className='font-[600]' size='md' color='grey1_light2'>
+                  Cancel
+                </Text>
+              </GradientPressable>
+            </View>
+          </View>
+        ),
+      })
+      return
+    }
+
+    router.navigate(url as any)
   }
 
   return (
@@ -119,7 +162,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
                     gradientClassname='w-[48px] max-x-[48px] h-[48px] max-h-[48px] rounded-[20px]'
                     type={isSelected ? 'primary' : 'extraDark'}
                     onPress={() => {
-                      router.navigate(page.href as any)
+                      handleSidebarLinkPress({ url: page.href })
                     }}
                   >
                     {isSelected ? page?.iconSelected : page?.icon}
