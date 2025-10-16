@@ -9,13 +9,13 @@ import { useTheme } from '../_context/theme'
 import * as ImagePicker from 'expo-image-picker'
 import useBreakpoints from '../_hooks/breakpoints'
 import { Controller, useForm } from 'react-hook-form'
-import { useAuth, UserType } from '../_context/auth'
 import { useApi } from '../_context/api'
 import { useRouter } from 'expo-router'
+import { useUser, type UserType } from '../_context/user'
 
 export default function EditProfilePage() {
   const { theme } = useTheme()
-  const { user, setUser } = useAuth()
+  const { user, setUser } = useUser()
   const router = useRouter()
   const breakpoints = useBreakpoints()
   const api = useApi()

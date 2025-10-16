@@ -5,16 +5,16 @@ import themeVars from '@/app/_styles/theme/themeVars'
 import IconCopy from '@/app/_assets/icons/copy'
 import Terms from '../_shared/policy/terms'
 import { usePopup } from '../_context/popup'
-import { useAuth } from '../_context/auth'
 import { useEffect, useState } from 'react'
 import { useApi } from '../_context/api'
 import type { ReferralInfo } from '../_context/auth.types'
 import * as Clipboard from 'expo-clipboard'
+import { useUser } from '../_context/user'
 
 export default function ReferralPage() {
   const { theme } = useTheme()
   const { setPopup } = usePopup()
-  const { user } = useAuth()
+  const { user } = useUser()
   const api = useApi()
 
   const [referralInfo, setReferralInfo] = useState<null | ReferralInfo>(null)

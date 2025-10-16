@@ -9,10 +9,10 @@ import useBreakpoints from '../_hooks/breakpoints'
 import { useEffect, useState } from 'react'
 import themeVars from '../_styles/theme/themeVars'
 import { findNodeHandle, type GestureResponderEvent, UIManager, Platform } from 'react-native'
-import { useAuth, UserType } from '../_context/auth'
 import { useApi } from '../_context/api'
 import { capitalize, getRandomNumber } from '../_lib/utils'
 import IconDices from '@/app/_assets/icons/dices.svg'
+import { useUser, UserType } from '../_context/user'
 
 export type SelcetInputType = {
   open: boolean
@@ -48,7 +48,7 @@ export default function NewFriendPage() {
   const dimentions = useDimensions()
   const router = useRouter()
   const breakpoints = useBreakpoints()
-  const { user, setUser } = useAuth()
+  const { user, setUser } = useUser()
   const api = useApi()
 
   const [blurActive, setBlurActive] = useState(false)

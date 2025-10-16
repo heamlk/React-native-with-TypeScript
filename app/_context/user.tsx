@@ -1,0 +1,126 @@
+import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext, useEffect, useState } from 'react'
+import storage from '@/app/_shared/storage/storage'
+import { useRouter } from 'expo-router'
+import { useApi } from './api'
+import type { CompanionAttributes, CompanionInfos, CustomerProfile, MarketplaceProduct, SubscriptionOption } from './auth.types'
+
+export type UserContextType = {
+  user: UserType | null
+  setUser: Dispatch<SetStateAction<UserType | null>>
+  getSubscriptionOption: ({ subscriptionId }: { subscriptionId: string }) => SubscriptionOption | undefined
+  isSubscriptionOptionActive: ({ subscriptionId }: { subscriptionId: string }) => boolean
+  hasAdditionalAISubscription: () => boolean
+  friendLimitReached: () => boolean
+  friendLimitReachedDialog: () => string
+  isPurchaseActive: ({ purchaseId }: { purchaseId: string }) => boolean
+}
+export type UserProviderProps = { children: ReactNode }
+
+const UserContext = createContext<UserContextType | null>(null)
+
+export type UserType = {
+  customerId: string
+  companions: CompanionInfos[]
+  activeCompanion?: string
+  profile: CustomerProfile
+  products: MarketplaceProduct[]
+  interests: Record<string, string>
+  lifetimeInfo?: {
+    left: number
+    price: number
+    tier: number
+  }
+  companionAttributes?: CompanionAttributes
+}
+
+export const getStoredUser = (): UserType | null => {
+  const data = storage.getString('user')
+
+  try {
+    const parsedData = JSON.parse(data as any)
+    if (parsedData?.customerId) {
+      return parsedData
+    }
+
+    return null
+  } catch (error) {
+    console.warn(error)
+    return null
+  }
+}
+
+export default function UserProvider({ children }: UserProviderProps) {
+  const router = useRouter()
+  const api = useApi()
+  const descopeProjectId = process.env.EXPO_PUBLIC_DESCOPE_PROJECT_ID!
+
+  const [user, setUser] = useState<UserType | null>(null)
+
+  const getSubscriptionOption = ({ subscriptionId }: { subscriptionId: string }) => {
+    return user?.profile?.subscription?.options?.[subscriptionId]
+  }
+
+  const isSubscriptionOptionActive = ({ subscriptionId }: { subscriptionId: string }) => {
+    if (user?.profile?.lifetime_subscription) {
+      const product = user?.products.find((product) => product.id === subscriptionId)
+      if (product?.included_in_lifetime_subscription === true) {
+        return !product.is_nsfw || user?.profile?.is_age_verified
+      }
+    }
+
+    const subscriptionOption = getSubscriptionOption({ subscriptionId })
+    return subscriptionOption?.activeUntil != null && subscriptionOption.activeUntil > new Date()
+  }
+
+  const hasAdditionalAISubscription = () => {
+    return isSubscriptionOptionActive({ subscriptionId: 'additional_ai' })
+  }
+
+  const friendLimitReached = () => {
+    const companionLimit = hasAdditionalAISubscription() ? 3 : 1
+    const canCreateMoreCompanions = (user?.companions.length || 0) < companionLimit
+
+    return canCreateMoreCompanions
+  }
+
+  const friendLimitReachedDialog = () => {
+    return friendLimitReached() ? (hasAdditionalAISubscription() ? 'Unable to create a new friend. Please delete an existing one to proceed.' : 'Unable to create a new friend. You can either delete an existing one or purchase the Additional AI subscription in the marketplace.') : ''
+  }
+
+  const isPurchaseActive = ({ purchaseId }: { purchaseId: string }) => {
+    if (user?.profile?.lifetime_subscription) {
+      const product = user?.products.find((product) => product.id === purchaseId)
+      if (product?.included_in_lifetime_subscription === true) {
+        return !product.is_nsfw || user?.profile?.is_age_verified
+      }
+    }
+    return user?.profile.purchases?.[purchaseId] != null
+  }
+
+  useEffect(() => {
+    const user = getStoredUser()
+    if (user) {
+      setUser(user)
+    }
+  }, [])
+
+  useEffect(() => {
+    console.log('user: ', user)
+    if (!user) {
+      return
+    }
+
+    storage.set('user', JSON.stringify(user))
+    setUser(user)
+  }, [user])
+
+  const value = { user, setUser, getSubscriptionOption, isSubscriptionOptionActive, hasAdditionalAISubscription, friendLimitReached, friendLimitReachedDialog, isPurchaseActive }
+
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>
+}
+
+export const useUser = () => {
+  const context = useContext(UserContext)
+  if (!context) throw new Error("useUser can't be null")
+  return context
+}

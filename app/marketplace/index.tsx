@@ -8,9 +8,9 @@ import useDimensions from '../_hooks/dimensions'
 import useBreakpoints from '../_hooks/breakpoints'
 import { LinearGradient } from 'expo-linear-gradient'
 import themeVars from '../_styles/theme/themeVars'
-import { useAuth } from '../_context/auth'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { MarketplaceProduct } from '../_context/auth.types'
+import { useUser } from '../_context/user'
 
 export default function Marketplace() {
   const { theme } = useTheme()
@@ -18,7 +18,7 @@ export default function Marketplace() {
   const dimentions = useDimensions()
   const router = useRouter()
   const breakpoints = useBreakpoints()
-  const { user } = useAuth()
+  const { user } = useUser()
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30

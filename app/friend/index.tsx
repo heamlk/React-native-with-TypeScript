@@ -11,10 +11,10 @@ import themeVars from '../_styles/theme/themeVars'
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
 import { usePopup } from '../_context/popup'
 import { useEffect } from 'react'
-import { useAuth } from '../_context/auth'
+import { useUser } from '../_context/user'
 
 export default function FriendPage() {
-  const { user } = useAuth()
+  const { user } = useUser()
   const { theme } = useTheme()
   const dimentions = useDimensions()
   const router = useRouter()

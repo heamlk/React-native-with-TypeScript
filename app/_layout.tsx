@@ -9,6 +9,7 @@ import './_styles/global.css'
 import PopupProvider from './_context/popup'
 import ProtectedRoutesProvider from './_context/protectedRoutes'
 import ApiProvider from './_context/api'
+import UserProvider from './_context/user'
 
 export default function RootLayout() {
   return (
@@ -16,17 +17,19 @@ export default function RootLayout() {
       <ThemeProvider>
         <SafeAreaProvider>
           <ApiProvider>
-            <AuthProvider>
-              <ProtectedRoutesProvider>
-                <DeeplinkProvider>
-                  <PopupProvider>
-                    <Layout>
-                      <Slot />
-                    </Layout>
-                  </PopupProvider>
-                </DeeplinkProvider>
-              </ProtectedRoutesProvider>
-            </AuthProvider>
+            <UserProvider>
+              <AuthProvider>
+                <ProtectedRoutesProvider>
+                  <DeeplinkProvider>
+                    <PopupProvider>
+                      <Layout>
+                        <Slot />
+                      </Layout>
+                    </PopupProvider>
+                  </DeeplinkProvider>
+                </ProtectedRoutesProvider>
+              </AuthProvider>
+            </UserProvider>
           </ApiProvider>
         </SafeAreaProvider>
       </ThemeProvider>

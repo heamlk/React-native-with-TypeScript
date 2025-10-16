@@ -12,12 +12,14 @@ import IconBubbles from '@/app/_assets/icons/bubbles.svg'
 import { usePopup } from '../_context/popup'
 import * as Linking from 'expo-linking'
 import OpenSourceLicense from '@/app/_shared/policy/openSourceLicense'
+import { useUser } from '../_context/user'
 
 export default function ProfilePage() {
   const breakpoints = useBreakpoints()
   const router = useRouter()
   const { theme } = useTheme()
-  const { user, logout } = useAuth()
+  const { user } = useUser()
+  const { logout } = useAuth()
   const { setPopup } = usePopup()
 
   const handleEditProfile = () => {

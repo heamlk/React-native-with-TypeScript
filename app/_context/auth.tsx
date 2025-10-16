@@ -1,12 +1,12 @@
 import * as AuthSession from 'expo-auth-session'
 import * as WebBrowser from 'expo-web-browser'
-import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext, useEffect, useState } from 'react'
+import { createContext, type ReactNode, useContext, useEffect } from 'react'
 import axios from 'axios'
 import * as Linking from 'expo-linking'
 import storage from '@/app/_shared/storage/storage'
 import { useRouter } from 'expo-router'
 import { useApi } from './api'
-import type { CompanionAttributes, CompanionInfos, CustomerProfile, MarketplaceProduct } from './auth.types'
+import { getStoredUser, UserType, useUser } from './user'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -17,50 +17,16 @@ export type AuthContextType = {
   otpVerify: ({ email, code }: { email: string; code: string }) => Promise<{ successful: boolean; data: any; error: null } | { successful: boolean; data: null; error: any }>
   authenticate: () => Promise<void>
   logout: () => void
-  user: UserType | null
-  setUser: Dispatch<SetStateAction<UserType | null>>
 }
 export type AuthProviderProps = { children: ReactNode }
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-export type UserType = {
-  customerId: string
-  companions: CompanionInfos[]
-  activeCompanion?: string
-  profile: CustomerProfile
-  products: MarketplaceProduct[]
-  interests: Record<string, string>
-  lifetimeInfo?: {
-    left: number
-    price: number
-    tier: number
-  }
-  companionAttributes?: CompanionAttributes
-}
-
-export const getStoredUser = (): UserType | null => {
-  const data = storage.getString('user')
-
-  try {
-    const parsedData = JSON.parse(data as any)
-    if (parsedData?.customerId) {
-      return parsedData
-    }
-
-    return null
-  } catch (error) {
-    console.warn(error)
-    return null
-  }
-}
-
 export default function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
   const api = useApi()
   const descopeProjectId = process.env.EXPO_PUBLIC_DESCOPE_PROJECT_ID!
-
-  const [user, setUser] = useState<UserType | null>(null)
+  const { user, setUser } = useUser()
 
   const oAuth = async ({ provider }: { provider: 'google' | 'microsoft' }) => {
     axios.post(`https://api.descope.com/v1/auth/oauth/authorize?provider=${provider}&redirectUrl=${encodeURIComponent(AuthSession.makeRedirectUri({ scheme: 'bfflai' }))}`, { customClaims: { userEmail: '{{user.email}}' } }, { headers: { Authorization: `Bearer ${descopeProjectId}` } }).then((res) => {
@@ -166,15 +132,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       setUser(user)
     }
   }, [])
-
-  useEffect(() => {
-    if (!user) {
-      return
-    }
-
-    storage.set('user', JSON.stringify(user))
-    setUser(user)
-  }, [user])
 
   const value = { oAuth, oAuthCodeExchange, otp, otpVerify, authenticate, logout, user, setUser }
 

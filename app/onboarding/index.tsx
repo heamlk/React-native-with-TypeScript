@@ -6,17 +6,17 @@ import IconUser from '@/app/_assets/icons/user'
 import IconPencil from '@/app/_assets/icons/pencil.svg'
 import themeVars from '@/app/_styles/theme/themeVars'
 import { useForm, Controller } from 'react-hook-form'
-import { useEffect, useRef, useState } from 'react'
-import { useAuth, UserType } from '@/app/_context/auth'
+import { useRef, useState } from 'react'
 import { useApi } from '@/app/_context/api'
 import { useRouter } from 'expo-router'
 import * as ImagePicker from 'expo-image-picker'
 import { Platform, Image } from 'react-native'
 import Subscription from '../_shared/components/subscription'
+import { useUser, type UserType } from '../_context/user'
 
 export default function OnboardingPage() {
   const { theme } = useTheme()
-  const { user, setUser } = useAuth()
+  const { user, setUser } = useUser()
   const dimentions = useDimensions()
   const breakpoints = useBreakpoints()
   const api = useApi()

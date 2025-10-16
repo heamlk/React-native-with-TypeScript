@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useEffect, type ReactNode } from 'react'
-import { getStoredUser, useAuth } from './auth'
 export type ProtectedRoutesType = 'light' | 'dark'
 export type ProtectedRoutesContextType = {}
-import { usePathname, useRootNavigationState, useRouter, useSegments } from 'expo-router'
+import { usePathname, useRootNavigationState, useRouter } from 'expo-router'
+import { useUser } from './user'
 
 const ProtectedRoutesContext = createContext<ProtectedRoutesContextType | null>(null)
 
 export default function ProtectedRoutesProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth()
+  const { user } = useUser()
   const value: ProtectedRoutesContextType = {}
   const pathname = usePathname()
   const router = useRouter()
@@ -16,7 +16,6 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
   const authenticatedPaths = ['/friend', '/friend/new', '/profile', '/profile/edit', '/referral', '/subscription', '/marketplace']
 
   useEffect(() => {
-    const user = getStoredUser()
     if (!rootNavigationState?.key) return
 
     const isAuthenticated = !!user?.customerId
