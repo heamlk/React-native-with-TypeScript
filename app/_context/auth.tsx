@@ -166,6 +166,11 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [])
 
+  useEffect(() => {
+    storage.set('user', JSON.stringify(user))
+    setUser(user)
+  }, [user])
+
   const value = { oAuth, oAuthCodeExchange, otp, otpVerify, authenticate, logout, user, setUser }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

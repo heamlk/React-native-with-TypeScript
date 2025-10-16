@@ -131,11 +131,8 @@ export default function OnboardingPage() {
         if (data === 'OK') {
           const [getProfileRes, getLifetimeInfoRes] = await Promise.all([api.getProfile(), api.getLifetimeInfo()])
 
-          setUser((prev) => ({
-            ...(prev as UserType),
-            profile: getProfileRes.data,
-            lifetimeInfo: getLifetimeInfoRes.data,
-          }))
+          const newUser = { ...user, profile: getProfileRes.data?.customer, lifetimeInfo: getLifetimeInfoRes.data } as UserType
+          setUser(newUser)
           setConfirmationError('')
         } else {
           setConfirmationError('An error occurred while setting up your account')
@@ -167,10 +164,8 @@ export default function OnboardingPage() {
     const data = res.data
 
     if (user) {
-      setUser((prev) => ({
-        ...(prev as UserType),
-        companionAttributes: data?.attributes,
-      }))
+      const newUser = { ...user, companionAttributes: data?.attributes }
+      setUser(newUser)
     }
 
     router.push('/friend')
