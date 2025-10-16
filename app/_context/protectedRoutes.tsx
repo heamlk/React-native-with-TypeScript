@@ -7,7 +7,7 @@ import { useUser } from './user'
 const ProtectedRoutesContext = createContext<ProtectedRoutesContextType | null>(null)
 
 export default function ProtectedRoutesProvider({ children }: { children: ReactNode }) {
-  const { user } = useUser()
+  const { user, friendLimitReached } = useUser()
   const value: ProtectedRoutesContextType = {}
   const pathname = usePathname()
   const router = useRouter()
@@ -46,11 +46,11 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
       return
     }
 
-    // // Redirecting to /profile if friend limit have reached
-    // if (pathname === '/friend/new' && !isSubscribed) {
-    //   setTimeout(() => router.push('/profile'), 0)
-    //   return
-    // }
+    // Redirecting to /profile if friend limit have reached
+    if (pathname === '/friend/new' && friendLimitReached()) {
+      setTimeout(() => router.push('/profile'), 0)
+      return
+    }
   }, [pathname, user])
 
   return <ProtectedRoutesContext.Provider value={value}>{children}</ProtectedRoutesContext.Provider>
