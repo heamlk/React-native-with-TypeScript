@@ -13,6 +13,7 @@ export type ApiContextType = {
   getLifetimeInfo: () => Promise<AxiosResponse<any, any, {}>>
   getAvailableAttributes: () => Promise<AxiosResponse<any, any, {}>>
   getReferralInfo: () => Promise<AxiosResponse<any, any, {}>>
+  postCreateCompanion: ({}: { name: string; age: number; gender: string; hair_color: string; hair_length: string; eye_color: string; skin_tone: string; attire: string; universe: string; personality: string; ancestral_region: string }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -119,6 +120,56 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  // {\"name\":\"Jennifer\",\"age\":41,\"gender\":\"female\",\"hair_color\":\"red\",\"hair_length\":\"medium length hair\",\"eye_color\":\"hazel\",\"skin_tone\":\"light\",\"attire\":\"casual\",\"universe\":\"fantasy\",\"personality\":\"anxious\",\"ancestral_region\":\"west asian\"}
+
+  const postCreateCompanion = async ({
+    name,
+    age,
+    gender,
+    hair_color,
+    hair_length,
+    eye_color,
+    skin_tone,
+    attire,
+    universe,
+    personality,
+    ancestral_region,
+  }: {
+    name: string
+    age: number
+    gender: string
+    hair_color: string
+    hair_length: string
+    eye_color: string
+    skin_tone: string
+    attire: string
+    universe: string
+    personality: string
+    ancestral_region: string
+  }) => {
+    return await api.post(
+      'companions/create',
+      {
+        name,
+        age,
+        gender,
+        hair_color,
+        hair_length,
+        eye_color,
+        skin_tone,
+        attire,
+        universe,
+        personality,
+        ancestral_region,
+      },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
   const value = {
     api,
     login,
@@ -130,6 +181,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     getAvailableAttributes,
     getReferralInfo,
     postUpdateProfile,
+    postCreateCompanion,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>

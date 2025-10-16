@@ -46,6 +46,12 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
       setTimeout(() => router.push('/profile'), 0)
       return
     }
+
+    // // Redirecting to /profile if friend limit have reached
+    // if (pathname === '/friend/new' && !isSubscribed) {
+    //   setTimeout(() => router.push('/profile'), 0)
+    //   return
+    // }
   }, [pathname, user])
 
   return <ProtectedRoutesContext.Provider value={value}>{children}</ProtectedRoutesContext.Provider>

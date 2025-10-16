@@ -121,7 +121,7 @@ export default function NewFriendPage() {
     }
   }
 
-  const handleGo = () => {
+  const handleGo = async () => {
     const keyNames: Record<string, string> = {
       age: 'Age',
       ancestral_region: 'Ancestral region',
@@ -140,7 +140,7 @@ export default function NewFriendPage() {
     const errors: string[] = []
 
     Object.entries(availableAttributes)?.map(([key, value]) => {
-      if (['optional_attributes', 'politics', 'hair_color'].includes(key)) return
+      if (['optional_attributes', 'politics'].includes(key)) return
 
       const keyValue = selectedAttributes?.[key]
       if (key === 'name') {
@@ -171,6 +171,29 @@ export default function NewFriendPage() {
     if (errors?.length > 0) {
       return
     }
+
+    console.log('selectedAttributes: ', selectedAttributes)
+
+    try {
+      const createCompanionReq = await api.postCreateCompanion({
+        age: Number(selectedAttributes?.age),
+        ancestral_region: selectedAttributes?.ancestral_region,
+        attire: selectedAttributes?.attire,
+        eye_color: selectedAttributes?.eye_color,
+        gender: selectedAttributes?.gender,
+        hair_color: selectedAttributes?.hair_color,
+        hair_length: selectedAttributes?.hair_length,
+        name: selectedAttributes?.name,
+        personality: selectedAttributes?.personality,
+        skin_tone: selectedAttributes?.skin_tone,
+        universe: selectedAttributes?.universe,
+      })
+      const getProfileReq = await api.getProfile()
+      const newUser = { ...user, profile: getProfileReq.data?.customer, companions: getProfileReq?.data?.companions } as UserType
+      setUser(newUser)
+    } catch (error) {
+      console.warn(error)
+    }
   }
 
   const handleRandomize = () => {
@@ -180,6 +203,7 @@ export default function NewFriendPage() {
 
     const randomUniverse = availableAttributes['universe'][getRandomNumber({ min: 0, max: availableAttributes['universe']?.length - 1 })]?.key
     const randomAge = Math.floor(Math.random() * (100 - 21 + 1)) + 21
+    const randomHairColor = availableAttributes['hair_color'][getRandomNumber({ min: 0, max: availableAttributes['hair_color']?.length - 1 })]?.key
     const randomHairLength = availableAttributes['hair_length'][getRandomNumber({ min: 0, max: availableAttributes['hair_length']?.length - 1 })]?.key
     const randomFacialHair = availableAttributes['facial_hair'][getRandomNumber({ min: 0, max: availableAttributes['facial_hair']?.length - 1 })]?.key
     const randomSkinTone = availableAttributes['skin_tone'][getRandomNumber({ min: 0, max: availableAttributes['skin_tone']?.length - 1 })]?.key
@@ -193,6 +217,7 @@ export default function NewFriendPage() {
       gender: randomGender,
       universe: randomUniverse,
       age: String(randomAge),
+      hair_color: randomHairColor,
       hair_length: randomHairLength,
       facial_hair: randomFacialHair,
       skin_tone: randomSkinTone,
@@ -358,8 +383,16 @@ export default function NewFriendPage() {
 
               <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
                 I have{' '}
+                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'hair_color', type: 'select' })}>
+                  <GetSelectedAttribute attribute='hair_color' def='Color' />
+                </Pressable>{' '}
+                hair.
+              </Text>
+
+              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                I have{' '}
                 <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'hair_length', type: 'select' })}>
-                  <GetSelectedAttribute attribute='hair_length' def='Color Length' />
+                  <GetSelectedAttribute attribute='hair_length' def='Length' />
                 </Pressable>{' '}
                 hair.
               </Text>

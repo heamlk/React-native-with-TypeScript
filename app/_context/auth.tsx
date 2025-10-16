@@ -27,6 +27,7 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export type UserType = {
   customerId: string
   companions: CompanionInfos[]
+  activeCompanion?: string
   profile: CustomerProfile
   products: MarketplaceProduct[]
   interests: Record<string, string>
@@ -167,6 +168,10 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   }, [])
 
   useEffect(() => {
+    if (!user) {
+      return
+    }
+
     storage.set('user', JSON.stringify(user))
     setUser(user)
   }, [user])
