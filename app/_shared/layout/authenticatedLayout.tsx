@@ -75,7 +75,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   }
 
   const handleSidebarLinkPress = ({ url }: { url: string }) => {
-    if (pathname === '/friend/new') {
+    if (pathname.includes('/friend/edit')) {
       popup.setPopup({
         open: true,
         maxWidth: 600,

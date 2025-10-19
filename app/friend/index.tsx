@@ -57,7 +57,7 @@ export default function FriendPage() {
 
     const isSubscribed = user?.profile?.is_subscribed
     if (isSubscribed) {
-      router.push('/friend/new')
+      router.push('/friend/edit/new')
       return
     }
   }

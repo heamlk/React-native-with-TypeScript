@@ -1,19 +1,19 @@
 import { GradientPressable, Pressable, Text, TextInput, View } from '@/app/_shared/components/reusable'
 import Soul from '@/app/_shared/components/Soul'
-import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
+import AuthenticatedLayout from '@/app/_shared/layout/authenticatedLayout'
 import { BlurView } from 'expo-blur'
-import { useTheme } from '../_context/theme'
-import { usePathname, useRouter } from 'expo-router'
-import useDimensions from '../_hooks/dimensions'
-import useBreakpoints from '../_hooks/breakpoints'
+import { useTheme } from '@/app/_context/theme'
+import { useLocalSearchParams, usePathname, useRouter } from 'expo-router'
+import useDimensions from '@/app/_hooks/dimensions'
+import useBreakpoints from '@/app/_hooks/breakpoints'
 import { useEffect, useState } from 'react'
-import themeVars from '../_styles/theme/themeVars'
+import themeVars from '@/app/_styles/theme/themeVars'
 import { findNodeHandle, type GestureResponderEvent, UIManager, Platform } from 'react-native'
-import { useApi } from '../_context/api'
-import { capitalize, getRandomNumber } from '../_lib/utils'
+import { useApi } from '@/app/_context/api'
+import { capitalize, getRandomNumber } from '@/app/_lib/utils'
 import IconDices from '@/app/_assets/icons/dices.svg'
-import { useUser, UserType } from '../_context/user'
-import { CompanionAttributes, CompanionInfos } from '../_context/auth.types'
+import { useUser, UserType } from '@/app/_context/user'
+import { CompanionAttributes, CompanionInfos } from '@/app/_context/auth.types'
 
 export type SelcetInputType = {
   open: boolean
@@ -44,6 +44,9 @@ export const defaultSelcetInput: SelcetInputType = {
 export const asd = {}
 
 export default function NewFriendPage() {
+  const params = useLocalSearchParams<{ friendId: string }>()
+  const userId = params.friendId
+
   const { theme } = useTheme()
   const pathname = usePathname()
   const dimentions = useDimensions()
