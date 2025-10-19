@@ -261,7 +261,10 @@ export default function NewFriendPage() {
   }, [])
 
   useEffect(() => {
-    const onCompanionUpdateEvent: any = ({ companion }: { companion: CompanionInfos }) => {
+    const onCompanionUpdateEvent: any = async ({ companion }: { companion: CompanionInfos }) => {
+      const [getProfileRes, getLifetimeInfoRes] = await Promise.all([api.getProfile(), api.getLifetimeInfo()])
+      setUser((prev) => ({ ...(prev as any), profile: getProfileRes?.data?.customer, lifetimeInfo: getLifetimeInfoRes?.data }))
+
       router.push(`/friend/${companion?.id}`)
       setSocketEvent('')
     }

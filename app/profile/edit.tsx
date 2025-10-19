@@ -140,7 +140,7 @@ export default function EditProfilePage() {
         const [getProfileRes, getLifetimeInfoRes] = await Promise.all([api.getProfile(), api.getLifetimeInfo()])
 
         clearErrors()
-        setUser((prev) => ({ ...(prev as any), profile: getProfileRes?.data?.customer }))
+        setUser((prev) => ({ ...(prev as any), profile: getProfileRes?.data?.customer, lifetimeInfo: getLifetimeInfoRes?.data }))
         router.push('/profile')
         setConfirmationError('')
       } else {

@@ -24,12 +24,6 @@ export default function FriendPage() {
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30
 
   const onCreateFriend = () => {
-    const isSubscribed = user?.profile?.is_subscribed
-    if (isSubscribed) {
-      router.push('/friend/new')
-      return
-    }
-
     if (friendLimitReached()) {
       setPopup({
         open: true,
@@ -58,6 +52,13 @@ export default function FriendPage() {
           </View>
         ),
       })
+      return
+    }
+
+    const isSubscribed = user?.profile?.is_subscribed
+    if (isSubscribed) {
+      router.push('/friend/new')
+      return
     }
   }
 
