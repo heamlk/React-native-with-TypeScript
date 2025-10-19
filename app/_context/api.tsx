@@ -59,6 +59,7 @@ export type ApiContextType = {
     companionId: string
   }) => Promise<AxiosResponse<any, any, {}>>
   deleteCompanion: ({ id }: { id: string }) => Promise<AxiosResponse<any, any, {}>>
+  postRegenerateCompanionPicture: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -275,6 +276,14 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  const postRegenerateCompanionPicture = async ({ companionId }: { companionId: string }) => {
+    return await api.post(`companions/${companionId}/regenerate-profile-picture`, null, {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
+
   const deleteCompanion = async ({ id }: { id: string }) => {
     return await api.delete(`companions/${id}`, {
       headers: {
@@ -320,6 +329,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     postCreateCompanion,
     postEditCompanion,
     deleteCompanion,
+    postRegenerateCompanionPicture,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>

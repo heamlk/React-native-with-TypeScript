@@ -32,6 +32,8 @@ export type GetThemeBackgroundProps = {
     | 'grey3_purple3'
     | 'grey6_dark1'
     | 'grey5_purple2/40'
+    | 'dark6/30'
+    | 'grey6/40_dark6/40'
     | 'transparent_dark1'
   breakpoints: BreakpointsType
 }
@@ -56,7 +58,9 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
     grey6_dark6: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark6,
     grey6_dark7: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7,
     grey6_transparent: theme === 'light' ? themeVars.colors.grey6 : 'none',
+    'dark6/30': themeVars.colors.dark6 + themeVars.colors.opacity30,
     'grey5_purple2/40': theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.purple2 + themeVars.colors.opacity40,
+    'grey6/40_dark6/40': theme === 'light' ? themeVars.colors.grey6 + themeVars.colors.opacity40 : themeVars.colors.dark6 + themeVars.colors.opacity40,
     transparent_dark1: theme === 'light' ? 'transparent' : themeVars.colors.dark1,
     transparent: 'transparent',
   }
@@ -115,6 +119,7 @@ export type GetThemeColorProps = {
     | 'yellow1_purple3'
     | 'light1_light2'
     | 'light1_light3'
+    | 'grey2_light3/50'
     | 'red1'
 }
 
@@ -140,6 +145,7 @@ export const getThemeColor = ({ theme, color }: GetThemeColorProps) => {
     yellow1_purple3: theme === 'light' ? themeVars.colors.yellow1 : themeVars.colors.purple3,
     light1_light2: theme === 'light' ? themeVars.colors.light1 : themeVars.colors.light2,
     light1_light3: theme === 'light' ? themeVars.colors.light1 : themeVars.colors.light3,
+    'grey2_light3/50': theme === 'light' ? themeVars.colors.grey2 : themeVars.colors.light3 + themeVars.colors.opacity50,
     red1: theme === 'light' ? themeVars.colors.red1 : themeVars.colors.red1,
   }
 

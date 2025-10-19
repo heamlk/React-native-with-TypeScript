@@ -3,7 +3,7 @@ import Soul from '@/app/_shared/components/Soul'
 import AuthenticatedLayout from '@/app/_shared/layout/authenticatedLayout'
 import { BlurView } from 'expo-blur'
 import { useTheme } from '@/app/_context/theme'
-import { useLocalSearchParams, usePathname, useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import useDimensions from '@/app/_hooks/dimensions'
 import useBreakpoints from '@/app/_hooks/breakpoints'
 import { useEffect, useState } from 'react'
@@ -51,7 +51,6 @@ export default function NewFriendPage() {
   const friendId = params.friendId
 
   const { theme } = useTheme()
-  const pathname = usePathname()
   const dimentions = useDimensions()
   const router = useRouter()
   const breakpoints = useBreakpoints()
@@ -383,7 +382,6 @@ export default function NewFriendPage() {
   useEffect(() => {
     if (friendId && friendId !== 'new') {
       const activeCompanion = user?.companions?.find((companion) => companion?.id === friendId)
-      console.log('activeCompanion: ', activeCompanion)
       if (activeCompanion) {
         setUser((prev) => ({ ...(prev as UserType), activeCompanion: activeCompanion }))
         setSelectedAttributes({
@@ -478,7 +476,7 @@ export default function NewFriendPage() {
           </Text>
           <View className='base:flex-col tablet:flex-row justify-center base:items-center base:gap-[30px] tablet:gap-[90px]'>
             {/* Soul */}
-            <View className='base:w-[100%] phone:w-[unset] tablet:min-w-[300px] desktop:min-w-[500px] base:h-[300px] desktop:h-[500px] items-center justify-center rounded-md' background={breakpoints === 'phone' ? 'transparent' : 'grey3_dark1'}>
+            <View className='base:w-[100%] phone:w-[unset] tablet:min-w-[300px] desktop:min-w-[500px] base:h-[300px] tablet:h-[500px] items-center justify-center rounded-md' background={breakpoints === 'phone' ? 'transparent' : 'grey3_dark1'}>
               {user?.activeCompanion?.profile_picture?.image ? (
                 <Image
                   source={{ uri: user?.activeCompanion?.profile_picture?.image }}
