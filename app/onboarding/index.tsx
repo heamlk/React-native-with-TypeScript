@@ -6,7 +6,7 @@ import IconUser from '@/app/_assets/icons/user'
 import IconPencil from '@/app/_assets/icons/pencil.svg'
 import themeVars from '@/app/_styles/theme/themeVars'
 import { useForm, Controller } from 'react-hook-form'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useApi } from '@/app/_context/api'
 import { useRouter } from 'expo-router'
 import * as ImagePicker from 'expo-image-picker'
@@ -21,6 +21,8 @@ export default function OnboardingPage() {
   const breakpoints = useBreakpoints()
   const api = useApi()
   const router = useRouter()
+
+  const [allowOnboarding, setAllowOnboarding] = useState(false)
 
   const [currentStep, setCurrentStep] = useState(0)
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
@@ -169,6 +171,18 @@ export default function OnboardingPage() {
     }
 
     router.push('/friend')
+  }
+
+  const isOnboardingCompleted = !!user?.profile?.username
+
+  useEffect(() => {
+    if (!isOnboardingCompleted) {
+      setAllowOnboarding(true)
+    }
+  }, [])
+
+  if (!allowOnboarding) {
+    return <View></View>
   }
 
   return (
