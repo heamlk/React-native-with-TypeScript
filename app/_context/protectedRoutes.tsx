@@ -28,7 +28,13 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
       return
     }
 
-    // Redirecting to main page if user is authenticated and profile is setup
+    // Redirect to main page if authenticated, profile set, and on login page
+    if (!authenticatedPaths.includes(pathname) && pathname !== '/onboarding' && pathname === '/' && isAuthenticated && isOnboardingCompleted) {
+      setTimeout(() => router.push('/friend'), 0)
+      return
+    }
+
+    // Redirect to profile page if authenticated, profile set, and on an incorrect page
     if (!authenticatedPaths.includes(pathname) && pathname !== '/onboarding' && isAuthenticated && isOnboardingCompleted) {
       setTimeout(() => router.push('/profile'), 0)
       return

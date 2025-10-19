@@ -54,7 +54,7 @@ export default function UserProvider({ children }: UserProviderProps) {
   const api = useApi()
   const descopeProjectId = process.env.EXPO_PUBLIC_DESCOPE_PROJECT_ID!
 
-  const [user, setUser] = useState<UserType | null>(null)
+  const [user, setUser] = useState<UserType | null>(getStoredUser())
 
   const getSubscriptionOption = ({ subscriptionId }: { subscriptionId: string }) => {
     return user?.profile?.subscription?.options?.[subscriptionId]
@@ -112,6 +112,19 @@ export default function UserProvider({ children }: UserProviderProps) {
     storage.set('user', JSON.stringify(user))
     setUser(user)
   }, [user])
+
+  useEffect(() => {
+    const handler = ({ customer }: any) => {
+      console.log('Socket event (customer_update): ', customer)
+      // api.socketState?.customer = parseCustomerProfile(rawCustomer)
+    }
+
+    api.socketState?.on('customer_update', handler)
+
+    return () => {
+      api.socketState?.off('customer_update', handler)
+    }
+  }, [])
 
   const value = { user, setUser, getSubscriptionOption, isSubscriptionOptionActive, hasAdditionalAISubscription, friendLimitReached, friendLimitReachedDialog, isPurchaseActive }
 
