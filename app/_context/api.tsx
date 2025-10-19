@@ -1,13 +1,24 @@
 import React, { createContext, Dispatch, SetStateAction, useContext, useEffect, useState, type ReactNode } from 'react'
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios'
 import storage from '../_shared/storage/storage'
-import DefaultEventsMap, { io, Socket } from 'socket.io-client'
-import { CompanionInfos } from './auth.types'
+import { io, Socket } from 'socket.io-client'
+import type { ChatMessage, CompanionInfos } from './auth.types'
+
+export interface ServerToClientEvents {
+  new_chat_message: (eventData: { companion_id: string; message: ChatMessage; local_message_id?: string; audio?: Uint8Array }) => void
+  companion_is_typing: (eventData: { companion_id: string; is_typing: boolean }) => void
+  companion_update: (eventData: { companion: CompanionInfos }) => void
+  companion_edit_error: () => void
+  companion_deletion: (eventData: { companion_id: string }) => void
+  companion_media_update: (eventData: { companion_id: string; images: any[] }) => void
+  companion_emotion: (eventData: { companion_id: string; emotion: string }) => void
+  customer_update: (eventData: { customer: any }) => void
+}
 
 export type ApiContextType = {
   api: AxiosInstance
-  socketState: Socket<AppSocketEvents> | null
-  setSocketState: Dispatch<SetStateAction<Socket<typeof DefaultEventsMap, typeof DefaultEventsMap> | null>>
+  socketState: Socket<ServerToClientEvents> | null
+  setSocketState: Dispatch<SetStateAction<Socket<ServerToClientEvents> | null>>
   login: () => Promise<AxiosResponse<any, any, {}>>
   getProfile: () => Promise<AxiosResponse<any, any, {}>>
   getProducts: () => Promise<AxiosResponse<any, any, {}>>
@@ -22,12 +33,8 @@ export type ApiContextType = {
 
 const ApiContext = createContext<ApiContextType | null>(null)
 
-export interface AppSocketEvents {
-  companion_update: { companion: CompanionInfos }
-}
-
 export default function ApiProvider({ children }: { children: ReactNode }) {
-  const [socketState, setSocketState] = useState<Socket<AppSocketEvents> | null>(null)
+  const [socketState, setSocketState] = useState<Socket<ServerToClientEvents> | null>(null)
 
   const api: AxiosInstance = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,

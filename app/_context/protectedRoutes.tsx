@@ -15,6 +15,10 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
 
   const authenticatedPaths = ['/friend', '/friend/new', '/profile', '/profile/edit', '/referral', '/subscription', '/marketplace']
 
+  const isPathAuthenticated = (pathname: string) => {
+    return authenticatedPaths.some((path) => pathname === path || pathname.startsWith('/friend/')) // match /friend/${companionId}
+  }
+
   useEffect(() => {
     if (!rootNavigationState?.key) return
 
@@ -29,13 +33,13 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
     }
 
     // Redirect to main page if authenticated, profile set, and on login page
-    if (!authenticatedPaths.includes(pathname) && pathname !== '/onboarding' && pathname === '/' && isAuthenticated && isOnboardingCompleted) {
+    if (!isPathAuthenticated(pathname) && pathname !== '/onboarding' && pathname === '/' && isAuthenticated && isOnboardingCompleted) {
       setTimeout(() => router.push('/friend'), 0)
       return
     }
 
     // Redirect to profile page if authenticated, profile set, and on an incorrect page
-    if (!authenticatedPaths.includes(pathname) && pathname !== '/onboarding' && isAuthenticated && isOnboardingCompleted) {
+    if (!isPathAuthenticated(pathname) && pathname !== '/onboarding' && isAuthenticated && isOnboardingCompleted) {
       setTimeout(() => router.push('/profile'), 0)
       return
     }
