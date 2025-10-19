@@ -8,12 +8,15 @@ import useDimensions from '@/app/_hooks/dimensions'
 import useBreakpoints from '@/app/_hooks/breakpoints'
 import { useEffect, useState } from 'react'
 import themeVars from '@/app/_styles/theme/themeVars'
-import { findNodeHandle, type GestureResponderEvent, UIManager, Platform } from 'react-native'
+import { findNodeHandle, type GestureResponderEvent, UIManager, Platform, Image } from 'react-native'
 import { useApi } from '@/app/_context/api'
 import { capitalize, getRandomNumber } from '@/app/_lib/utils'
 import IconDices from '@/app/_assets/icons/dices.svg'
+import IconTrash from '@/app/_assets/icons/trash.svg'
 import { useUser, UserType } from '@/app/_context/user'
 import { CompanionAttributes, CompanionInfos } from '@/app/_context/auth.types'
+import { usePopup } from '@/app/_context/popup'
+import { LinearGradient } from 'expo-linear-gradient'
 
 export type SelcetInputType = {
   open: boolean
@@ -45,15 +48,16 @@ export const asd = {}
 
 export default function NewFriendPage() {
   const params = useLocalSearchParams<{ friendId: string }>()
-  const userId = params.friendId
+  const friendId = params.friendId
 
   const { theme } = useTheme()
   const pathname = usePathname()
   const dimentions = useDimensions()
   const router = useRouter()
   const breakpoints = useBreakpoints()
-  const { user, setUser } = useUser()
+  const { user, setUser, updateUser } = useUser()
   const api = useApi()
+  const { setPopup } = usePopup()
 
   const [socketEvent, setSocketEvent] = useState('')
 
@@ -178,27 +182,57 @@ export default function NewFriendPage() {
       return
     }
 
-    try {
-      setSocketEvent('Creating friend...')
-      const createCompanionReq = await api.postCreateCompanion({
-        age: Number(selectedAttributes?.age),
-        ancestral_region: selectedAttributes?.ancestral_region,
-        attire: selectedAttributes?.attire,
-        eye_color: selectedAttributes?.eye_color,
-        gender: selectedAttributes?.gender,
-        hair_color: selectedAttributes?.hair_color,
-        hair_length: selectedAttributes?.hair_length,
-        name: selectedAttributes?.name,
-        personality: selectedAttributes?.personality,
-        skin_tone: selectedAttributes?.skin_tone,
-        universe: selectedAttributes?.universe,
-      })
-      const getProfileReq = await api.getProfile()
-      const newUser = { ...user, profile: getProfileReq.data?.customer, companions: getProfileReq?.data?.companions } as UserType
-      setUser(newUser)
-    } catch (error) {
-      setSocketEvent('')
-      console.warn(error)
+    if (user?.activeCompanion?.id) {
+      // Updating companion
+      try {
+        setSocketEvent('Editing friend...')
+        const updateCompanionReq = await api.postEditCompanion({
+          age: Number(selectedAttributes?.age),
+          ancestral_region: selectedAttributes?.ancestral_region,
+          attire: selectedAttributes?.attire,
+          eye_color: selectedAttributes?.eye_color,
+          gender: selectedAttributes?.gender,
+          hair_color: selectedAttributes?.hair_color,
+          hair_length: selectedAttributes?.hair_length,
+          facial_hair: selectedAttributes?.facial_hair,
+          name: selectedAttributes?.name,
+          personality: selectedAttributes?.personality,
+          skin_tone: selectedAttributes?.skin_tone,
+          universe: selectedAttributes?.universe,
+          companionId: user?.activeCompanion?.id,
+        })
+        const getProfileReq = await api.getProfile()
+        const newUser = { ...user, profile: getProfileReq.data?.customer, companions: getProfileReq?.data?.companions } as UserType
+        setUser(newUser)
+      } catch (error) {
+        setSocketEvent('')
+        console.warn(error)
+      }
+    } else {
+      // Creating companion
+      try {
+        setSocketEvent('Creating friend...')
+        const createCompanionReq = await api.postCreateCompanion({
+          age: Number(selectedAttributes?.age),
+          ancestral_region: selectedAttributes?.ancestral_region,
+          attire: selectedAttributes?.attire,
+          eye_color: selectedAttributes?.eye_color,
+          gender: selectedAttributes?.gender,
+          hair_color: selectedAttributes?.hair_color,
+          hair_length: selectedAttributes?.hair_length,
+          facial_hair: selectedAttributes?.facial_hair,
+          name: selectedAttributes?.name,
+          personality: selectedAttributes?.personality,
+          skin_tone: selectedAttributes?.skin_tone,
+          universe: selectedAttributes?.universe,
+        })
+        const getProfileReq = await api.getProfile()
+        const newUser = { ...user, profile: getProfileReq.data?.customer, companions: getProfileReq?.data?.companions } as UserType
+        setUser(newUser)
+      } catch (error) {
+        setSocketEvent('')
+        console.warn(error)
+      }
     }
   }
 
@@ -235,6 +269,76 @@ export default function NewFriendPage() {
     setValidationErrors([])
   }
 
+  const handleDelete = async () => {
+    try {
+      setSocketEvent('Deleting friend...')
+
+      const req = await api.deleteCompanion({ id: user?.activeCompanion?.id || '' })
+      const data = req?.data
+
+      if (data === 'OK') {
+        await updateUser()
+        setSocketEvent('')
+
+        router.push('/friend')
+      }
+    } catch (error) {
+      setSocketEvent('')
+      console.warn(error)
+    }
+  }
+
+  const handleDeletePopup = () => {
+    setPopup({
+      open: true,
+      maxWidth: 600,
+      content: (
+        <View className='gap-[24px]'>
+          <Text className='text-[24px] font-[600]' color='grey1_light1'>
+            Delete friend
+          </Text>
+          <Text className='' size='md' color='grey1_light1'>
+            Are you sure you want to delete this friend?
+          </Text>
+          <View className='flex-row gap-[16px]'>
+            <GradientPressable
+              className='w-[150px] h-[48px]'
+              type='dark'
+              onPress={async () => {
+                setPopup({ open: false })
+                handleDelete()
+              }}
+            >
+              <Text className='font-[600]' size='md' color='grey1_light2'>
+                Ok
+              </Text>
+            </GradientPressable>
+            <GradientPressable className='w-[150px] h-[48px]' type='dark' onPress={() => setPopup({ open: false })}>
+              <Text className='font-[600]' size='md' color='grey1_light2'>
+                Cancel
+              </Text>
+            </GradientPressable>
+          </View>
+        </View>
+      ),
+    })
+  }
+
+  const GetSelectedAttribute = ({ attribute, def }: { attribute: string; def: string }) => {
+    const selectedAttribute = availableAttributes?.[attribute]?.find((att: any) => att?.key === selectedAttributes?.[attribute])?.value || selectedAttributes?.[attribute] || ''
+    return breakpoints === 'phone' ? (
+      <GradientPressable type='dark' isPressable={false}>
+        <Text className='base:text-[20px] phone:text-[24px]' color='light1_light2'>
+          {selectedAttribute || def}
+        </Text>
+      </GradientPressable>
+    ) : (
+      <Text className='base:text-[20px] phone:text-[24px]' color='red1'>
+        {selectedAttribute || def}
+      </Text>
+    )
+  }
+
   useEffect(() => {
     const getAttributes = async () => {
       const res = await api.getAvailableAttributes()
@@ -265,10 +369,7 @@ export default function NewFriendPage() {
 
   useEffect(() => {
     const onCompanionUpdateEvent: any = async ({ companion }: { companion: CompanionInfos }) => {
-      const [getProfileRes, getLifetimeInfoRes] = await Promise.all([api.getProfile(), api.getLifetimeInfo()])
-      setUser((prev) => ({ ...(prev as any), profile: getProfileRes?.data?.customer, lifetimeInfo: getLifetimeInfoRes?.data }))
-
-      router.push(`/friend/${companion?.id}`)
+      router.push(`/friend/confirm/${companion?.id}`)
       setSocketEvent('')
     }
 
@@ -279,20 +380,29 @@ export default function NewFriendPage() {
     }
   }, [])
 
-  const GetSelectedAttribute = ({ attribute, def }: { attribute: string; def: string }) => {
-    const selectedAttribute = availableAttributes?.[attribute]?.find((att: any) => att?.key === selectedAttributes?.[attribute])?.value || selectedAttributes?.[attribute] || ''
-    return breakpoints === 'phone' ? (
-      <GradientPressable type='dark' isPressable={false}>
-        <Text className='base:text-[20px] phone:text-[24px]' color='light1_light2'>
-          {selectedAttribute || def}
-        </Text>
-      </GradientPressable>
-    ) : (
-      <Text className='base:text-[20px] phone:text-[24px]' color='red1'>
-        {selectedAttribute || def}
-      </Text>
-    )
-  }
+  useEffect(() => {
+    if (friendId && friendId !== 'new') {
+      const activeCompanion = user?.companions?.find((companion) => companion?.id === friendId)
+      console.log('activeCompanion: ', activeCompanion)
+      if (activeCompanion) {
+        setUser((prev) => ({ ...(prev as UserType), activeCompanion: activeCompanion }))
+        setSelectedAttributes({
+          name: activeCompanion?.name || '',
+          gender: activeCompanion?.gender || '',
+          universe: activeCompanion?.universe || '',
+          age: String(activeCompanion?.age) || '21',
+          hair_color: activeCompanion?.hair_color || '',
+          hair_length: activeCompanion?.hair_length || '',
+          facial_hair: activeCompanion?.facial_hair || '',
+          skin_tone: activeCompanion?.skin_tone || '',
+          eye_color: activeCompanion?.eye_color || '',
+          ancestral_region: activeCompanion?.ancestral_region || '',
+          attire: activeCompanion?.attire || '',
+          personality: activeCompanion?.personality || '',
+        })
+      }
+    }
+  }, [user])
 
   return (
     <AuthenticatedLayout disableRelative={true} mainZIndex={mainZIndex}>
@@ -368,8 +478,19 @@ export default function NewFriendPage() {
           </Text>
           <View className='base:flex-col tablet:flex-row justify-center base:items-center base:gap-[30px] tablet:gap-[90px]'>
             {/* Soul */}
-            <View className='w-[100%] max-w-[500px] base:h-[300px] phone:h-[500px] items-center justify-center rounded-md' background={breakpoints === 'phone' ? 'transparent' : 'grey3_dark1'}>
-              <Soul width={200} height={200} soulSize={200} />
+            <View className='base:w-[100%] phone:w-[unset] tablet:min-w-[300px] desktop:min-w-[500px] base:h-[300px] desktop:h-[500px] items-center justify-center rounded-md' background={breakpoints === 'phone' ? 'transparent' : 'grey3_dark1'}>
+              {user?.activeCompanion?.profile_picture?.image ? (
+                <Image
+                  source={{ uri: user?.activeCompanion?.profile_picture?.image }}
+                  style={{
+                    ...(breakpoints === 'phone' ? { width: dimentions?.deviceWidth, height: 300, borderRadius: 0 } : breakpoints === 'tablet' ? { width: 300, height: 300, borderRadius: themeVars.borderRadius.md } : { width: 500, height: 500, borderRadius: themeVars.borderRadius.md }),
+                  }}
+                />
+              ) : (
+                <Soul width={200} height={200} soulSize={200} />
+              )}
+
+              {breakpoints === 'phone' ? <LinearGradient className='w-[100%] h-[80px] absolute bottom-[0px] left-[0px]' colors={[theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7, 'transparent']} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} /> : <></>}
             </View>
             {/* Soul - END */}
 
@@ -386,8 +507,8 @@ export default function NewFriendPage() {
 
                 <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
                   My name is{' '}
-                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'first_name', type: 'input', inputPlaceholder: 'First name' })}>
-                    <GetSelectedAttribute attribute='first_name' def='First name' />
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'name', type: 'input', inputPlaceholder: 'First name' })}>
+                    <GetSelectedAttribute attribute='name' def='First name' />
                   </Pressable>{' '}
                   .
                 </Text>
@@ -494,23 +615,36 @@ export default function NewFriendPage() {
                     </Text>
                   </Pressable>
 
-                  <Pressable className='w-[100%] max-w-[290px] h-[92px] items-center justify-center rounded-md border-[2px]' background='grey3_dark1' border='transparent_purple2/40' onPress={handleRandomize}>
-                    <Text className='text-[24px] font-[600]' color='light1_light3'>
-                      Randomize
-                    </Text>
-                  </Pressable>
+                  {user?.activeCompanion ? (
+                    <Pressable className='w-[100%] max-w-[290px] h-[92px] items-center justify-center rounded-md border-[2px]' background='transparent_dark1' border='red1' onPress={handleDeletePopup}>
+                      <Text className='text-[24px] font-[600]' color='red1'>
+                        Delete
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    <Pressable className='w-[100%] max-w-[290px] h-[92px] items-center justify-center rounded-md border-[2px]' background='grey3_dark1' border='transparent_purple2/40' onPress={handleRandomize}>
+                      <Text className='text-[24px] font-[600]' color='light1_light3'>
+                        Randomize
+                      </Text>
+                    </Pressable>
+                  )}
                 </View>
               ) : (
                 <></>
               )}
 
               {breakpoints === 'phone' ? (
-                <View className='px-[35px]'>
+                <View className='px-[35px] gap-[10px]'>
                   <GradientPressable className='w-[100%] h-[70px]' type='primary' onPress={handleGo}>
-                    <Text className='font-[600]' size='md' color='light1_light2'>
+                    <Text className='font-[600]' size='lg' color='light1_light2'>
                       Go
                     </Text>
                   </GradientPressable>
+                  <Pressable className='w-[100%] h-[70px] items-center justify-center rounded-md border-[2px]' background='transparent_dark1' border='red1' onPress={handleDeletePopup}>
+                    <Text className='font-[600]' size='lg' color='red1'>
+                      Delete
+                    </Text>
+                  </Pressable>
                 </View>
               ) : (
                 <></>
@@ -519,8 +653,8 @@ export default function NewFriendPage() {
             {/* Form - END */}
 
             {breakpoints === 'phone' ? (
-              <Pressable className='w-[48px] h-[48px] bg-dark2/60 items-center justify-center rounded-[20px] absolute top-[24px] right-[24px]' onPress={handleRandomize}>
-                <IconDices fill={'red'} />
+              <Pressable className='w-[48px] h-[48px] bg-dark2/60 items-center justify-center rounded-[20px] absolute top-[24px] right-[24px]' onPress={user?.activeCompanion ? handleDelete : handleRandomize}>
+                {user?.activeCompanion ? <IconTrash /> : <IconDices />}
               </Pressable>
             ) : (
               <></>

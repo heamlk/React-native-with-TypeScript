@@ -1,6 +1,5 @@
 import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext, useEffect, useState } from 'react'
 import storage from '@/app/_shared/storage/storage'
-import { useRouter } from 'expo-router'
 import { useApi } from './api'
 import type { CompanionAttributes, CompanionInfos, CustomerProfile, MarketplaceProduct, SubscriptionOption } from './auth.types'
 
@@ -13,6 +12,16 @@ export type UserContextType = {
   friendLimitReached: () => boolean
   friendLimitReachedDialog: () => string
   isPurchaseActive: ({ purchaseId }: { purchaseId: string }) => boolean
+  updateUser: () => Promise<{
+    profile: any
+    lifetimeInfo: any
+    customerId?: string | undefined
+    companions?: CompanionInfos[] | undefined
+    activeCompanion?: CompanionInfos | null
+    products?: MarketplaceProduct[] | undefined
+    interests?: Record<string, string> | undefined
+    companionAttributes?: CompanionAttributes
+  }>
 }
 export type UserProviderProps = { children: ReactNode }
 
@@ -21,7 +30,7 @@ const UserContext = createContext<UserContextType | null>(null)
 export type UserType = {
   customerId: string
   companions: CompanionInfos[]
-  activeCompanion?: string
+  activeCompanion?: CompanionInfos | null
   profile: CustomerProfile
   products: MarketplaceProduct[]
   interests: Record<string, string>
@@ -50,11 +59,16 @@ export const getStoredUser = (): UserType | null => {
 }
 
 export default function UserProvider({ children }: UserProviderProps) {
-  const router = useRouter()
   const api = useApi()
-  const descopeProjectId = process.env.EXPO_PUBLIC_DESCOPE_PROJECT_ID!
 
   const [user, setUser] = useState<UserType | null>(getStoredUser())
+
+  const updateUser = async () => {
+    const [getProfileRes, getLifetimeInfoRes] = await Promise.all([api.getProfile(), api.getLifetimeInfo()])
+    const newUser = { ...user, profile: getProfileRes?.data?.customer, companions: getProfileRes?.data?.companions, lifetimeInfo: getLifetimeInfoRes?.data, activeCompanion: null }
+    setUser(newUser as UserType)
+    return newUser
+  }
 
   const getSubscriptionOption = ({ subscriptionId }: { subscriptionId: string }) => {
     return user?.profile?.subscription?.options?.[subscriptionId]
@@ -126,7 +140,7 @@ export default function UserProvider({ children }: UserProviderProps) {
     }
   }, [])
 
-  const value = { user, setUser, getSubscriptionOption, isSubscriptionOptionActive, hasAdditionalAISubscription, friendLimitReached, friendLimitReachedDialog, isPurchaseActive }
+  const value = { user, setUser, updateUser, getSubscriptionOption, isSubscriptionOptionActive, hasAdditionalAISubscription, friendLimitReached, friendLimitReachedDialog, isPurchaseActive }
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }

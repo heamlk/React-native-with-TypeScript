@@ -28,7 +28,37 @@ export type ApiContextType = {
   getLifetimeInfo: () => Promise<AxiosResponse<any, any, {}>>
   getAvailableAttributes: () => Promise<AxiosResponse<any, any, {}>>
   getReferralInfo: () => Promise<AxiosResponse<any, any, {}>>
-  postCreateCompanion: ({}: { name: string; age: number; gender: string; hair_color: string; hair_length: string; eye_color: string; skin_tone: string; attire: string; universe: string; personality: string; ancestral_region: string }) => Promise<AxiosResponse<any, any, {}>>
+  postCreateCompanion: ({}: { name: string; age: number; gender: string; hair_color: string; facial_hair: string; hair_length: string; eye_color: string; skin_tone: string; attire: string; universe: string; personality: string; ancestral_region: string }) => Promise<AxiosResponse<any, any, {}>>
+  postEditCompanion: ({
+    name,
+    age,
+    gender,
+    facial_hair,
+    hair_color,
+    hair_length,
+    eye_color,
+    skin_tone,
+    attire,
+    universe,
+    personality,
+    ancestral_region,
+    companionId,
+  }: {
+    name: string
+    age: number
+    gender: string
+    facial_hair: string
+    hair_color: string
+    hair_length: string
+    eye_color: string
+    skin_tone: string
+    attire: string
+    universe: string
+    personality: string
+    ancestral_region: string
+    companionId: string
+  }) => Promise<AxiosResponse<any, any, {}>>
+  deleteCompanion: ({ id }: { id: string }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -141,12 +171,11 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  // {\"name\":\"Jennifer\",\"age\":41,\"gender\":\"female\",\"hair_color\":\"red\",\"hair_length\":\"medium length hair\",\"eye_color\":\"hazel\",\"skin_tone\":\"light\",\"attire\":\"casual\",\"universe\":\"fantasy\",\"personality\":\"anxious\",\"ancestral_region\":\"west asian\"}
-
   const postCreateCompanion = async ({
     name,
     age,
     gender,
+    facial_hair,
     hair_color,
     hair_length,
     eye_color,
@@ -159,6 +188,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     name: string
     age: number
     gender: string
+    facial_hair: string
     hair_color: string
     hair_length: string
     eye_color: string
@@ -174,6 +204,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
         name,
         age,
         gender,
+        facial_hair,
         hair_color,
         hair_length,
         eye_color,
@@ -189,6 +220,67 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
         },
       }
     )
+  }
+
+  const postEditCompanion = async ({
+    name,
+    age,
+    gender,
+    facial_hair,
+    hair_color,
+    hair_length,
+    eye_color,
+    skin_tone,
+    attire,
+    universe,
+    personality,
+    ancestral_region,
+    companionId,
+  }: {
+    name: string
+    age: number
+    gender: string
+    facial_hair: string
+    hair_color: string
+    hair_length: string
+    eye_color: string
+    skin_tone: string
+    attire: string
+    universe: string
+    personality: string
+    ancestral_region: string
+    companionId: string
+  }) => {
+    return await api.post(
+      `companions/${companionId}`,
+      {
+        name,
+        age,
+        gender,
+        facial_hair,
+        hair_color,
+        hair_length,
+        eye_color,
+        skin_tone,
+        attire,
+        universe,
+        personality,
+        ancestral_region,
+      },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
+  const deleteCompanion = async ({ id }: { id: string }) => {
+    return await api.delete(`companions/${id}`, {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
   }
 
   useEffect(() => {
@@ -226,6 +318,8 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     getReferralInfo,
     postUpdateProfile,
     postCreateCompanion,
+    postEditCompanion,
+    deleteCompanion,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>

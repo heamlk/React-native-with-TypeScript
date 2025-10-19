@@ -11,11 +11,11 @@ import useBreakpoints from '../_hooks/breakpoints'
 import { Controller, useForm } from 'react-hook-form'
 import { useApi } from '../_context/api'
 import { useRouter } from 'expo-router'
-import { useUser, type UserType } from '../_context/user'
+import { useUser } from '../_context/user'
 
 export default function EditProfilePage() {
   const { theme } = useTheme()
-  const { user, setUser } = useUser()
+  const { user, updateUser } = useUser()
   const router = useRouter()
   const breakpoints = useBreakpoints()
   const api = useApi()
@@ -137,10 +137,8 @@ export default function EditProfilePage() {
       setSaving(false)
 
       if (data === 'OK') {
-        const [getProfileRes, getLifetimeInfoRes] = await Promise.all([api.getProfile(), api.getLifetimeInfo()])
-
+        await updateUser()
         clearErrors()
-        setUser((prev) => ({ ...(prev as any), profile: getProfileRes?.data?.customer, lifetimeInfo: getLifetimeInfoRes?.data }))
         router.push('/profile')
         setConfirmationError('')
       } else {

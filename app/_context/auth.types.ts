@@ -95,15 +95,15 @@ export interface CompanionAttributes {
   name: string
   age: number
   gender: string
-  hairColor: string
-  hairLength: string
-  eyeColor: string
-  skinTone: string
-  facialHair?: string
+  hair_color: string
+  hair_length: string
+  eye_color: string
+  skin_tone: string
+  facial_hair?: string
   attire: string
   universe: string
   personality: string
-  ancestralRegion: string
+  ancestral_region: string
 }
 
 export interface ImageMedia {
@@ -123,9 +123,9 @@ export interface CompanionMedia {
 export interface CompanionInfos extends CompanionAttributes {
   id: string
   bio: string
-  profilePicture: ProfilePicture
-  emotionsAnimations?: EmotionsAnimations
-  chatClearedAt?: Date
+  profile_picture: ProfilePicture
+  emotions_animations?: EmotionsAnimations
+  chat_cleared_at?: Date
 }
 
 export interface ProfilePicture {

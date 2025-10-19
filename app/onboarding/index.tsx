@@ -12,11 +12,11 @@ import { useRouter } from 'expo-router'
 import * as ImagePicker from 'expo-image-picker'
 import { Platform, Image } from 'react-native'
 import Subscription from '../_shared/components/subscription'
-import { useUser, type UserType } from '../_context/user'
+import { useUser } from '../_context/user'
 
 export default function OnboardingPage() {
   const { theme } = useTheme()
-  const { user, setUser } = useUser()
+  const { user, setUser, updateUser } = useUser()
   const dimentions = useDimensions()
   const breakpoints = useBreakpoints()
   const api = useApi()
@@ -131,10 +131,7 @@ export default function OnboardingPage() {
         const data = res?.data
 
         if (data === 'OK') {
-          const [getProfileRes, getLifetimeInfoRes] = await Promise.all([api.getProfile(), api.getLifetimeInfo()])
-
-          const newUser = { ...user, profile: getProfileRes.data?.customer, lifetimeInfo: getLifetimeInfoRes.data } as UserType
-          setUser(newUser)
+          await updateUser()
           setConfirmationError('')
         } else {
           setConfirmationError('An error occurred while setting up your account')

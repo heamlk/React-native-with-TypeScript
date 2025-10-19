@@ -6,17 +6,15 @@ import { useEffect, useState } from 'react'
 export default function User() {
   const router = useRouter()
   const params = useLocalSearchParams<{ friendId: string }>()
-  const userId = params.friendId
+  const friendId = params.friendId
 
   const [allowUser, setAllowUser] = useState(false)
 
   useEffect(() => {
-    if (!isNaN(Number(userId)) && userId !== '') {
+    if (friendId && friendId !== 'new') {
       setAllowUser(true)
       return
     }
-
-    router.push('/friend')
   }, [])
 
   if (!allowUser) {
@@ -26,7 +24,7 @@ export default function User() {
   return (
     <AuthenticatedLayout>
       <View>
-        <Text>{userId}</Text>
+        <Text>{friendId}</Text>
       </View>
     </AuthenticatedLayout>
   )
