@@ -78,9 +78,8 @@ export default function UserProvider({ children }: UserProviderProps) {
 
   const friendLimitReached = () => {
     const companionLimit = hasAdditionalAISubscription() ? 3 : 1
-    const canCreateMoreCompanions = (user?.companions.length || 0) < companionLimit
-
-    return canCreateMoreCompanions
+    const companionLimitReached = (user?.companions?.length || 0) >= companionLimit
+    return companionLimitReached
   }
 
   const friendLimitReachedDialog = () => {

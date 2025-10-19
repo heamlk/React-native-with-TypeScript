@@ -10,11 +10,10 @@ import useBreakpoints from '@/app/_hooks/breakpoints'
 import themeVars from '../_styles/theme/themeVars'
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
 import { usePopup } from '../_context/popup'
-import { useEffect } from 'react'
 import { useUser } from '../_context/user'
 
 export default function FriendPage() {
-  const { user } = useUser()
+  const { user, friendLimitReached, friendLimitReachedDialog } = useUser()
   const { theme } = useTheme()
   const dimentions = useDimensions()
   const router = useRouter()
@@ -31,38 +30,36 @@ export default function FriendPage() {
       return
     }
 
-    setPopup({
-      open: true,
-      maxWidth: 600,
-      content: (
-        <View className='gap-[24px]'>
-          <Text className='text-[24px] font-[600]' color='grey1_light1'>
-            Friend limit reached
-          </Text>
-          <Text className='' size='md' color='grey1_light1'>
-            Unable to create a new friend. You can either delete an existing one or purchase the Additional AI subscription in the marketplace.
-          </Text>
-          <View className='flex-row gap-[16px]'>
-            <GradientPressable
-              className='w-[150px] h-[48px]'
-              type='dark'
-              onPress={() => {
-                setPopup({ open: false })
-              }}
-            >
-              <Text className='font-[600]' size='md' color='grey1_light2'>
-                Ok
-              </Text>
-            </GradientPressable>
+    if (friendLimitReached()) {
+      setPopup({
+        open: true,
+        maxWidth: 600,
+        content: (
+          <View className='gap-[24px]'>
+            <Text className='text-[24px] font-[600]' color='grey1_light1'>
+              Friend limit reached
+            </Text>
+            <Text className='' size='md' color='grey1_light1'>
+              {friendLimitReachedDialog()}
+            </Text>
+            <View className='flex-row gap-[16px]'>
+              <GradientPressable
+                className='w-[150px] h-[48px]'
+                type='dark'
+                onPress={() => {
+                  setPopup({ open: false })
+                }}
+              >
+                <Text className='font-[600]' size='md' color='grey1_light2'>
+                  Ok
+                </Text>
+              </GradientPressable>
+            </View>
           </View>
-        </View>
-      ),
-    })
+        ),
+      })
+    }
   }
-
-  useEffect(() => {
-    console.log('user: ', user)
-  }, [user])
 
   return (
     <AuthenticatedLayout>
