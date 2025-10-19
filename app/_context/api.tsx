@@ -1,9 +1,13 @@
-import React, { createContext, useContext, type ReactNode } from 'react'
+import React, { createContext, Dispatch, SetStateAction, useContext, useEffect, useState, type ReactNode } from 'react'
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios'
 import storage from '../_shared/storage/storage'
+import DefaultEventsMap, { io, Socket } from 'socket.io-client'
+import { CompanionInfos } from './auth.types'
 
 export type ApiContextType = {
   api: AxiosInstance
+  socketState: Socket<AppSocketEvents> | null
+  setSocketState: Dispatch<SetStateAction<Socket<typeof DefaultEventsMap, typeof DefaultEventsMap> | null>>
   login: () => Promise<AxiosResponse<any, any, {}>>
   getProfile: () => Promise<AxiosResponse<any, any, {}>>
   getProducts: () => Promise<AxiosResponse<any, any, {}>>
@@ -18,12 +22,22 @@ export type ApiContextType = {
 
 const ApiContext = createContext<ApiContextType | null>(null)
 
+export interface AppSocketEvents {
+  companion_update: { companion: CompanionInfos }
+}
+
 export default function ApiProvider({ children }: { children: ReactNode }) {
+  const [socketState, setSocketState] = useState<Socket<AppSocketEvents> | null>(null)
+
   const api: AxiosInstance = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
-    // headers: {
-    //   'Content-Type': 'application/json',
-    // },
+  })
+
+  const socket: Socket = io(process.env.EXPO_PUBLIC_API_BASE_URL, {
+    auth: {
+      token: (storage.getString('session') as any) || '',
+    },
+    transports: ['websocket', 'polling'],
   })
 
   const login = async () => {
@@ -170,8 +184,31 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  useEffect(() => {
+    const newSocket = socket
+    setSocketState(newSocket)
+
+    const handleError = (err: any) => {
+      console.error('Socket error:', err)
+    }
+
+    newSocket.on('connect_error', handleError)
+    newSocket.on('connect_timeout', handleError)
+    newSocket.on('error', handleError)
+
+    return () => {
+      newSocket.off('connect_error', handleError)
+      newSocket.off('connect_timeout', handleError)
+      newSocket.off('error', handleError)
+
+      newSocket.disconnect()
+    }
+  }, [])
+
   const value = {
     api,
+    socketState,
+    setSocketState,
     login,
     getProfile,
     getProducts,

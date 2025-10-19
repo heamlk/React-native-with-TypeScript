@@ -13,6 +13,7 @@ import { useApi } from '../_context/api'
 import { capitalize, getRandomNumber } from '../_lib/utils'
 import IconDices from '@/app/_assets/icons/dices.svg'
 import { useUser, UserType } from '../_context/user'
+import { CompanionAttributes, CompanionInfos } from '../_context/auth.types'
 
 export type SelcetInputType = {
   open: boolean
@@ -51,6 +52,8 @@ export default function NewFriendPage() {
   const { user, setUser } = useUser()
   const api = useApi()
 
+  const [socketEvent, setSocketEvent] = useState('')
+
   const [blurActive, setBlurActive] = useState(false)
   const [mainZIndex, setMainZIndex] = useState<0 | 10>(0)
   const [inputSelect, setInputSelect] = useState<SelcetInputType>(defaultSelcetInput)
@@ -81,7 +84,7 @@ export default function NewFriendPage() {
       const handle = findNodeHandle(event?.currentTarget)
       if (handle)
         UIManager?.measure(handle, (x, y, width, height, pageX, pageY) => {
-          console.log('Native measure:', { x, y, width, height, pageX, pageY })
+          // console.log('Native measure:', { x, y, width, height, pageX, pageY })
         })
     }
 
@@ -172,9 +175,8 @@ export default function NewFriendPage() {
       return
     }
 
-    console.log('selectedAttributes: ', selectedAttributes)
-
     try {
+      setSocketEvent('Creating friend...')
       const createCompanionReq = await api.postCreateCompanion({
         age: Number(selectedAttributes?.age),
         ancestral_region: selectedAttributes?.ancestral_region,
@@ -192,6 +194,7 @@ export default function NewFriendPage() {
       const newUser = { ...user, profile: getProfileReq.data?.customer, companions: getProfileReq?.data?.companions } as UserType
       setUser(newUser)
     } catch (error) {
+      setSocketEvent('')
       console.warn(error)
     }
   }
@@ -255,6 +258,19 @@ export default function NewFriendPage() {
     }
 
     getAttributes()
+  }, [])
+
+  useEffect(() => {
+    const onCompanionUpdateEvent: any = ({ companion }: { companion: CompanionInfos }) => {
+      router.push(`/friend/${companion?.id}`)
+      setSocketEvent('')
+    }
+
+    api.socketState?.on('companion_update', onCompanionUpdateEvent)
+
+    return () => {
+      api.socketState?.off('companion_update', onCompanionUpdateEvent)
+    }
   }, [])
 
   const GetSelectedAttribute = ({ attribute, def }: { attribute: string; def: string }) => {
@@ -332,171 +348,180 @@ export default function NewFriendPage() {
         <></>
       )}
 
-      <View className='gap-[30]'>
-        <Text className='base:hidden phone:flex mx-auto text-center' size='lg' color='grey1_light1'>
-          Perfect, now let’s see what I should act and look like!
-        </Text>
-        <View className='base:flex-col tablet:flex-row justify-center base:items-center base:gap-[30px] tablet:gap-[90px]'>
-          {/* Soul */}
-          <View className='w-[100%] max-w-[500px] base:h-[300px] phone:h-[500px] items-center justify-center rounded-md' background={breakpoints === 'phone' ? 'transparent' : 'grey3_dark1'}>
-            <Soul width={200} height={200} soulSize={200} />
-          </View>
-          {/* Soul - END */}
-
-          {/* Form */}
-          <View className='w-[100%] max-w-[600px] gap-[40px]'>
-            <View className='px-[50px] base:gap-[24px] phone:gap-[0px]'>
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                Hi, I am from the{' '}
-                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'universe', type: 'select' })}>
-                  <GetSelectedAttribute attribute='universe' def='Universe' />
-                </Pressable>{' '}
-                universe.
-              </Text>
-
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                My name is{' '}
-                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'first_name', type: 'input', inputPlaceholder: 'First name' })}>
-                  <GetSelectedAttribute attribute='first_name' def='First name' />
-                </Pressable>{' '}
-                .
-              </Text>
-
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                I am excited to be your new best friend!
-              </Text>
-
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                Let me tell you about myself, I am{' '}
-                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'gender', type: 'select' })}>
-                  <GetSelectedAttribute attribute='gender' def='Gender' />
-                </Pressable>
-              </Text>
-
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                and I am{' '}
-                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'age', type: 'input', inputPlaceholder: 'Age' })}>
-                  <GetSelectedAttribute attribute='age' def='Age' />
-                </Pressable>{' '}
-                years old.
-              </Text>
-
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                I have{' '}
-                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'hair_color', type: 'select' })}>
-                  <GetSelectedAttribute attribute='hair_color' def='Color' />
-                </Pressable>{' '}
-                hair.
-              </Text>
-
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                I have{' '}
-                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'hair_length', type: 'select' })}>
-                  <GetSelectedAttribute attribute='hair_length' def='Length' />
-                </Pressable>{' '}
-                hair.
-              </Text>
-
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                I have{' '}
-                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'facial_hair', type: 'select' })}>
-                  <GetSelectedAttribute attribute='facial_hair' def='Facial' />
-                </Pressable>{' '}
-                hair.
-              </Text>
-
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                a{' '}
-                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'skin_tone', type: 'select' })}>
-                  <GetSelectedAttribute attribute='skin_tone' def='Color-ish' />
-                </Pressable>{' '}
-                skin tone.
-              </Text>
-
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                My eyes are{' '}
-                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'eye_color', type: 'select' })}>
-                  <GetSelectedAttribute attribute='eye_color' def='Color' />
-                </Pressable>{' '}
-                .
-              </Text>
-
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                My ancestral region is{' '}
-                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'ancestral_region', type: 'select' })}>
-                  <GetSelectedAttribute attribute='ancestral_region' def='Ancestral region' />
-                </Pressable>{' '}
-                .
-              </Text>
-
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                I like to wear{' '}
-                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'attire', type: 'select' })}>
-                  <GetSelectedAttribute attribute='attire' def='Attire' />
-                </Pressable>{' '}
-                .
-              </Text>
-
-              <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
-                I have a{' '}
-                <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'personality', type: 'select' })}>
-                  <GetSelectedAttribute attribute='personality' def='Blank' />
-                </Pressable>{' '}
-                personality.
-              </Text>
-
-              <View className='gap-[4px] mt-[14px]'>
-                {validationErrors?.map((error) => {
-                  return (
-                    <Text key={error + 46454} size='md' color='red1'>
-                      {error}
-                    </Text>
-                  )
-                })}
-              </View>
+      {socketEvent ? (
+        <View className='gap-[10px] items-center justify-center m-auto'>
+          <Text className='font-[600]' size='3xl' color='grey3_light3'>
+            {socketEvent}
+          </Text>
+          <Soul width={80} height={80} soulSize={80} />
+        </View>
+      ) : (
+        <View className='gap-[30]'>
+          <Text className='base:hidden phone:flex mx-auto text-center' size='lg' color='grey1_light1'>
+            Perfect, now let’s see what I should act and look like!
+          </Text>
+          <View className='base:flex-col tablet:flex-row justify-center base:items-center base:gap-[30px] tablet:gap-[90px]'>
+            {/* Soul */}
+            <View className='w-[100%] max-w-[500px] base:h-[300px] phone:h-[500px] items-center justify-center rounded-md' background={breakpoints === 'phone' ? 'transparent' : 'grey3_dark1'}>
+              <Soul width={200} height={200} soulSize={200} />
             </View>
+            {/* Soul - END */}
 
-            {breakpoints !== 'phone' ? (
-              <View className='flex-row gap-[20px]'>
-                <Pressable className='w-[100%] max-w-[290px] h-[92px] items-center justify-center rounded-md border-[2px]' background='grey3_dark1' border='transparent_purple2/40' onPress={handleGo}>
-                  <Text className='text-[24px] font-[600]' color='light1_light3'>
-                    Go
-                  </Text>
-                </Pressable>
+            {/* Form */}
+            <View className='w-[100%] max-w-[600px] gap-[40px]'>
+              <View className='px-[50px] base:gap-[24px] phone:gap-[0px]'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  Hi, I am from the{' '}
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'universe', type: 'select' })}>
+                    <GetSelectedAttribute attribute='universe' def='Universe' />
+                  </Pressable>{' '}
+                  universe.
+                </Text>
 
-                <Pressable className='w-[100%] max-w-[290px] h-[92px] items-center justify-center rounded-md border-[2px]' background='grey3_dark1' border='transparent_purple2/40' onPress={handleRandomize}>
-                  <Text className='text-[24px] font-[600]' color='light1_light3'>
-                    Randomize
-                  </Text>
-                </Pressable>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  My name is{' '}
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'first_name', type: 'input', inputPlaceholder: 'First name' })}>
+                    <GetSelectedAttribute attribute='first_name' def='First name' />
+                  </Pressable>{' '}
+                  .
+                </Text>
+
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  I am excited to be your new best friend!
+                </Text>
+
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  Let me tell you about myself, I am{' '}
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'gender', type: 'select' })}>
+                    <GetSelectedAttribute attribute='gender' def='Gender' />
+                  </Pressable>
+                </Text>
+
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  and I am{' '}
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'age', type: 'input', inputPlaceholder: 'Age' })}>
+                    <GetSelectedAttribute attribute='age' def='Age' />
+                  </Pressable>{' '}
+                  years old.
+                </Text>
+
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  I have{' '}
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'hair_color', type: 'select' })}>
+                    <GetSelectedAttribute attribute='hair_color' def='Color' />
+                  </Pressable>{' '}
+                  hair.
+                </Text>
+
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  I have{' '}
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'hair_length', type: 'select' })}>
+                    <GetSelectedAttribute attribute='hair_length' def='Length' />
+                  </Pressable>{' '}
+                  hair.
+                </Text>
+
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  I have{' '}
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'facial_hair', type: 'select' })}>
+                    <GetSelectedAttribute attribute='facial_hair' def='Facial' />
+                  </Pressable>{' '}
+                  hair.
+                </Text>
+
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  a{' '}
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'skin_tone', type: 'select' })}>
+                    <GetSelectedAttribute attribute='skin_tone' def='Color-ish' />
+                  </Pressable>{' '}
+                  skin tone.
+                </Text>
+
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  My eyes are{' '}
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'eye_color', type: 'select' })}>
+                    <GetSelectedAttribute attribute='eye_color' def='Color' />
+                  </Pressable>{' '}
+                  .
+                </Text>
+
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  My ancestral region is{' '}
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'ancestral_region', type: 'select' })}>
+                    <GetSelectedAttribute attribute='ancestral_region' def='Ancestral region' />
+                  </Pressable>{' '}
+                  .
+                </Text>
+
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  I like to wear{' '}
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'attire', type: 'select' })}>
+                    <GetSelectedAttribute attribute='attire' def='Attire' />
+                  </Pressable>{' '}
+                  .
+                </Text>
+
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                  I have a{' '}
+                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'personality', type: 'select' })}>
+                    <GetSelectedAttribute attribute='personality' def='Blank' />
+                  </Pressable>{' '}
+                  personality.
+                </Text>
+
+                <View className='gap-[4px] mt-[14px]'>
+                  {validationErrors?.map((error) => {
+                    return (
+                      <Text key={error + 46454} size='md' color='red1'>
+                        {error}
+                      </Text>
+                    )
+                  })}
+                </View>
               </View>
-            ) : (
-              <></>
-            )}
+
+              {breakpoints !== 'phone' ? (
+                <View className='flex-row gap-[20px]'>
+                  <Pressable className='w-[100%] max-w-[290px] h-[92px] items-center justify-center rounded-md border-[2px]' background='grey3_dark1' border='transparent_purple2/40' onPress={handleGo}>
+                    <Text className='text-[24px] font-[600]' color='light1_light3'>
+                      Go
+                    </Text>
+                  </Pressable>
+
+                  <Pressable className='w-[100%] max-w-[290px] h-[92px] items-center justify-center rounded-md border-[2px]' background='grey3_dark1' border='transparent_purple2/40' onPress={handleRandomize}>
+                    <Text className='text-[24px] font-[600]' color='light1_light3'>
+                      Randomize
+                    </Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <></>
+              )}
+
+              {breakpoints === 'phone' ? (
+                <View className='px-[35px]'>
+                  <GradientPressable className='w-[100%] h-[70px]' type='primary' onPress={handleGo}>
+                    <Text className='font-[600]' size='md' color='light1_light2'>
+                      Go
+                    </Text>
+                  </GradientPressable>
+                </View>
+              ) : (
+                <></>
+              )}
+            </View>
+            {/* Form - END */}
 
             {breakpoints === 'phone' ? (
-              <View className='px-[35px]'>
-                <GradientPressable className='w-[100%] h-[70px]' type='primary' onPress={handleGo}>
-                  <Text className='font-[600]' size='md' color='light1_light2'>
-                    Go
-                  </Text>
-                </GradientPressable>
-              </View>
+              <Pressable className='w-[48px] h-[48px] bg-dark2/60 items-center justify-center rounded-[20px] absolute top-[24px] right-[24px]' onPress={handleRandomize}>
+                <IconDices fill={'red'} />
+              </Pressable>
             ) : (
               <></>
             )}
           </View>
-          {/* Form - END */}
-
-          {breakpoints === 'phone' ? (
-            <Pressable className='w-[48px] h-[48px] bg-dark2/60 items-center justify-center rounded-[20px] absolute top-[24px] right-[24px]' onPress={handleRandomize}>
-              <IconDices fill={'red'} />
-            </Pressable>
-          ) : (
-            <></>
-          )}
         </View>
-      </View>
+      )}
     </AuthenticatedLayout>
   )
 }
