@@ -14,10 +14,11 @@ import IconMarketFilled from '@/app/_assets/icons/market-filled.svg'
 import { usePathname, useRouter } from 'expo-router'
 import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
-import { type Dispatch, type ReactNode, type SetStateAction, useRef } from 'react'
-import { Animated } from 'react-native'
+import { type ReactNode, useRef } from 'react'
+import { Animated, Image } from 'react-native'
 import IconMenu from '@/app/_assets/icons/menu.svg'
 import { usePopup } from '@/app/_context/popup'
+import { useUser } from '@/app/_context/user'
 
 export type AuthenticatedLayoutProps = {
   children: ReactNode
@@ -34,6 +35,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   const router = useRouter()
   const breakpoints = useBreakpoints()
   const popup = usePopup()
+  const { user } = useUser()
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30
@@ -115,6 +117,10 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
     router.navigate(url as any)
   }
 
+  const handleCompanionPress = () => {
+    router.push(`/friend/${user?.activeCompanion?.id}`)
+  }
+
   return (
     <View className='base:p-[0] phone:p-[30px]' style={{ width: dimentions.deviceWidth, minHeight: dimentions.deviceHeight, position: disableRelative ? 'static' : 'relative' }}>
       <View className='w-[100%] h-[100%]' style={{ position: disableRelative ? 'static' : 'relative' }}>
@@ -124,7 +130,16 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
             <Pressable onPress={() => router.push('/friend')}>
               <IconLogo width={40} height={34} theme={theme} />
             </Pressable>
-            <ThemeToggle />
+            <View className='flex-row items-center gap-[12px]'>
+              <ThemeToggle />
+              {user?.activeCompanion?.profile_picture?.thumbnail ? (
+                <Pressable onPress={handleCompanionPress}>
+                  <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} style={{ width: 48, height: 48, borderRadius: 9999 }} />
+                </Pressable>
+              ) : (
+                <></>
+              )}
+            </View>
           </View>
         ) : (
           <></>
@@ -174,6 +189,14 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
 
               {breakpoints === 'phone' ? (
                 <>
+                  <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'grey4_dark4' }) }}></View>
+                  {user?.activeCompanion?.profile_picture?.thumbnail ? (
+                    <Pressable onPress={handleCompanionPress}>
+                      <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} style={{ width: 48, height: 48, borderRadius: 9999 }} />
+                    </Pressable>
+                  ) : (
+                    <></>
+                  )}
                   <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'grey4_dark4' }) }}></View>
                   <ThemeToggle />
                 </>

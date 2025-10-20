@@ -124,6 +124,13 @@ export default function UserProvider({ children }: UserProviderProps) {
     }
 
     storage.set('user', JSON.stringify(user))
+
+    if (!user?.activeCompanion && user?.companions?.length > 0) {
+      const newUser = { ...user, activeCompanion: user?.companions?.[0] }
+      setUser(newUser)
+      return
+    }
+
     setUser(user)
   }, [user])
 
