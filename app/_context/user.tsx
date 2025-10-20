@@ -83,7 +83,7 @@ export default function UserProvider({ children }: UserProviderProps) {
     }
 
     const subscriptionOption = getSubscriptionOption({ subscriptionId })
-    return subscriptionOption?.active_until != null && subscriptionOption.active_until > new Date()
+    return subscriptionOption?.active_until != null && subscriptionOption?.active_until >= Math.floor(Date.now() / 1000)
   }
 
   const hasAdditionalAISubscription = () => {

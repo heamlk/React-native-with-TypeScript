@@ -62,6 +62,9 @@ export type ApiContextType = {
   postRegenerateCompanionPicture: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
   getOwnModel: () => Promise<AxiosResponse<any, any, {}>>
   postOwnModel: (params: OwnModelParams) => Promise<AxiosResponse<any, any, {}>>
+  postUpdateSubscriptionStatus: ({ active }: { active: boolean }) => Promise<AxiosResponse<any, any, {}>>
+  postUpdateSubscriptionOptionStatus: ({ active, product_id }: { active: boolean; product_id: string }) => Promise<AxiosResponse<any, any, {}>>
+  postGetManageSubscriptionUrl: () => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -310,6 +313,58 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const postUpdateSubscriptionStatus = async ({ active }: { active: boolean }) => {
+    return await api.post(
+      `marketplace/set-subscription-status`,
+      { active },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
+  const postUpdateSubscriptionOptionStatus = async ({ active, product_id }: { active: boolean; product_id: string }) => {
+    return await api.post(
+      `marketplace/set-subscription-option-status`,
+      { active, product_id },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
+  const postGetManageSubscriptionUrl = async () => {
+    return await api.post(
+      `marketplace/manage-subscription-url`,
+      {
+        success_url: window?.location?.origin + '/subscription',
+        cancel_url: window?.location?.origin + '/subscription',
+      },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
+  //   async getManageSubscriptionUrl (successUrl: string, cancelUrl: string) {
+  //     const payload: Record<string, string> = {
+  //         success_url: successUrl,
+  //         cancel_url: cancelUrl,
+  //     }
+  //     const response = await this.fetchApi("POST", "marketplace/manage-subscription-url", payload)
+  //     const result = await response.json()
+  //     if (!("url" in result)) {
+  //         throw new BFFLApiError("Error while getting subscription URL")
+  //     }
+  //     return result.url as string
+  // }
+
   useEffect(() => {
     const newSocket = socket
     setSocketState(newSocket)
@@ -350,6 +405,9 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     postRegenerateCompanionPicture,
     getOwnModel,
     postOwnModel,
+    postUpdateSubscriptionStatus,
+    postUpdateSubscriptionOptionStatus,
+    postGetManageSubscriptionUrl,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>
