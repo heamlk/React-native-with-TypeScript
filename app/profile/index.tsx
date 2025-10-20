@@ -13,6 +13,7 @@ import { usePopup } from '../_context/popup'
 import * as Linking from 'expo-linking'
 import OpenSourceLicense from '@/app/_shared/policy/openSourceLicense'
 import { useUser } from '../_context/user'
+import IconCheckGreen from '@/app/_assets/icons/check-green.svg'
 
 export default function ProfilePage() {
   const breakpoints = useBreakpoints()
@@ -43,6 +44,16 @@ export default function ProfilePage() {
       open: true,
       content: <OpenSourceLicense />,
     })
+  }
+
+  const handleVerifyAge = () => {}
+
+  const handleBringModel = () => {
+    router.push('/model')
+  }
+
+  const formatDate = ({ date }: { date: Date }) => {
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
   }
 
   return (
@@ -95,6 +106,13 @@ export default function ProfilePage() {
                 {user?.profile?.date_of_birth?.replaceAll('-', '/')}
               </Text>
             </View>
+            <Pressable className='w-[100%] flex-row items-center justify-between mt-[20px]' onPress={handleVerifyAge}>
+              <Text color='grey1_light1' size='md' className='font-[600]'>
+                Verify age
+              </Text>
+
+              <IconNext width={18} height={20} theme={theme} />
+            </Pressable>
           </View>
 
           <View className='w-[100%] px-[24px] py-[14px] gap-[8px] rounded-sm' background='grey6_dark7'>
@@ -121,13 +139,60 @@ export default function ProfilePage() {
           </View>
 
           <View className='w-[100%] px-[24px] py-[14px] gap-[16px] rounded-sm' background='grey6_dark7'>
-            <View className='w-[100%] flex-row items-center justify-between'>
-              <Text color='grey3_light3' size='md'>
-                Status
-              </Text>
-              <Text color='grey1_light1' size='md'>
-                {user?.profile?.is_subscribed ? 'Active' : 'Inactive'}
-              </Text>
+            <View className='gap-[10px]'>
+              <View className='w-[100%] flex-row items-center justify-between'>
+                <Text color='grey3_light3' size='md'>
+                  Status
+                </Text>
+                <View className='flex-row gap-[4px] items-center'>
+                  {user?.profile?.is_subscribed ? (
+                    <>
+                      <Text color='grey1_light1' size='md'>
+                        Active
+                      </Text>
+                      <IconCheckGreen />
+                    </>
+                  ) : (
+                    <Text color='grey1_light1' size='md'>
+                      Inactive
+                    </Text>
+                  )}
+                </View>
+              </View>
+              {user?.profile?.subscription?.status === 'active' && (
+                <>
+                  <View className='w-[100%] flex-row items-center justify-between'>
+                    <Text color='grey3_light3' size='md'>
+                      Member since
+                    </Text>
+                    <View className='flex-row gap-[4px] items-center'>
+                      <Text color='grey1_light1' size='md'>
+                        {formatDate({ date: new Date((user?.profile?.subscription?.start_date || 0) * 1000) })}
+                      </Text>
+                    </View>
+                  </View>
+                  <View className='w-[100%] flex-row items-center justify-between'>
+                    <Text color='grey3_light3' size='md'>
+                      Member until
+                    </Text>
+                    <View className='flex-row gap-[4px] items-center'>
+                      <Text color='grey1_light1' size='md'>
+                        {formatDate({ date: new Date((user?.profile?.subscription?.current_period_end || 0) * 1000) })}
+                      </Text>
+                    </View>
+                  </View>
+                  <View className='w-[100%] flex-row items-center justify-between'>
+                    <Text color='grey3_light3' size='md'>
+                      Auto-renewal
+                    </Text>
+                    <View className='flex-row gap-[4px] items-center'>
+                      <Text color='grey1_light1' size='md'>
+                        {!user?.profile?.subscription?.cancel_at_period_end ? 'Enabled' : 'Disabled'}
+                      </Text>
+                    </View>
+                  </View>
+                </>
+              )}
             </View>
 
             <Pressable className='w-[100%] flex-row items-center justify-between' onPress={handleManageSubscription}>
@@ -138,6 +203,18 @@ export default function ProfilePage() {
               <IconNext width={18} height={20} theme={theme} />
             </Pressable>
           </View>
+
+          {user?.profile?.subscription?.status === 'active' && (
+            <View className='w-[100%] px-[24px] py-[14px] gap-[16px] rounded-sm' background='grey6_dark7'>
+              <Pressable className='w-[100%] flex-row items-center justify-between' onPress={handleBringModel}>
+                <Text color='grey1_light1' size='md' className='font-[600]'>
+                  Bring your own model
+                </Text>
+
+                <IconNext width={18} height={20} theme={theme} />
+              </Pressable>
+            </View>
+          )}
 
           <View className='w-[100%] px-[24px] py-[14px] gap-[16px] rounded-sm' background='grey6_dark7'>
             <Pressable className='w-[100%] flex-row items-center justify-between' onPress={handleReferralProgram}>

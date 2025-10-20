@@ -2,7 +2,7 @@ import React, { createContext, Dispatch, SetStateAction, useContext, useEffect, 
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios'
 import storage from '../_shared/storage/storage'
 import { io, Socket } from 'socket.io-client'
-import type { ChatMessage, CompanionInfos } from './auth.types'
+import type { ChatMessage, CompanionInfos, OwnModelParams } from './auth.types'
 
 export interface ServerToClientEvents {
   new_chat_message: (eventData: { companion_id: string; message: ChatMessage; local_message_id?: string; audio?: Uint8Array }) => void
@@ -60,6 +60,8 @@ export type ApiContextType = {
   }) => Promise<AxiosResponse<any, any, {}>>
   deleteCompanion: ({ id }: { id: string }) => Promise<AxiosResponse<any, any, {}>>
   postRegenerateCompanionPicture: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
+  getOwnModel: () => Promise<AxiosResponse<any, any, {}>>
+  postOwnModel: (params: OwnModelParams) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -292,6 +294,22 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const getOwnModel = async () => {
+    return await api.get(`customers/own-model`, {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
+
+  const postOwnModel = async (params: OwnModelParams) => {
+    return await api.post(`customers/own-model`, params, {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
+
   useEffect(() => {
     const newSocket = socket
     setSocketState(newSocket)
@@ -330,6 +348,8 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     postEditCompanion,
     deleteCompanion,
     postRegenerateCompanionPicture,
+    getOwnModel,
+    postOwnModel,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>

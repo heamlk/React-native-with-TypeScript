@@ -13,7 +13,7 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
   const router = useRouter()
   const rootNavigationState = useRootNavigationState()
 
-  const authenticatedPaths = ['/friend', '/friend/new', '/profile', '/profile/edit', '/referral', '/subscription', '/marketplace']
+  const authenticatedPaths = ['/friend', '/friend/new', '/profile', '/profile/edit', '/referral', '/subscription', '/marketplace', '/model']
 
   const isPathAuthenticated = (pathname: string) => {
     return authenticatedPaths.some((path) => pathname === path || pathname.startsWith('/friend/')) // match /friend/${companionId}

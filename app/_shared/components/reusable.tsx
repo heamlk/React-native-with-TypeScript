@@ -72,7 +72,7 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
 // Border
 export type GetThemeBorderProps = {
   theme: ThemeType
-  border: 'form' | 'input2' | 'buttonOutline' | 'input2Focus' | 'grey4_dark4' | 'grey5_dark3' | 'grey6_dark3' | 'transparent_light3' | 'transparent_dark3' | 'transparent_purple2/40' | 'transparent' | 'red1'
+  border: 'form' | 'input2' | 'buttonOutline' | 'input2Focus' | 'grey3_transparent' | 'grey4_dark4' | 'grey5_dark3' | 'grey6_dark3' | 'transparent_light3' | 'transparent_dark3' | 'transparent_purple2/40' | 'transparent' | 'red1'
 }
 
 export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
@@ -82,6 +82,7 @@ export const getThemeBorder = ({ theme, border }: GetThemeBorderProps) => {
     input2: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark4,
     input2Focus: theme === 'light' ? themeVars.colors.grey4 : themeVars.colors.purple3,
 
+    grey3_transparent: theme === 'light' ? themeVars.colors.grey3 : 'transparent',
     grey4_dark4: theme === 'light' ? themeVars.colors.grey4 : themeVars.colors.dark4,
     grey5_dark3: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.dark3,
     grey6_dark3: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark3,

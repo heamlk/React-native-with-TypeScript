@@ -48,16 +48,16 @@ export interface CreateCustomerData {
 
 export interface Subscription {
   status: string
-  startDate: Date
-  currentPeriodStart: Date
-  currentPeriodEnd: Date
-  cancelAtPeriodEnd: boolean
+  start_date: number
+  current_period_start: number
+  current_period_end: number
+  cancel_at_period_end: boolean
   options?: Record<string, SubscriptionOption>
 }
 
 export interface SubscriptionOption {
-  cancelAtPeriodEnd: boolean
-  activeUntil: Date
+  cancel_at_period_end: boolean
+  active_until: Date
 }
 
 export interface Purchase {
@@ -192,11 +192,11 @@ export interface ReferralInfo {
 }
 
 export interface OwnModelParams {
-  selected: string
-  chatgptApiKey: string
-  claudeApiKey: string
-  geminiApiKey: string
-  grokApiKey: string
+  selected: 'bffl' | 'chatgpt' | 'claude' | 'gemini' | 'grok'
+  chatgpt_api_key: string
+  claude_api_key: string
+  gemini_api_key: string
+  grok_api_key: string
 }
 
 export default function Blank() {}

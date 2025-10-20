@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Pressable, View, Text, getThemeBackground, GradientPressable } from '@/app/_shared/components/reusable'
-import AuthenticatedLayout from '@/app/_shared/layout/authenticatedLayout'
 import IconCheckGreen from '@/app/_assets/icons/check-green.svg'
 import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
