@@ -65,6 +65,7 @@ export type ApiContextType = {
   postUpdateSubscriptionStatus: ({ active }: { active: boolean }) => Promise<AxiosResponse<any, any, {}>>
   postUpdateSubscriptionOptionStatus: ({ active, product_id }: { active: boolean; product_id: string }) => Promise<AxiosResponse<any, any, {}>>
   postGetManageSubscriptionUrl: () => Promise<AxiosResponse<any, any, {}>>
+  postVerifyAge: ({ agechecker_uuid }: { agechecker_uuid: string }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -352,18 +353,20 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     )
   }
 
-  //   async getManageSubscriptionUrl (successUrl: string, cancelUrl: string) {
-  //     const payload: Record<string, string> = {
-  //         success_url: successUrl,
-  //         cancel_url: cancelUrl,
-  //     }
-  //     const response = await this.fetchApi("POST", "marketplace/manage-subscription-url", payload)
-  //     const result = await response.json()
-  //     if (!("url" in result)) {
-  //         throw new BFFLApiError("Error while getting subscription URL")
-  //     }
-  //     return result.url as string
-  // }
+  const postVerifyAge = async ({ agechecker_uuid }: { agechecker_uuid: string }) => {
+    return await api.post(
+      `customers/verify-age`,
+      {
+        success_url: window?.location?.origin + '/subscription',
+        cancel_url: window?.location?.origin + '/subscription',
+      },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
 
   useEffect(() => {
     const newSocket = socket
@@ -408,6 +411,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     postUpdateSubscriptionStatus,
     postUpdateSubscriptionOptionStatus,
     postGetManageSubscriptionUrl,
+    postVerifyAge,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>

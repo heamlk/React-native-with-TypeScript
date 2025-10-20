@@ -14,14 +14,38 @@ import * as Linking from 'expo-linking'
 import OpenSourceLicense from '@/app/_shared/policy/openSourceLicense'
 import { useUser } from '../_context/user'
 import IconCheckGreen from '@/app/_assets/icons/check-green.svg'
+import useAgeChecker from '../_hooks/useAgeChecker'
+import { useApi } from '../_context/api'
+import { useState } from 'react'
 
 export default function ProfilePage() {
   const breakpoints = useBreakpoints()
   const router = useRouter()
   const { theme } = useTheme()
-  const { user } = useUser()
+  const { user, updateUser } = useUser()
   const { logout } = useAuth()
   const { setPopup } = usePopup()
+  const api = useApi()
+
+  const [fetchingAgeVerification, setFetchingAgeVerification] = useState<boolean>(false)
+
+  const { verifyAge } = useAgeChecker({
+    onAccept: async (uuid) => {
+      try {
+        setFetchingAgeVerification(true)
+        const req = await api.postVerifyAge({ agechecker_uuid: uuid })
+        const data = req?.data
+
+        if (data === 'OK') {
+          await updateUser()
+          setFetchingAgeVerification(false)
+        }
+      } catch (error) {
+        console.warn(error)
+        setFetchingAgeVerification(false)
+      }
+    },
+  })
 
   const handleEditProfile = () => {
     router.push('/profile/edit')
@@ -46,7 +70,17 @@ export default function ProfilePage() {
     })
   }
 
-  const handleVerifyAge = () => {}
+  const handleVerifyAge = () => {
+    if (fetchingAgeVerification) {
+      return
+    }
+
+    try {
+      verifyAge()
+    } catch (error) {
+      console.warn(error)
+    }
+  }
 
   const handleBringModel = () => {
     router.push('/model')
@@ -106,13 +140,17 @@ export default function ProfilePage() {
                 {user?.profile?.date_of_birth?.replaceAll('-', '/')}
               </Text>
             </View>
-            <Pressable className='w-[100%] flex-row items-center justify-between mt-[20px]' onPress={handleVerifyAge}>
-              <Text color='grey1_light1' size='md' className='font-[600]'>
-                Verify age
-              </Text>
+            {(user?.profile?.subscription?.status === 'active' || user?.profile?.lifetime_subscription) && !user?.profile?.is_age_verified ? (
+              <Pressable className='w-[100%] flex-row items-center justify-between mt-[20px]' onPress={handleVerifyAge}>
+                <Text color='grey1_light1' size='md' className='font-[600]'>
+                  Verify age
+                </Text>
 
-              <IconNext width={18} height={20} theme={theme} />
-            </Pressable>
+                <IconNext width={18} height={20} theme={theme} />
+              </Pressable>
+            ) : (
+              <></>
+            )}
           </View>
 
           <View className='w-[100%] px-[24px] py-[14px] gap-[8px] rounded-sm' background='grey6_dark7'>
