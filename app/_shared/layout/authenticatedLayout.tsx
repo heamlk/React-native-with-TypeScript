@@ -121,7 +121,9 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
         {/* Header */}
         {breakpoints !== 'phone' ? (
           <View className='w-[100%] flex-row items-center justify-between'>
-            <IconLogo width={40} height={34} theme={theme} />
+            <Pressable onPress={() => router.push('/friend')}>
+              <IconLogo width={40} height={34} theme={theme} />
+            </Pressable>
             <ThemeToggle />
           </View>
         ) : (
