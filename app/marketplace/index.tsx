@@ -114,6 +114,14 @@ export default function Marketplace() {
                             return <View key={index + 76787} className='flex-1'></View>
                           }
 
+                          let isSubscribed = false
+                          Object.entries(user?.profile?.subscription?.options || {})?.forEach(([key, value]) => {
+                            if (product?.id === key) {
+                              const active_until = value?.active_until
+                              isSubscribed = active_until >= Math.floor(Date.now() / 1000)
+                            }
+                          })
+
                           return (
                             <View key={index + 99518} className='base:h-[118px] phone:h-[146px] flex-1 flex-row relative border-[1px] rounded-md' border='transparent_dark3' background='grey6_dark7'>
                               <View className='relative rounded-l-md overflow-hidden' style={breakpoints === 'phone' ? { width: 170, height: 118 } : { width: 192, height: 144 }}>
@@ -125,11 +133,19 @@ export default function Marketplace() {
                                   {product?.name}
                                 </Text>
                                 {product?.status === 'available' ? (
-                                  <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type='primary'>
-                                    <Text className='font-[600] text-light1' size='sm'>
-                                      ${product?.price}/Month
-                                    </Text>
-                                  </GradientPressable>
+                                  isSubscribed ? (
+                                    <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1'>
+                                      <Text className='font-[600]' size='xs' color='light1_light2'>
+                                        ACTIVE
+                                      </Text>
+                                    </Pressable>
+                                  ) : (
+                                    <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type='primary'>
+                                      <Text className='font-[600] text-light1' size='sm'>
+                                        ${product?.price}/Month
+                                      </Text>
+                                    </GradientPressable>
+                                  )
                                 ) : (
                                   <></>
                                 )}
@@ -192,6 +208,14 @@ export default function Marketplace() {
                             return <View key={index + 78945} className='flex-1'></View>
                           }
 
+                          let isSubscribed = false
+                          Object.entries(user?.profile?.subscription?.options || {})?.forEach(([key, value]) => {
+                            if (product?.id === key) {
+                              const active_until = value?.active_until
+                              isSubscribed = active_until >= Math.floor(Date.now() / 1000)
+                            }
+                          })
+
                           return (
                             <View key={index + 34668} className='base:h-[118px] phone:h-[146px] flex-1 flex-row relative border-[1px] rounded-md' border='transparent_dark3' background='grey6_dark7'>
                               <View className='relative rounded-l-md overflow-hidden' style={breakpoints === 'phone' ? { width: 170, height: 118 } : { width: 192, height: 144 }}>
@@ -203,14 +227,23 @@ export default function Marketplace() {
                                   {product?.name}
                                 </Text>
                                 {product?.status === 'available' ? (
-                                  <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type='primary'>
-                                    <Text className='font-[600] text-light1' size='sm'>
-                                      ${product?.price}
-                                    </Text>
-                                  </GradientPressable>
+                                  isSubscribed ? (
+                                    <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1'>
+                                      <Text className='font-[600]' size='xs' color='light1_light2'>
+                                        ACTIVE
+                                      </Text>
+                                    </Pressable>
+                                  ) : (
+                                    <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type='primary'>
+                                      <Text className='font-[600] text-light1' size='sm'>
+                                        ${product?.price}
+                                      </Text>
+                                    </GradientPressable>
+                                  )
                                 ) : (
                                   <></>
                                 )}
+
                                 {product?.status === 'coming_soon' ? (
                                   <View className='self-start h-[24px] items-center justify-center px-[12px] rounded-md' background='grey5_dark3'>
                                     <Text className='font-[600] text-light1' size='xs' color='grey2_light2'>

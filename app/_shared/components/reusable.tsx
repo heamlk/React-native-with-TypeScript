@@ -20,6 +20,7 @@ export type GetThemeBackgroundProps = {
     | 'input2'
     | 'button'
     | 'buttonOutline'
+    | 'green1'
     | 'light1_dark1'
     | 'light1_dark2'
     | 'grey5_dark2'
@@ -47,6 +48,7 @@ export const getThemeBackground = ({ theme, background, breakpoints }: GetThemeB
     button: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.purple1,
     buttonOutline: theme === 'light' ? themeVars.colors.grey5 : 'transparent',
 
+    green1: themeVars.colors.green1,
     light1_dark1: theme === 'light' ? themeVars.colors.light1 : themeVars.colors.dark1,
     light1_dark2: theme === 'light' ? themeVars.colors.light1 : themeVars.colors.dark2,
     grey3_dark1: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.dark1,
