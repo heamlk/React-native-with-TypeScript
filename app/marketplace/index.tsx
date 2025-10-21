@@ -1,4 +1,4 @@
-import { ImageBackground } from 'react-native'
+import { Image, ImageBackground } from 'react-native'
 import { GradientPressable, View, Text, getThemeBorder, Pressable, getThemeBackground } from '../_shared/components/reusable'
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
 import ImageMarketplace from '@/app/_assets/images/marketplace.jpg'
@@ -9,8 +9,10 @@ import useBreakpoints from '../_hooks/breakpoints'
 import { LinearGradient } from 'expo-linear-gradient'
 import themeVars from '../_styles/theme/themeVars'
 import { useState } from 'react'
-import { MarketplaceProduct } from '../_context/auth.types'
+import { MarketplaceProduct, SubscriptionOption } from '../_context/auth.types'
 import { useUser } from '../_context/user'
+import { BlurView } from 'expo-blur'
+import IconBack from '@/app/_assets/icons/arrow-narrow-left.svg'
 
 export default function Marketplace() {
   const { theme } = useTheme()
@@ -22,6 +24,8 @@ export default function Marketplace() {
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30
+
+  const [popup, setPopup] = useState<null | { product: MarketplaceProduct; subscriptionOption: SubscriptionOption }>(null)
 
   const [activeFilters, setActiveFilters] = useState<('monthly' | 'oneTime' | 'active')[]>([])
   const filters: ('monthly' | 'oneTime' | 'active')[] = ['active', 'monthly', 'oneTime']
@@ -36,8 +40,80 @@ export default function Marketplace() {
     })
   }
 
+  const handlePopupOpen = ({ product, subscriptionOption }: { product: MarketplaceProduct; subscriptionOption: SubscriptionOption }) => {
+    setPopup({ product, subscriptionOption })
+  }
+
+  const handlePopupClose = () => {
+    setPopup(null)
+  }
+
+  const activateSubscription = ({ subscriptionOption }: { subscriptionOption: SubscriptionOption }) => {}
+
   return (
-    <AuthenticatedLayout keepMarginsOnMobile={breakpoints === 'phone' ? false : true} keepSafePaddingOnMobile={breakpoints === 'phone' ? false : true}>
+    <AuthenticatedLayout keepMarginsOnMobile={breakpoints === 'phone' ? false : true} keepSafePaddingOnMobile={breakpoints === 'phone' ? false : true} disableRelative={popup ? true : false} mainZIndex={popup ? 10 : 0}>
+      {popup ? (
+        <Pressable className='w-[100%] h-[100%] absolute top-[0] left-[0] z-[100]' onPress={handlePopupClose}>
+          <BlurView className='w-[100%] h-[100%] items-center justify-center' style={{ backgroundColor: theme === 'light' ? themeVars.colors.white + themeVars.colors.opacity60 : themeVars.colors.dark2 + themeVars.colors.opacity60 }} intensity={20}>
+            <View className='w-[100%] max-w-[500px] base:h-[250px] phone:h-[500px] flex-row gap-[16px]'>
+              {breakpoints !== 'phone' ? (
+                <Pressable className='w-[48px] h-[48px] rounded-[20px] items-center justify-center' background='dark2/60' onPress={handlePopupClose}>
+                  <IconBack />
+                </Pressable>
+              ) : (
+                <></>
+              )}
+
+              <Pressable className='flex-1 rounded-md border-[1px] cursor-default' background='grey6_dark6' border='transparent_dark3' onPress={(e) => e.preventDefault()}>
+                {breakpoints !== 'phone' ? (
+                  <View className='relative' style={{ width: 436, height: 240 }}>
+                    <LinearGradient className='flex-1 base:h-[118px] phone:h-[146px] absolute bottom-[0px] left-[1px] z-[100]' colors={[theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7, 'transparent']} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={{ width: 432 }} />
+                    <Image source={{ uri: popup?.product?.banner_image }} style={{ width: 432, height: 240, borderTopLeftRadius: themeVars.borderRadius.md, borderTopRightRadius: themeVars.borderRadius.md }} />
+                  </View>
+                ) : (
+                  <></>
+                )}
+
+                <View className='flex-1 gap-[24px] px-[24px] pb-[24px] base:pt-[24px] phone:pt-[0]'>
+                  <Text className='font-[600] text-[24px]' color='grey1_light1'>
+                    {popup?.product?.name}
+                  </Text>
+                  <View className='border-t-[1px] border-b-[1px] py-[24px]' border='grey3_dark3'>
+                    <Text size='md' color='grey1_light1'>
+                      {popup?.product?.description}
+                    </Text>
+                  </View>
+                  <View className='flex-1 justify-end'>
+                    <View className='flex-row justify-between'>
+                      <Text className='font-[600]' size='md' color='grey1_light1'>
+                        ${popup?.product?.price}
+                        {popup?.product?.type === 'subscription' ? '/Month' : ''}
+                      </Text>
+
+                      {popup?.subscriptionOption?.active_until >= Math.floor(Date.now() / 1000) ? (
+                        <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1'>
+                          <Text className='font-[600]' size='xs' color='light1_light2'>
+                            ACTIVE
+                          </Text>
+                        </Pressable>
+                      ) : (
+                        <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type={theme === 'light' ? 'dark' : 'primary'} onPress={() => activateSubscription({ subscriptionOption: popup?.subscriptionOption })}>
+                          <Text className='font-[600] text-light1' size='sm'>
+                            Activate
+                          </Text>
+                        </GradientPressable>
+                      )}
+                    </View>
+                  </View>
+                </View>
+              </Pressable>
+            </View>
+          </BlurView>
+        </Pressable>
+      ) : (
+        <></>
+      )}
+
       <View className='w-[100%] gap-[24px]'>
         {/* Banner */}
         <View className='w-[100%] relative'>
@@ -115,8 +191,11 @@ export default function Marketplace() {
                           }
 
                           let isSubscribed = false
+                          let subscriptionOption: any = {}
+
                           Object.entries(user?.profile?.subscription?.options || {})?.forEach(([key, value]) => {
                             if (product?.id === key) {
+                              subscriptionOption = value
                               const active_until = value?.active_until
                               isSubscribed = active_until >= Math.floor(Date.now() / 1000)
                             }
@@ -134,13 +213,13 @@ export default function Marketplace() {
                                 </Text>
                                 {product?.status === 'available' ? (
                                   isSubscribed ? (
-                                    <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1'>
+                                    <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1' onPress={() => handlePopupOpen({ product, subscriptionOption })}>
                                       <Text className='font-[600]' size='xs' color='light1_light2'>
                                         ACTIVE
                                       </Text>
                                     </Pressable>
                                   ) : (
-                                    <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type='primary'>
+                                    <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type='primary' onPress={() => handlePopupOpen({ product, subscriptionOption })}>
                                       <Text className='font-[600] text-light1' size='sm'>
                                         ${product?.price}/Month
                                       </Text>
@@ -209,8 +288,12 @@ export default function Marketplace() {
                           }
 
                           let isSubscribed = false
+                          let subscriptionOption: any = {}
+
                           Object.entries(user?.profile?.subscription?.options || {})?.forEach(([key, value]) => {
                             if (product?.id === key) {
+                              subscriptionOption = value
+
                               const active_until = value?.active_until
                               isSubscribed = active_until >= Math.floor(Date.now() / 1000)
                             }
@@ -228,13 +311,13 @@ export default function Marketplace() {
                                 </Text>
                                 {product?.status === 'available' ? (
                                   isSubscribed ? (
-                                    <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1'>
+                                    <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1' onPress={() => handlePopupOpen({ product, subscriptionOption })}>
                                       <Text className='font-[600]' size='xs' color='light1_light2'>
                                         ACTIVE
                                       </Text>
                                     </Pressable>
                                   ) : (
-                                    <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type='primary'>
+                                    <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type='primary' onPress={() => handlePopupOpen({ product, subscriptionOption })}>
                                       <Text className='font-[600] text-light1' size='sm'>
                                         ${product?.price}
                                       </Text>
