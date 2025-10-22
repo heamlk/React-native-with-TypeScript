@@ -2,7 +2,7 @@ import React, { createContext, Dispatch, SetStateAction, useContext, useEffect, 
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios'
 import storage from '../_shared/storage/storage'
 import { io, Socket } from 'socket.io-client'
-import type { ChatMessage, CompanionInfos, OwnModelParams } from './auth.types'
+import type { ChatMessage, CompanionInfos, MarketplaceProduct, OwnModelParams } from './auth.types'
 
 export interface ServerToClientEvents {
   new_chat_message: (eventData: { companion_id: string; message: ChatMessage; local_message_id?: string; audio?: Uint8Array }) => void
@@ -66,6 +66,8 @@ export type ApiContextType = {
   postUpdateSubscriptionOptionStatus: ({ active, product_id }: { active: boolean; product_id: string }) => Promise<AxiosResponse<any, any, {}>>
   postGetManageSubscriptionUrl: () => Promise<AxiosResponse<any, any, {}>>
   postVerifyAge: ({ agechecker_uuid }: { agechecker_uuid: string }) => Promise<AxiosResponse<any, any, {}>>
+  postAddSubscriptionOption: ({ productId, success_url, cancel_url }: { productId: string; success_url: string; cancel_url: string }) => Promise<AxiosResponse<any, any, {}>>
+  postGetPaymentUrl: ({ productId, success_url, cancel_url }: { productId: string; success_url: string; cancel_url: string }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -368,6 +370,38 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  const postAddSubscriptionOption = async ({ productId, success_url, cancel_url }: { productId: MarketplaceProduct['id']; success_url: string; cancel_url: string }) => {
+    return await api.post(
+      `marketplace/add-subscription-option`,
+      {
+        product_id: productId,
+        success_url,
+        cancel_url,
+      },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
+  const postGetPaymentUrl = async ({ productId, success_url, cancel_url }: { productId: MarketplaceProduct['id']; success_url: string; cancel_url: string }) => {
+    return await api.post(
+      `marketplace/payment-url`,
+      {
+        product_id: productId,
+        success_url,
+        cancel_url,
+      },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
   useEffect(() => {
     const newSocket = socket
     setSocketState(newSocket)
@@ -412,6 +446,8 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     postUpdateSubscriptionOptionStatus,
     postGetManageSubscriptionUrl,
     postVerifyAge,
+    postAddSubscriptionOption,
+    postGetPaymentUrl,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>

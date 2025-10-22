@@ -3,29 +3,29 @@ import { GradientPressable, View, Text, getThemeBorder, Pressable, getThemeBackg
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
 import ImageMarketplace from '@/app/_assets/images/marketplace.jpg'
 import { useTheme } from '../_context/theme'
-import { usePathname, useRouter } from 'expo-router'
 import useDimensions from '../_hooks/dimensions'
 import useBreakpoints from '../_hooks/breakpoints'
 import { LinearGradient } from 'expo-linear-gradient'
 import themeVars from '../_styles/theme/themeVars'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MarketplaceProduct, SubscriptionOption } from '../_context/auth.types'
 import { useUser } from '../_context/user'
 import { BlurView } from 'expo-blur'
 import IconBack from '@/app/_assets/icons/arrow-narrow-left.svg'
+import { useApi } from '../_context/api'
 
 export default function Marketplace() {
   const { theme } = useTheme()
-  const pathname = usePathname()
   const dimentions = useDimensions()
-  const router = useRouter()
   const breakpoints = useBreakpoints()
-  const { user } = useUser()
+  const { user, updateUser } = useUser()
+  const api = useApi()
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30
 
   const [popup, setPopup] = useState<null | { product: MarketplaceProduct; subscriptionOption: SubscriptionOption }>(null)
+  const [activating, setActivating] = useState<null | MarketplaceProduct['id']>(null)
 
   const [activeFilters, setActiveFilters] = useState<('monthly' | 'oneTime' | 'active')[]>([])
   const filters: ('monthly' | 'oneTime' | 'active')[] = ['active', 'monthly', 'oneTime']
@@ -48,7 +48,28 @@ export default function Marketplace() {
     setPopup(null)
   }
 
-  const activateSubscription = ({ subscriptionOption }: { subscriptionOption: SubscriptionOption }) => {}
+  const activateSubscription = async ({ product, subscriptionOption }: { product: MarketplaceProduct; subscriptionOption: SubscriptionOption }) => {
+    const isSubscription = product?.type === 'subscription'
+    setActivating(product?.id)
+    const req = isSubscription ? await api.postAddSubscriptionOption({ productId: product?.id, success_url: '/marketplace', cancel_url: '/marketplace' }) : await api.postGetPaymentUrl({ productId: product?.id, success_url: '/marketplace', cancel_url: '/marketplace' })
+    const data = req?.data
+    setActivating(null)
+
+    if (data !== 'OK' && data?.url !== null) {
+      window.location.href = data?.url
+    } else {
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(true)
+        }, 3000)
+      })
+      await updateUser()
+    }
+  }
+
+  useEffect(() => {
+    updateUser()
+  }, [])
 
   return (
     <AuthenticatedLayout keepMarginsOnMobile={breakpoints === 'phone' ? false : true} keepSafePaddingOnMobile={breakpoints === 'phone' ? false : true} disableRelative={popup ? true : false} mainZIndex={popup ? 10 : 0}>
@@ -97,9 +118,9 @@ export default function Marketplace() {
                           </Text>
                         </Pressable>
                       ) : (
-                        <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type={theme === 'light' ? 'dark' : 'primary'} onPress={() => activateSubscription({ subscriptionOption: popup?.subscriptionOption })}>
+                        <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type={theme === 'light' ? 'dark' : 'primary'} onPress={() => activateSubscription({ product: popup?.product, subscriptionOption: popup?.subscriptionOption })}>
                           <Text className='font-[600] text-light1' size='sm'>
-                            Activate
+                            {activating ? 'Loading...' : 'Activate'}
                           </Text>
                         </GradientPressable>
                       )}
