@@ -175,6 +175,8 @@ export default function OnboardingPage() {
   useEffect(() => {
     if (!isOnboardingCompleted) {
       setAllowOnboarding(true)
+    } else {
+      router.push('/friend')
     }
   }, [])
 
