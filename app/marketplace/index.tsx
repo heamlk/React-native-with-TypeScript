@@ -49,6 +49,10 @@ export default function Marketplace() {
   }
 
   const activateSubscription = async ({ product, subscriptionOption }: { product: MarketplaceProduct; subscriptionOption: SubscriptionOption }) => {
+    if (activating) {
+      return
+    }
+
     const isSubscription = product?.type === 'subscription'
     setActivating(product?.id)
     const req = isSubscription ? await api.postAddSubscriptionOption({ productId: product?.id, success_url: '/marketplace', cancel_url: '/marketplace' }) : await api.postGetPaymentUrl({ productId: product?.id, success_url: '/marketplace', cancel_url: '/marketplace' })

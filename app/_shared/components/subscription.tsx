@@ -1,20 +1,48 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Pressable, View, Text, getThemeBackground, GradientPressable } from '@/app/_shared/components/reusable'
 import IconCheckGreen from '@/app/_assets/icons/check-green.svg'
 import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
 import { useUser } from '@/app/_context/user'
+import { useApi } from '@/app/_context/api'
 
 export default function Subscription() {
-  const { user } = useUser()
+  const { user, updateUser } = useUser()
   const { theme } = useTheme()
+  const api = useApi()
   const breakpoints = useBreakpoints()
 
   const [selectedSubscription, setSelectedSubscription] = useState(0)
+  const [fetchingMonthlySubscription, setFetchingMonthlySubscription] = useState(false)
 
   const formatDate = ({ date }: { date: Date }) => {
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
   }
+
+  const handleMothlySubscription = async () => {
+    if (fetchingMonthlySubscription) {
+      return
+    }
+
+    try {
+      setFetchingMonthlySubscription(true)
+      const req = await api.postGetNewSubscriptionUrl({ mode: selectedSubscription === 0 ? 'monthly' : 'lifetime', cancel_url: '/subscription', success_url: '/subscription' })
+      const data = req?.data
+      const url = data?.url
+      setFetchingMonthlySubscription(false)
+
+      if (url) {
+        window.location.href = url
+      }
+    } catch (error) {
+      console.warn(error)
+      setFetchingMonthlySubscription(false)
+    }
+  }
+
+  useEffect(() => {
+    updateUser()
+  }, [])
 
   return (
     <View className='w-[100%] p-[24px] rounded-sm' background='grey6_dark7'>
@@ -143,7 +171,7 @@ export default function Subscription() {
               </View>
             </View>
 
-            <GradientPressable type='dark' className='h-[48px] items-center justicy-center rounded-[99999px]' combinedStyle={{ width: '100%' }}>
+            <GradientPressable type='dark' className='h-[48px] items-center justicy-center rounded-[99999px]' combinedStyle={{ width: '100%' }} onPress={handleMothlySubscription}>
               <Text className='font-[600]' size='md' color='grey1_light2'>
                 Subscribe
               </Text>

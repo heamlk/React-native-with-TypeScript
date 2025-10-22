@@ -68,6 +68,7 @@ export type ApiContextType = {
   postVerifyAge: ({ agechecker_uuid }: { agechecker_uuid: string }) => Promise<AxiosResponse<any, any, {}>>
   postAddSubscriptionOption: ({ productId, success_url, cancel_url }: { productId: string; success_url: string; cancel_url: string }) => Promise<AxiosResponse<any, any, {}>>
   postGetPaymentUrl: ({ productId, success_url, cancel_url }: { productId: string; success_url: string; cancel_url: string }) => Promise<AxiosResponse<any, any, {}>>
+  postGetNewSubscriptionUrl: ({ mode, success_url, cancel_url }: { mode: string; success_url: string; cancel_url: string }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -402,6 +403,36 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  const postGetNewSubscriptionUrl = async ({ mode, success_url, cancel_url }: { mode: string; success_url: string; cancel_url: string }) => {
+    return await api.post(
+      `marketplace/new-subscription-url`,
+      {
+        mode,
+        success_url,
+        cancel_url,
+      },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
+  //   async getNewSubscriptionUrl (mode: string, successUrl: string, cancelUrl: string) {
+  //     const payload: Record<string, string> = {
+  //         mode,
+  //         success_url: successUrl,
+  //         cancel_url: cancelUrl,
+  //     }
+  //     const response = await this.fetchApi("POST", "marketplace/new-subscription-url", payload)
+  //     const result = await response.json()
+  //     if (!("url" in result)) {
+  //         throw new BFFLApiError("Error while getting subscription URL")
+  //     }
+  //     return result.url as string
+  // }
+
   useEffect(() => {
     const newSocket = socket
     setSocketState(newSocket)
@@ -448,6 +479,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     postVerifyAge,
     postAddSubscriptionOption,
     postGetPaymentUrl,
+    postGetNewSubscriptionUrl,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>

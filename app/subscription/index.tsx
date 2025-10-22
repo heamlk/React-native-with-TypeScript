@@ -17,6 +17,10 @@ export default function SubscriptionPage() {
   const [fetchingSubscriptionBillingInfoUrl, setFetchingSubscriptionBillingInfoUrl] = useState<boolean | 'error'>(false)
 
   const handleUpdateSubscriptionOptionStatus = async ({ active, product_id }: { active: boolean; product_id: string }) => {
+    if (updatingSubscriptionOptionStatus) {
+      return
+    }
+
     setUpdatingSubscriptionOptionStatus(product_id)
 
     try {
@@ -31,6 +35,10 @@ export default function SubscriptionPage() {
   }
 
   const handleChangeBillingInfo = async () => {
+    if (fetchingSubscriptionBillingInfoUrl === true) {
+      return
+    }
+
     setFetchingSubscriptionBillingInfoUrl(true)
     try {
       const req = await api.postGetManageSubscriptionUrl()
@@ -49,6 +57,10 @@ export default function SubscriptionPage() {
   }
 
   const handleCancelSubscription = async () => {
+    if (updatingSubscriptionStatus === true) {
+      return
+    }
+
     setUpdatingSubscriptionStatus(true)
 
     try {
@@ -146,7 +158,7 @@ export default function SubscriptionPage() {
             </View>
           </View>
         ) : (
-          <></>
+          <Subscription />
         )}
 
         <View className='gap-[32px]'>
