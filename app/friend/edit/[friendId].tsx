@@ -44,8 +44,6 @@ export const defaultSelcetInput: SelcetInputType = {
   onChange: (string: string) => {},
 }
 
-export const asd = {}
-
 export default function NewFriendPage() {
   const params = useLocalSearchParams<{ friendId: string }>()
   const friendId = params.friendId
@@ -476,8 +474,8 @@ export default function NewFriendPage() {
           </Text>
           <View className='base:flex-col tablet:flex-row justify-center base:items-center base:gap-[30px] tablet:gap-[90px]'>
             {/* Soul */}
-            <View className='base:w-[100%] phone:w-[unset] tablet:min-w-[300px] desktop:min-w-[500px] base:h-[300px] tablet:h-[500px] items-center justify-center rounded-md' background={breakpoints === 'phone' ? 'transparent' : 'grey3_dark1'}>
-              {user?.activeCompanion?.profile_picture?.image ? (
+            <View className='base:w-[100%] base:w-[unset] phone:min-w-[300px] tablet:min-w-[500px] desktop:min-w-[500px] base:h-[300px] tablet:h-[500px] items-center justify-center rounded-md' background={breakpoints === 'phone' ? 'transparent' : 'grey3_dark1'}>
+              {friendId !== 'new' && user?.activeCompanion?.profile_picture?.image ? (
                 <Image
                   source={{ uri: user?.activeCompanion?.profile_picture?.image }}
                   style={{
@@ -488,7 +486,7 @@ export default function NewFriendPage() {
                 <Soul width={200} height={200} soulSize={200} />
               )}
 
-              {breakpoints === 'phone' ? <LinearGradient className='w-[100%] h-[80px] absolute bottom-[0px] left-[0px]' colors={[theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7, 'transparent']} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} /> : <></>}
+              {breakpoints === 'phone' && friendId !== 'new' ? <LinearGradient className='w-[100%] h-[80px] absolute bottom-[0px] left-[0px]' colors={[theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7, 'transparent']} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} /> : <></>}
             </View>
             {/* Soul - END */}
 
@@ -613,7 +611,7 @@ export default function NewFriendPage() {
                     </Text>
                   </Pressable>
 
-                  {user?.activeCompanion ? (
+                  {user?.activeCompanion && friendId !== 'new' ? (
                     <Pressable className='w-[100%] max-w-[290px] h-[92px] items-center justify-center rounded-md border-[2px]' background='transparent_dark1' border='red1' onPress={handleDeletePopup}>
                       <Text className='text-[24px] font-[600]' color='red1'>
                         Delete
@@ -638,11 +636,6 @@ export default function NewFriendPage() {
                       Go
                     </Text>
                   </GradientPressable>
-                  <Pressable className='w-[100%] h-[70px] items-center justify-center rounded-md border-[2px]' background='transparent_dark1' border='red1' onPress={handleDeletePopup}>
-                    <Text className='font-[600]' size='lg' color='red1'>
-                      Delete
-                    </Text>
-                  </Pressable>
                 </View>
               ) : (
                 <></>
@@ -651,8 +644,8 @@ export default function NewFriendPage() {
             {/* Form - END */}
 
             {breakpoints === 'phone' ? (
-              <Pressable className='w-[48px] h-[48px] bg-dark2/60 items-center justify-center rounded-[20px] absolute top-[24px] right-[24px]' onPress={user?.activeCompanion ? handleDelete : handleRandomize}>
-                {user?.activeCompanion ? <IconTrash /> : <IconDices />}
+              <Pressable className='w-[48px] h-[48px] bg-dark2/60 items-center justify-center rounded-[20px] absolute top-[24px] right-[24px]' onPress={user?.activeCompanion && friendId !== 'new' ? handleDelete : handleRandomize}>
+                {user?.activeCompanion && friendId !== 'new' ? <IconTrash /> : <IconDices />}
               </Pressable>
             ) : (
               <></>
