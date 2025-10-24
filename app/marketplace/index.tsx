@@ -22,7 +22,7 @@ export default function Marketplace() {
   const api = useApi()
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
-  const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30
+  const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
 
   const [popup, setPopup] = useState<null | { product: MarketplaceProduct; subscriptionOption: SubscriptionOption }>(null)
   const [activating, setActivating] = useState<null | MarketplaceProduct['id']>(null)

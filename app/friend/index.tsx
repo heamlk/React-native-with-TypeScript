@@ -21,7 +21,7 @@ export default function FriendPage() {
   const { setPopup } = usePopup()
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
-  const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30
+  const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
 
   const onCreateFriend = () => {
     if (friendLimitReached()) {

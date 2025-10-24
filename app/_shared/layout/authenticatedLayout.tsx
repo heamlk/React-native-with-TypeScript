@@ -38,7 +38,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   const { user } = useUser()
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
-  const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 34 - 30
+  const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
 
   const pages = [
     {
@@ -126,7 +126,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
       <View className='w-[100%] h-[100%]' style={{ position: disableRelative ? 'static' : 'relative' }}>
         {/* Header */}
         {breakpoints !== 'phone' ? (
-          <View className='w-[100%] flex-row items-center justify-between'>
+          <View className='w-[100%] h-[48px] flex-row items-center justify-between'>
             <Pressable onPress={() => router.push('/friend')}>
               <IconLogo width={40} height={34} theme={theme} />
             </Pressable>
