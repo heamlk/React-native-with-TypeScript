@@ -40,7 +40,9 @@ export default function User() {
   const [allowUser, setAllowUser] = useState(false)
   const [companionTyping, setCompanionTyping] = useState(false)
 
-  const [defaultVideo, setDefaultVideo] = useState<string | null>(null)
+  const [defaultVideo, setDefaultVideo] = useState<string | null>(user?.activeCompanion?.emotions_animations?.urls?.blink || null)
+  const [nextVideo, setNextVideo] = useState<string | null>(null)
+
   const [isVideoReady, setIsVideoReady] = useState(false)
   const [emotionEnabled, setEmotionEnabled] = useState(user?.activeCompanion?.emotions_animations?.enabled || false)
   const [messageInput, setMessageInput] = useState('')
@@ -186,6 +188,21 @@ export default function User() {
     }
   }
 
+  const handleCompanionEmotionEvent = async ({ companion_id, emotion }: { companion_id: string; emotion: string }) => {
+    if (companion_id !== user?.activeCompanion?.id) {
+      return
+    }
+
+    const blinkVideoUrl = user?.activeCompanion?.emotions_animations?.urls.blink
+    const smileVideoUrl = user?.activeCompanion?.emotions_animations?.urls.smile
+
+    if (emotion === 'blink') {
+      setNextVideo(() => blinkVideoUrl ?? '')
+    } else {
+      setNextVideo(() => smileVideoUrl ?? '')
+    }
+  }
+
   useEffect(() => {
     if (!friendId) {
       router.push('/profile')
@@ -202,18 +219,10 @@ export default function User() {
   }, [])
 
   useEffect(() => {
-    const blinkVideoUrl = user?.activeCompanion?.emotions_animations?.urls.blink
-
-    if (defaultVideo !== blinkVideoUrl) {
-      setDefaultVideo(() => blinkVideoUrl ?? null)
-    }
-  }, [user?.activeCompanion, defaultVideo])
-
-  useEffect(() => {
     updateConversationHistory()
 
     api.socketState?.on('companion_emotion', (event) => {
-      console.log('Socket event (companion_emotion): ', event)
+      handleCompanionEmotionEvent(event)
     })
     api.socketState?.on('companion_is_typing', (event) => {
       handleCompanionTypingEvent(event)
@@ -238,15 +247,31 @@ export default function User() {
             {emotionEnabled && user?.activeCompanion?.emotions_animations?.enabled && defaultVideo != null ? (
               <Video
                 ref={videoRef}
-                source={{ uri: defaultVideo || '' }}
+                source={{ uri: defaultVideo }}
                 resizeMode={ResizeMode.COVER}
                 shouldPlay={isVideoReady}
-                isLooping
+                isLooping={false}
                 isMuted
                 useNativeControls={false}
                 onLoad={() => setIsVideoReady(true)}
                 videoStyle={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}
                 style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}
+                onPlaybackStatusUpdate={(status) => {
+                  if (status.isLoaded && !isVideoReady) {
+                    setIsVideoReady(true)
+                  }
+
+                  if (status.isLoaded && status.didJustFinish) {
+                    const blinkVideoUrl = user?.activeCompanion?.emotions_animations?.urls?.blink || ''
+
+                    if (nextVideo !== defaultVideo) {
+                      setDefaultVideo(nextVideo)
+                      setNextVideo(blinkVideoUrl)
+                    }
+
+                    videoRef?.current?.playAsync()
+                  }
+                }}
               />
             ) : (
               <Image source={{ uri: user?.activeCompanion?.profile_picture?.image }} className='base:rounded-t-[0px] phone:rounded-t-md' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }} />
@@ -370,8 +395,6 @@ export default function User() {
             <View className='h-[60px] flex-row items-center gap-[10px] pr-[24px]'>
               <VoiceToText
                 onChange={(text) => {
-                  console.log('textL ', text)
-                  console.log('messageInput + text ', messageInput + text)
                   setMessageInput((prev) => ' ' + prev + text)
                 }}
               />
