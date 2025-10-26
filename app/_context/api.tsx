@@ -69,6 +69,8 @@ export type ApiContextType = {
   postAddSubscriptionOption: ({ productId, success_url, cancel_url }: { productId: string; success_url: string; cancel_url: string }) => Promise<AxiosResponse<any, any, {}>>
   postGetPaymentUrl: ({ productId, success_url, cancel_url }: { productId: string; success_url: string; cancel_url: string }) => Promise<AxiosResponse<any, any, {}>>
   postGetNewSubscriptionUrl: ({ mode, success_url, cancel_url }: { mode: string; success_url: string; cancel_url: string }) => Promise<AxiosResponse<any, any, {}>>
+  postUpdateAnimationStatue: ({ companionId, enabled }: { companionId: string; enabled: boolean }) => Promise<AxiosResponse<any, any, {}>>
+  postClearChat: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -419,19 +421,27 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     )
   }
 
-  //   async getNewSubscriptionUrl (mode: string, successUrl: string, cancelUrl: string) {
-  //     const payload: Record<string, string> = {
-  //         mode,
-  //         success_url: successUrl,
-  //         cancel_url: cancelUrl,
-  //     }
-  //     const response = await this.fetchApi("POST", "marketplace/new-subscription-url", payload)
-  //     const result = await response.json()
-  //     if (!("url" in result)) {
-  //         throw new BFFLApiError("Error while getting subscription URL")
-  //     }
-  //     return result.url as string
-  // }
+  const postUpdateAnimationStatue = async ({ companionId, enabled }: { companionId: string; enabled: boolean }) => {
+    return await api.post(
+      `companions/${companionId}/set-animations-status`,
+      {
+        enabled,
+      },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
+  const postClearChat = async ({ companionId }: { companionId: string }) => {
+    return await api.post(`companions/${companionId}/clear-chat`, null, {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
 
   useEffect(() => {
     const newSocket = socket
@@ -480,6 +490,8 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     postAddSubscriptionOption,
     postGetPaymentUrl,
     postGetNewSubscriptionUrl,
+    postUpdateAnimationStatue,
+    postClearChat,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>
