@@ -19,6 +19,7 @@ import { ResizeMode, Video } from 'expo-av'
 import { useApi } from '../_context/api'
 import { usePopup } from '../_context/popup'
 import Soul from '../_shared/components/Soul'
+import VoiceToText from '../_shared/components/voiceToText'
 
 export default function User() {
   const { theme } = useTheme()
@@ -367,9 +368,13 @@ export default function User() {
           <View className='w-[100%] max-w-[640px] h-[60px] flex-row border-[1px] rounded-[31px] mx-auto relative' border='grey5_dark3' background='grey5_dark2'>
             <TextInput className='h-[60px] flex-1 text-[16px] pl-[24px] pr-[12px]' color='grey1_light1' placeholder='Type a message…' value={messageInput} onChangeText={(event) => setMessageInput(event)} onSubmitEditing={handleSendMessage} returnKeyType='send' />
             <View className='h-[60px] flex-row items-center gap-[10px] pr-[24px]'>
-              <Pressable className=''>
-                <IconMicrophone width={24} height={24} color={themeVars.colors.purple5} hoverColor={themeVars.colors.purple3} />
-              </Pressable>
+              <VoiceToText
+                onChange={(text) => {
+                  console.log('textL ', text)
+                  console.log('messageInput + text ', messageInput + text)
+                  setMessageInput((prev) => ' ' + prev + text)
+                }}
+              />
 
               <Pressable className='' onPress={handleSendMessage}>
                 <IconMessage width={30} height={30} color={themeVars.colors.purple1} />
