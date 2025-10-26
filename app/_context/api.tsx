@@ -74,6 +74,8 @@ export type ApiContextType = {
   postSendMessage: ({ companionId, message }: { companionId: string; message: string }) => Promise<AxiosResponse<any, any, {}>>
   getConversationsHistory: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
   getConversationMedia: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
+  deleteConversationMedia: ({ companionId, mediaId }: { companionId: string; mediaId: string }) => Promise<AxiosResponse<any, any, {}>>
+  postGenerateCompanionMediaAnimation: ({ companionId, mediaId }: { companionId: string; mediaId: string }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -477,6 +479,29 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const deleteConversationMedia = async ({ companionId, mediaId }: { companionId: string; mediaId: string }) => {
+    return await api.delete(`companions/${companionId}/media`, {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+      data: {
+        media_id: mediaId,
+      },
+    })
+  }
+
+  const postGenerateCompanionMediaAnimation = async ({ companionId, mediaId }: { companionId: string; mediaId: string }) => {
+    return await api.post(
+      `companions/${companionId}/media/generate-animation`,
+      { media_id: mediaId },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
   useEffect(() => {
     const newSocket = socket
     setSocketState(newSocket)
@@ -529,6 +554,8 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     postSendMessage,
     getConversationsHistory,
     getConversationMedia,
+    deleteConversationMedia,
+    postGenerateCompanionMediaAnimation,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>

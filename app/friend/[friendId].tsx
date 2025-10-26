@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
 import { GradientPressable, Pressable, Text, TextInput, View } from '../_shared/components/reusable'
 import { useEffect, useRef, useState } from 'react'
-import { Image, ScrollView } from 'react-native'
+import { ActivityIndicator, Image, ScrollView } from 'react-native'
 import { useUser } from '../_context/user'
 import useBreakpoints from '../_hooks/breakpoints'
 import useDimensions from '../_hooks/dimensions'
@@ -11,6 +11,8 @@ import IconAnimationToggle from '@/app/_assets/icons/animations-toggle.svg'
 import IconClean from '@/app/_assets/icons/clean.svg'
 import IconChecked from '@/app/_assets/icons/check-circle.svg'
 import IconLeft from '@/app/_assets/icons/iconLeft'
+import IconTrash from '@/app/_assets/icons/trash.svg'
+import IconClose from '@/app/_assets/icons/close'
 import IconMessage from '@/app/_assets/icons/message'
 import themeVars from '../_styles/theme/themeVars'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -21,6 +23,8 @@ import { usePopup } from '../_context/popup'
 import Soul from '../_shared/components/Soul'
 import VoiceToText from '../_shared/components/voiceToText'
 import type { ImageMedia } from '../_context/auth.types'
+import { BlurView } from 'expo-blur'
+import Carousel, { type ICarouselInstance } from 'react-native-reanimated-carousel'
 
 export default function User() {
   const { theme } = useTheme()
@@ -35,13 +39,21 @@ export default function User() {
 
   const videoRef = useRef<Video | null>(null)
   const viewRef = useRef<ScrollView | null>(null)
+  const carouselRef = useRef<ICarouselInstance>(null)
+  const carouselSmallRef = useRef<ICarouselInstance>(null)
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
 
+  const [carouselData, setCarouselData] = useState({
+    open: false,
+    defaultIndex: 0,
+  })
   const [allowUser, setAllowUser] = useState(false)
   const [companionTyping, setCompanionTyping] = useState(false)
   const [fetchingMedia, setFetchingMedia] = useState(false)
+  const [fetchingMediaAnimation, setFetchingMediaAnimation] = useState(false)
+  const [deletingMedia, setDeletingMedia] = useState(false)
 
   const [defaultVideo, setDefaultVideo] = useState<string | null>(user?.activeCompanion?.emotions_animations?.urls?.blink || null)
   const [nextVideo, setNextVideo] = useState<string | null>(null)
@@ -253,6 +265,95 @@ export default function User() {
     }
   }
 
+  const handleBlurOpen = ({ index }: { index: number }) => {
+    setCarouselData({ open: true, defaultIndex: index })
+  }
+
+  const handleBlurClose = () => {
+    setCarouselData({ open: false, defaultIndex: 0 })
+  }
+
+  const handleCarouselDelete = async ({ mediaId }: { mediaId: string }) => {
+    if (deletingMedia) {
+      return
+    }
+
+    try {
+      setDeletingMedia(true)
+      const req = await api.deleteConversationMedia({ companionId: user?.activeCompanion?.id || '', mediaId })
+      const data = req?.data
+      setDeletingMedia(false)
+
+      if (data === 'OK') {
+        updateMedia()
+        setPopup({ open: false })
+      }
+    } catch (error) {
+      console.warn(error)
+    }
+  }
+
+  const handleCarouselDeleteClick = async ({ mediaId }: { mediaId: string }) => {
+    setPopup({
+      open: true,
+      maxWidth: 600,
+      content: (
+        <View className='gap-[24px]'>
+          <Text className='text-[24px] font-[600]' color='grey1_light1'>
+            Delete image
+          </Text>
+          <Text className='' size='md' color='grey1_light1'>
+            Are you sure you want to delete this image?
+          </Text>
+          <View className='flex-row gap-[16px]'>
+            <GradientPressable className='w-[150px] h-[48px]' type='dark' onPress={() => handleCarouselDelete({ mediaId })}>
+              <Text className='font-[600]' size='md' color='grey1_light2'>
+                Ok
+              </Text>
+            </GradientPressable>
+            <GradientPressable className='w-[150px] h-[48px]' type='dark' onPress={() => setPopup({ open: false })}>
+              <Text className='font-[600]' size='md' color='grey1_light2'>
+                Cancel
+              </Text>
+            </GradientPressable>
+          </View>
+        </View>
+      ),
+    })
+  }
+
+  const reduceByLimit = ({ number, limit }: { number: number; limit: number }) => {
+    if (limit === 0) return number
+    return number % limit
+  }
+
+  const handleGenerateCompanionAnimation = async ({ mediaId }: { mediaId: string }) => {
+    if (fetchingMediaAnimation) {
+      return
+    }
+
+    const mediaObject = conversationMedia?.find((obj) => obj?.id === mediaId)
+
+    if (mediaObject?.animation_generation_status !== null) {
+      return
+    }
+
+    try {
+      setFetchingMediaAnimation(true)
+      const req = await api.postGenerateCompanionMediaAnimation({ companionId: user?.activeCompanion?.id || '', mediaId: mediaId })
+      const data = req?.data
+      setFetchingMediaAnimation(false)
+
+      if (data === 'OK') {
+        await updateUser()
+        await updateMedia()
+      }
+    } catch (error) {
+      setFetchingMediaAnimation(false)
+      console.warn(error)
+    }
+  }
+
   useEffect(() => {
     if (!friendId) {
       router.push('/profile')
@@ -294,7 +395,106 @@ export default function User() {
   }
 
   return (
-    <AuthenticatedLayout keepSafePaddingOnMobile={false}>
+    <AuthenticatedLayout keepSafePaddingOnMobile={false} disableRelative={true} mainZIndex={carouselData?.open ? 10 : 0}>
+      {/* Blur background */}
+      {carouselData?.open ? (
+        <View className='w-[100%] h-[100%] absolute top-[0] left-[0] z-[100]'>
+          <BlurView className='w-[100%] h-[100%] items-center justify-center' style={{ backgroundColor: theme === 'light' ? themeVars.colors.white + themeVars.colors.opacity60 : themeVars.colors.dark2 + themeVars.colors.opacity60 }} intensity={20}>
+            {/* Carousel */}
+            {conversationMedia ? (
+              <Carousel
+                ref={carouselRef}
+                loop
+                width={breakpoints === 'desktop' ? 1172 : dimentions?.deviceWidth}
+                height={breakpoints === 'desktop' ? 768 : (dimentions?.deviceWidth / 293) * 192}
+                autoPlay={true}
+                data={conversationMedia}
+                defaultIndex={carouselData?.defaultIndex}
+                autoPlayInterval={9995000}
+                scrollAnimationDuration={1000}
+                onSnapToItem={(event) =>
+                  setCarouselData({
+                    open: true,
+                    defaultIndex: reduceByLimit({ number: event, limit: conversationMedia?.length }),
+                  })
+                }
+                renderItem={({ item }) => (
+                  <>
+                    <Image source={{ uri: item?.image }} style={{ width: breakpoints === 'desktop' ? 1172 : dimentions?.deviceWidth, height: breakpoints === 'desktop' ? 768 : (dimentions?.deviceWidth / 293) * 192 }} />
+                  </>
+                )}
+              />
+            ) : (
+              <></>
+            )}
+
+            {/* Carousel - END */}
+
+            {/* Controls */}
+            <View className='flex-row gap-[20px] absolute bottom-[40px] justify-center'>
+              <Pressable
+                className='w-[60px] h-[60px] items-center justify-center rounded-[9999] pr-[10px]'
+                background='black/50_dark1'
+                onPress={() => {
+                  carouselRef.current?.prev()
+                  setCarouselData({
+                    open: true,
+                    defaultIndex: reduceByLimit({ number: Number(carouselRef.current?.getCurrentIndex()), limit: conversationMedia?.length }),
+                  })
+                }}
+              >
+                <IconLeft width={35} height={35} theme={theme} />
+              </Pressable>
+              <Pressable
+                className='w-[60px] h-[60px] items-center justify-center rounded-[9999] pr-[4px]'
+                background='black/50_dark1'
+                style={{ transform: [{ rotate: '180deg' }] }}
+                onPress={() => {
+                  carouselRef.current?.next()
+                  setCarouselData({
+                    open: true,
+                    defaultIndex: reduceByLimit({ number: Number(carouselRef.current?.getCurrentIndex()), limit: conversationMedia?.length }),
+                  })
+                }}
+              >
+                <IconLeft width={35} height={35} theme={theme} />
+              </Pressable>
+              <Pressable
+                className='w-[60px] h-[60px] items-center justify-center rounded-[9999]'
+                background='black/50_dark1'
+                onPress={() => {
+                  handleCarouselDeleteClick({ mediaId: conversationMedia?.[carouselData?.defaultIndex]?.id })
+                }}
+              >
+                <IconTrash width={35} height={35} />
+              </Pressable>
+              <Pressable className='w-[60px] h-[60px] items-center justify-center rounded-[9999]' background='black/50_dark1' onPress={() => handleGenerateCompanionAnimation({ mediaId: conversationMedia?.[carouselData?.defaultIndex]?.id })}>
+                {conversationMedia?.[carouselData?.defaultIndex]?.animation_generation_status === null ? (
+                  <>
+                    <IconAnimationToggle />
+                    <Text className='font-[600]' size='xs' color='grey6_light1'>
+                      {user?.profile?.animation_generation_quota}
+                    </Text>
+                  </>
+                ) : (
+                  <ActivityIndicator size='large' color={themeVars.colors.purple1} />
+                )}
+              </Pressable>
+            </View>
+            {/* Controls - END */}
+
+            {/* Close button */}
+            <Pressable className='w-[60px] h-[60px] absolute top-[40px] right-[40px] items-center justify-center rounded-[9999]' background='black/50_dark1' onPress={handleBlurClose}>
+              <IconClose width={35} height={35} color={themeVars.colors.purple1} />
+            </Pressable>
+            {/* Close button - END */}
+          </BlurView>
+        </View>
+      ) : (
+        <></>
+      )}
+      {/* Blur background - END */}
+
       <View className='base:flex-col phone:flex-row base:rounded-[0px] phone:rounded-lg' style={{ width: containerWidth, height: containerHeight }} background='grey6_dark1'>
         {/* Character */}
         <View className='base:p-[0] phone:p-[16px] gap-[40px]' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth } : breakpoints === 'tablet' ? { width: 300 } : { width: 664 }}>
@@ -382,32 +582,43 @@ export default function User() {
               </View>
             </View>
           </View>
-
-          <View className='flex-1 gap-[12px] px-[50px]'>
-            <View className='flex-row items-center justify-between'>
-              <Text className='font-[600]' size='sm' color='grey1_light2'>
-                Shared images
-              </Text>
-              <View className='flex-row items-center gap-[16px]'>
-                <Pressable>
-                  <IconLeft theme={theme} />
-                </Pressable>
-                <Pressable style={{ transform: [{ rotate: '180deg' }] }}>
-                  <IconLeft theme={theme} />
-                </Pressable>
-              </View>
-            </View>
-
-            <View className='flex-row flex-wrap gap-[10px]'>
-              {conversationMedia?.map((image, imageIndex) => {
-                return (
-                  <Pressable key={image?.created_at + String(imageIndex)} className='w-[121px] h-[81px] border-[1px] rounded-[12px] overflow-hidden' border='grey3_dark3'>
-                    <Image source={{ uri: image?.image }} style={{ width: 121, height: 81 }} />
+          {breakpoints === 'desktop' ? (
+            <View className='flex-1 gap-[12px] px-[50px]'>
+              <View className='flex-row items-center justify-between'>
+                <Text className='font-[600]' size='sm' color='grey1_light2'>
+                  Shared images
+                </Text>
+                <View className='flex-row items-center gap-[16px]'>
+                  <Pressable onPress={() => carouselSmallRef?.current?.prev()}>
+                    <IconLeft theme={theme} />
                   </Pressable>
-                )
-              })}
+                  <Pressable style={{ transform: [{ rotate: '180deg' }] }} onPress={() => carouselSmallRef?.current?.next()}>
+                    <IconLeft theme={theme} />
+                  </Pressable>
+                </View>
+              </View>
+
+              <Carousel
+                ref={carouselSmallRef}
+                loop={true}
+                width={131}
+                height={81}
+                snapEnabled={true}
+                pagingEnabled={true}
+                autoPlayInterval={2000}
+                data={conversationMedia}
+                style={{ width: '100%' }}
+                onSnapToItem={(index) => console.log('current index:', index)}
+                renderItem={({ item, index }) => (
+                  <Pressable className='w-[121px] h-[81px] border-[1px] rounded-[12px] overflow-hidden' border='grey3_dark3' onPress={() => handleBlurOpen({ index })}>
+                    <Image source={{ uri: item?.thumbnail }} style={{ width: 121, height: 81 }} />
+                  </Pressable>
+                )}
+              />
             </View>
-          </View>
+          ) : (
+            <></>
+          )}
         </View>
         {/* Character - END */}
 
@@ -430,7 +641,7 @@ export default function User() {
                 if (message?.role === 'companion' && message?.type === 'text') {
                   return (
                     <View key={message?.content + messageIndex} className='gap-[16px] flex-row items-center'>
-                      <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px]' />
+                      <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto' />
                       <GradientPressable combinedClassname='flex-1 min-h-[44px] h-[unset] px-[10px] py-[6px] items-center justify-center' gradientClassname='rounded-[16px]' type='primary' isPressable={false}>
                         <Text className='font-[500]' size='md' color='light1'>
                           {message?.content}
@@ -441,7 +652,7 @@ export default function User() {
                 } else if (message?.role === 'companion' && message?.type === 'image') {
                   return (
                     <View key={message?.content + messageIndex} className='gap-[16px] flex-row items-center'>
-                      <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px]' />
+                      <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto' />
                       <Image style={{ width: 200, height: 150, borderRadius: 16 }} source={{ uri: message?.content }} />
                     </View>
                   )

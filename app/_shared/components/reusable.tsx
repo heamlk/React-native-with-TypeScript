@@ -125,6 +125,7 @@ export type GetThemeColorProps = {
     | 'grey3_light3'
     | 'grey3_purple5'
     | 'grey5_light3'
+    | 'grey6_light1'
     | 'black_light5'
     | 'yellow1_purple3'
     | 'light1_light2'
@@ -152,6 +153,7 @@ export const getThemeColor = ({ theme, color }: GetThemeColorProps) => {
     grey3_light3: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.light3,
     grey3_purple5: theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.purple5,
     grey5_light3: theme === 'light' ? themeVars.colors.grey5 : themeVars.colors.light3,
+    grey6_light1: theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.light1,
     black_light5: theme === 'light' ? themeVars.colors.black : themeVars.colors.light5,
     yellow1_purple3: theme === 'light' ? themeVars.colors.yellow1 : themeVars.colors.purple3,
     light1_light2: theme === 'light' ? themeVars.colors.light1 : themeVars.colors.light2,
