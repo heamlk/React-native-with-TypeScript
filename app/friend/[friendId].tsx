@@ -18,6 +18,7 @@ import { useTheme } from '../_context/theme'
 import { ResizeMode, Video } from 'expo-av'
 import { useApi } from '../_context/api'
 import { usePopup } from '../_context/popup'
+import Soul from '../_shared/components/Soul'
 
 export default function User() {
   const { theme } = useTheme()
@@ -36,13 +37,37 @@ export default function User() {
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
 
   const [allowUser, setAllowUser] = useState(false)
+  const [companionTyping, setCompanionTyping] = useState(false)
 
   const [defaultVideo, setDefaultVideo] = useState<string | null>(null)
   const [isVideoReady, setIsVideoReady] = useState(false)
   const [emotionEnabled, setEmotionEnabled] = useState(user?.activeCompanion?.emotions_animations?.enabled || false)
+  const [messageInput, setMessageInput] = useState('')
+  const [messages, setMessages] = useState<
+    {
+      content: string
+      created_at: string
+      role: 'customer' | 'companion'
+      type: 'text' | 'image'
+    }[]
+  >([])
 
   const [clearingChat, setClearingChat] = useState(false)
   const [updatingEmotionsStatus, setUpdatingEmotionsStatus] = useState(false)
+  const [sendingMessage, setSendingMessage] = useState(false)
+
+  const updateConversationHistory = async () => {
+    try {
+      const req = await api.getConversationsHistory({ companionId: user?.activeCompanion?.id || '' })
+      const data = req?.data
+
+      if (data?.status === 'OK') {
+        setMessages(data?.conversation)
+      }
+    } catch (error) {
+      console.warn(error)
+    }
+  }
 
   const handleEdit = () => {
     router.push(`/friend/edit/${user?.activeCompanion?.id}`)
@@ -83,6 +108,7 @@ export default function User() {
       setClearingChat(false)
 
       if (data === 'OK') {
+        await updateConversationHistory()
         await updateUser()
       }
     } catch (error) {
@@ -123,7 +149,41 @@ export default function User() {
     })
   }
 
-  const isAnimationsEnabled = user?.activeCompanion?.emotions_animations?.enabled ?? false
+  const handleSendMessage = async () => {
+    if (sendingMessage || !messageInput) {
+      return
+    }
+
+    const message = messageInput
+
+    setMessageInput('')
+    setMessages((prev) => [
+      ...prev,
+      {
+        content: message,
+        created_at: new Date().toString(),
+        role: 'customer',
+        type: 'text',
+      },
+    ])
+
+    try {
+      const req = await api.postSendMessage({ companionId: user?.activeCompanion?.id || '', message: message })
+      const data = req?.data
+    } catch (error) {
+      console.warn(error)
+    }
+  }
+
+  const handleCompanionTypingEvent = async ({ companion_id, is_typing }: { companion_id: string; is_typing: boolean }) => {
+    if (companion_id === user?.activeCompanion?.id) {
+      if (!is_typing) {
+        await updateConversationHistory()
+      }
+
+      setCompanionTyping(is_typing)
+    }
+  }
 
   useEffect(() => {
     if (!friendId) {
@@ -149,14 +209,18 @@ export default function User() {
   }, [user?.activeCompanion, defaultVideo])
 
   useEffect(() => {
-    const handler = ({ event }: any) => {
-      console.log('Socket event (companionEmotion): ', event)
-    }
+    updateConversationHistory()
 
-    api.socketState?.on('companionEmotion', handler)
+    api.socketState?.on('companion_emotion', (event) => {
+      console.log('Socket event (companion_emotion): ', event)
+    })
+    api.socketState?.on('companion_is_typing', (event) => {
+      handleCompanionTypingEvent(event)
+    })
 
     return () => {
-      api.socketState?.off('companionEmotion', handler)
+      api.socketState?.off('companion_emotion')
+      api.socketState?.off('companion_is_typing')
     }
   }, [])
 
@@ -170,7 +234,7 @@ export default function User() {
         {/* Character */}
         <View className='base:p-[0] phone:p-[16px]' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth } : breakpoints === 'tablet' ? { width: 300 } : { width: 664 }}>
           <View className='base:rounded-t-[0px] phone:rounded-t-md relative overflow-hidden' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}>
-            {emotionEnabled && isAnimationsEnabled && defaultVideo != null ? (
+            {emotionEnabled && user?.activeCompanion?.emotions_animations?.enabled && defaultVideo != null ? (
               <Video
                 ref={videoRef}
                 source={{ uri: defaultVideo || '' }}
@@ -246,36 +310,68 @@ export default function User() {
 
         {/* Chat container */}
         <View className='flex-1 px-[16px] base:py-[24px] phone:py-[32px]'>
-          <View className='flex-1 base:gap-[24px] phone:gap-[40px]'>
-            <View className='w-[100%] max-w-[496px] rounded-[16px] px-[20px] py-[12px] mx-auto' background='grey5_dark2'>
-              <Text className='font-[500] text-center' size='md' color='grey2_light3'>
-                Please keep in mind that all of the interactions are fictional. Do not take actual advice you see in this chat.
-              </Text>
-            </View>
-
+          <View className='flex-1'>
             {/* Chat area */}
-            <View className='w-[100%] max-w-[640px] mx-auto flex-1 gap-[16px] mb-[16px] overflow-y-auto'>
-              <View className='gap-[16px] flex-row items-center'>
-                <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px]' />
-                <GradientPressable combinedClassname='h-[44px] px-[10px] items-center justify-center' gradientClassname='rounded-[16px]' type='primary' isPressable={false}>
-                  <Text className='font-[500]' size='md' color='light1'>
-                    Hi oiofdibo! How's everything?
-                  </Text>
-                </GradientPressable>
+            <View className='w-[100%] max-w-[640px] mx-auto flex-1 gap-[16px] mb-[16px] overflow-y-auto scrollbar-hide'>
+              <View className='w-[100%] max-w-[496px] rounded-[16px] px-[20px] py-[12px] mx-auto mb-[16px]' background='grey5_dark2'>
+                <Text className='font-[500] text-center' size='md' color='grey2_light3'>
+                  Please keep in mind that all of the interactions are fictional. Do not take actual advice you see in this chat.
+                </Text>
               </View>
+
+              {messages?.map((message, messageIndex) => {
+                if (message?.role === 'companion' && message?.type === 'text') {
+                  return (
+                    <View key={message?.content + messageIndex} className='gap-[16px] flex-row items-center'>
+                      <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px]' />
+                      <GradientPressable combinedClassname='flex-1 min-h-[44px] h-[unset] px-[10px] py-[6px] items-center justify-center' gradientClassname='rounded-[16px]' type='primary' isPressable={false}>
+                        <Text className='font-[500]' size='md' color='light1'>
+                          {message?.content}
+                        </Text>
+                      </GradientPressable>
+                    </View>
+                  )
+                } else if (message?.role === 'companion' && message?.type === 'image') {
+                  return (
+                    <View key={message?.content + messageIndex} className='gap-[16px] flex-row items-center'>
+                      <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px]' />
+                      <Image style={{ width: 200, height: 150, borderRadius: 16 }} source={{ uri: message?.content }} />
+                    </View>
+                  )
+                }
+
+                return (
+                  <View key={message?.content + messageIndex} className='gap-[16px] flex-row items-center justify-end'>
+                    <View className='h-[44px] px-[20px] items-center justify-center rounded-[16px]' background='light1_dark2'>
+                      <Text className='font-[500]' size='md' color='light1'>
+                        {message?.content}
+                      </Text>
+                    </View>
+                  </View>
+                )
+              })}
+
+              {companionTyping ? (
+                <View className='gap-[16px] flex-row items-center'>
+                  <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px]' />
+                  <Soul width={44} height={44} soulSize={44} />
+                </View>
+              ) : (
+                <></>
+              )}
             </View>
             {/* Chat area - END */}
           </View>
 
           {/* Input */}
           <View className='w-[100%] max-w-[640px] h-[60px] flex-row border-[1px] rounded-[31px] mx-auto relative' border='grey5_dark3' background='grey5_dark2'>
-            <TextInput className='h-[60px] flex-1 text-[16px] pl-[24px] pr-[12px]' color='grey1_light1' placeholder='Type a message…' />
+            <TextInput className='h-[60px] flex-1 text-[16px] pl-[24px] pr-[12px]' color='grey1_light1' placeholder='Type a message…' value={messageInput} onChangeText={(event) => setMessageInput(event)} onSubmitEditing={handleSendMessage} returnKeyType='send' />
             <View className='h-[60px] flex-row items-center gap-[10px] pr-[24px]'>
               <Pressable className=''>
                 <IconMicrophone width={24} height={24} color={themeVars.colors.purple5} hoverColor={themeVars.colors.purple3} />
               </Pressable>
 
-              <Pressable className=''>
+              <Pressable className='' onPress={handleSendMessage}>
                 <IconMessage width={30} height={30} color={themeVars.colors.purple1} />
               </Pressable>
             </View>

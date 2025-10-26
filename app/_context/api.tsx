@@ -11,7 +11,7 @@ export interface ServerToClientEvents {
   companion_edit_error: () => void
   companion_deletion: (eventData: { companion_id: string }) => void
   companion_media_update: (eventData: { companion_id: string; images: any[] }) => void
-  companionEmotion: (eventData: { companion_id: string; emotion: string }) => void
+  companion_emotion: (eventData: { companion_id: string; emotion: string }) => void
   customer_update: (eventData: { customer: any }) => void
 }
 
@@ -71,6 +71,8 @@ export type ApiContextType = {
   postGetNewSubscriptionUrl: ({ mode, success_url, cancel_url }: { mode: string; success_url: string; cancel_url: string }) => Promise<AxiosResponse<any, any, {}>>
   postUpdateAnimationStatue: ({ companionId, enabled }: { companionId: string; enabled: boolean }) => Promise<AxiosResponse<any, any, {}>>
   postClearChat: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
+  postSendMessage: ({ companionId, message }: { companionId: string; message: string }) => Promise<AxiosResponse<any, any, {}>>
+  getConversationsHistory: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -443,6 +445,29 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const postSendMessage = async ({ companionId, message }: { companionId: string; message: string }) => {
+    return await api.post(
+      `companions/${companionId}/send-message`,
+      {
+        local_message_id: Math.random().toString(36).substring(7),
+        message,
+      },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
+  const getConversationsHistory = async ({ companionId }: { companionId: string }) => {
+    return await api.get(`companions/${companionId}/conversation-history`, {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
+
   useEffect(() => {
     const newSocket = socket
     setSocketState(newSocket)
@@ -492,6 +517,8 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     postGetNewSubscriptionUrl,
     postUpdateAnimationStatue,
     postClearChat,
+    postSendMessage,
+    getConversationsHistory,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>
