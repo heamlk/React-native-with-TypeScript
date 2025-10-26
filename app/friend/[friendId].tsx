@@ -14,6 +14,7 @@ import IconLeft from '@/app/_assets/icons/iconLeft'
 import IconTrash from '@/app/_assets/icons/trash.svg'
 import IconClose from '@/app/_assets/icons/close'
 import IconMessage from '@/app/_assets/icons/message'
+import IconMedia from '@/app/_assets/icons/mediaIcon.svg'
 import themeVars from '../_styles/theme/themeVars'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTheme } from '../_context/theme'
@@ -54,6 +55,9 @@ export default function User() {
   const [fetchingMedia, setFetchingMedia] = useState(false)
   const [fetchingMediaAnimation, setFetchingMediaAnimation] = useState(false)
   const [deletingMedia, setDeletingMedia] = useState(false)
+  const [clearingChat, setClearingChat] = useState(false)
+  const [updatingEmotionsStatus, setUpdatingEmotionsStatus] = useState(false)
+  const [sendingMessage, setSendingMessage] = useState(false)
 
   const [defaultVideo, setDefaultVideo] = useState<string | null>(user?.activeCompanion?.emotions_animations?.urls?.blink || null)
   const [nextVideo, setNextVideo] = useState<string | null>(null)
@@ -70,10 +74,7 @@ export default function User() {
     }[]
   >([])
   const [conversationMedia, setConversationMedia] = useState<ImageMedia[]>([])
-
-  const [clearingChat, setClearingChat] = useState(false)
-  const [updatingEmotionsStatus, setUpdatingEmotionsStatus] = useState(false)
-  const [sendingMessage, setSendingMessage] = useState(false)
+  const [mediaBlurOpen, setMediaBlurOpen] = useState(true)
 
   const updateConversationHistory = async () => {
     try {
@@ -354,6 +355,14 @@ export default function User() {
     }
   }
 
+  const handleMediaBlurOpen = () => {
+    setMediaBlurOpen(true)
+  }
+
+  const handleMediaBlurClose = () => {
+    setMediaBlurOpen(false)
+  }
+
   useEffect(() => {
     if (!friendId) {
       router.push('/profile')
@@ -395,7 +404,7 @@ export default function User() {
   }
 
   return (
-    <AuthenticatedLayout keepSafePaddingOnMobile={false} disableRelative={true} mainZIndex={carouselData?.open ? 10 : 0}>
+    <AuthenticatedLayout keepSafePaddingOnMobile={false} disableRelative={true} mainZIndex={carouselData?.open || mediaBlurOpen ? 10 : 0}>
       {/* Blur background */}
       {carouselData?.open ? (
         <View className='w-[100%] h-[100%] absolute top-[0] left-[0] z-[100]'>
@@ -495,6 +504,55 @@ export default function User() {
       )}
       {/* Blur background - END */}
 
+      {/* Media blur */}
+      {mediaBlurOpen ? (
+        <View className='w-[100%] h-[100%] absolute top-[0] left-[0] z-[99]'>
+          <View className='w-[100%] h-[100%] items-center' background='grey6_dark7'>
+            <Pressable className='w-[48px] h-[48px] mt-[16px] ml-auto mr-[24px] rounded-[20px] items-center justify-center' background='dark2/60' onPress={handleMediaBlurClose}>
+              <IconClose width={28} height={28} color='white' />
+            </Pressable>
+
+            <View className='w-[100%] gap-[12px] px-[50px] mt-[30px]'>
+              <View className='flex-row items-center justify-between'>
+                <Text className='font-[600]' size='sm' color='grey1_light2'>
+                  Shared images
+                </Text>
+                <View className='flex-row items-center gap-[16px]'>
+                  <Pressable onPress={() => carouselSmallRef?.current?.prev()}>
+                    <IconLeft theme={theme} />
+                  </Pressable>
+                  <Pressable style={{ transform: [{ rotate: '180deg' }] }} onPress={() => carouselSmallRef?.current?.next()}>
+                    <IconLeft theme={theme} />
+                  </Pressable>
+                </View>
+              </View>
+
+              <Carousel
+                ref={carouselSmallRef}
+                loop={true}
+                width={131}
+                height={81}
+                snapEnabled={true}
+                pagingEnabled={true}
+                autoPlayInterval={2000}
+                data={conversationMedia}
+                style={{ width: '100%' }}
+                onSnapToItem={(index) => console.log('current index:', index)}
+                renderItem={({ item, index }) => (
+                  <Pressable className='w-[121px] h-[81px] border-[1px] rounded-[12px] overflow-hidden' border='grey3_dark3' onPress={() => handleBlurOpen({ index })}>
+                    <Image source={{ uri: item?.thumbnail }} style={{ width: 121, height: 81 }} />
+                  </Pressable>
+                )}
+              />
+            </View>
+          </View>
+        </View>
+      ) : (
+        <></>
+      )}
+
+      {/* Media blur - END */}
+
       <View className='base:flex-col phone:flex-row base:rounded-[0px] phone:rounded-lg' style={{ width: containerWidth, height: containerHeight }} background='grey6_dark1'>
         {/* Character */}
         <View className='base:p-[0] phone:p-[16px] gap-[40px]' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth } : breakpoints === 'tablet' ? { width: 300 } : { width: 664 }}>
@@ -543,6 +601,14 @@ export default function User() {
               <></>
             )}
             {/* Settings - END */}
+
+            {breakpoints === 'phone' && conversationMedia?.length > 0 ? (
+              <Pressable className='w-[48px] h-[48px] absolute top-[16px] right-[24px] rounded-[20px] items-center justify-center' background='grey6/40_dark6/40' onPress={handleMediaBlurOpen}>
+                <IconMedia />
+              </Pressable>
+            ) : (
+              <></>
+            )}
 
             <View className='w-[100%] h-[40px] overflow-visible flex-row items-center justify-between absolute bottom-[24px] left-[0px] z-[101] px-[24px]'>
               <View className='gap-[10px] flex-row items-center'>
