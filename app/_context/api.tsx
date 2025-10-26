@@ -11,7 +11,7 @@ export interface ServerToClientEvents {
   companion_edit_error: () => void
   companion_deletion: (eventData: { companion_id: string }) => void
   companion_media_update: (eventData: { companion_id: string; images: any[] }) => void
-  companion_emotion: (eventData: { companion_id: string; emotion: string }) => void
+  companionEmotion: (eventData: { companion_id: string; emotion: string }) => void
   customer_update: (eventData: { customer: any }) => void
 }
 

@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
 import { GradientPressable, Pressable, Text, TextInput, View } from '../_shared/components/reusable'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Image } from 'react-native'
 import { useUser } from '../_context/user'
 import useBreakpoints from '../_hooks/breakpoints'
@@ -15,6 +15,8 @@ import IconMessage from '@/app/_assets/icons/message'
 import themeVars from '../_styles/theme/themeVars'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTheme } from '../_context/theme'
+import { ResizeMode, Video } from 'expo-av'
+import { useApi } from '../_context/api'
 
 export default function User() {
   const { theme } = useTheme()
@@ -24,15 +26,22 @@ export default function User() {
   const { user, setUser, updateUser } = useUser()
   const breakpoints = useBreakpoints()
   const dimentions = useDimensions()
+  const api = useApi()
+
+  const videoRef = useRef<Video | null>(null)
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
 
   const [allowUser, setAllowUser] = useState(false)
+  const [defaultVideo, setDefaultVideo] = useState<string | null>(null)
+  const [isVideoReady, setIsVideoReady] = useState(false)
 
   const handleEdit = () => {}
   const handleAnimationToggle = () => {}
   const handleClear = () => {}
+
+  const isAnimationsEnabled = user?.activeCompanion?.emotions_animations?.enabled ?? false
 
   useEffect(() => {
     if (!friendId) {
@@ -49,6 +58,41 @@ export default function User() {
     setAllowUser(true)
   }, [])
 
+  useEffect(() => {
+    const blinkVideoUrl = user?.activeCompanion?.emotions_animations?.urls.blink
+
+    if (defaultVideo !== blinkVideoUrl) {
+      setDefaultVideo(() => blinkVideoUrl ?? null)
+    }
+
+    const video = videoRef.current
+    if (!video || !defaultVideo || !isVideoReady) return
+
+    const onPlaybackStatusUpdate = (status: any) => {
+      if (status.didJustFinish && !status.isLooping) {
+        void video.replayAsync()
+      }
+    }
+
+    video.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
+
+    return () => {
+      video.setOnPlaybackStatusUpdate(null)
+    }
+  }, [user?.companions, defaultVideo])
+
+  useEffect(() => {
+    const handler = ({ event }: any) => {
+      console.log('Socket event (companionEmotion): ', event)
+    }
+
+    api.socketState?.on('companionEmotion', handler)
+
+    return () => {
+      api.socketState?.off('companionEmotion', handler)
+    }
+  }, [])
+
   if (!allowUser) {
     return <View></View>
   }
@@ -58,10 +102,25 @@ export default function User() {
       <View className='base:flex-col phone:flex-row base:rounded-[0px] phone:rounded-lg' style={{ width: containerWidth, height: containerHeight }} background='grey6_dark1'>
         {/* Character */}
         <View className='base:p-[0] phone:p-[16px]' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth } : breakpoints === 'tablet' ? { width: 300 } : { width: 664 }}>
-          <View className='base:rounded-t-[0px] phone:rounded-t-md relative' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}>
-            <Image source={{ uri: user?.activeCompanion?.profile_picture?.image }} className='base:rounded-t-[0px] phone:rounded-t-md' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }} />
+          <View className='base:rounded-t-[0px] phone:rounded-t-md relative overflow-hidden' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}>
+            {isAnimationsEnabled && defaultVideo != null ? (
+              <Video
+                ref={videoRef}
+                source={{ uri: defaultVideo }}
+                resizeMode={ResizeMode.COVER}
+                shouldPlay
+                isLooping
+                isMuted
+                useNativeControls={false}
+                onLoad={() => setIsVideoReady(true)}
+                videoStyle={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}
+                style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}
+              />
+            ) : (
+              <Image source={{ uri: user?.activeCompanion?.profile_picture?.image }} className='base:rounded-t-[0px] phone:rounded-t-md' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }} />
+            )}
 
-            {breakpoints === 'phone' ? <LinearGradient className='flex-1 h-[40px] absolute bottom-[0px] left-[0px] z-[100]' colors={[theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7, 'transparent']} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={{ width: dimentions.deviceWidth }} /> : <></>}
+            <LinearGradient className='flex-1 h-[60px] absolute bottom-[0px] left-[0px] z-[100]' colors={[theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7, 'transparent']} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={{ width: dimentions.deviceWidth }} />
 
             {/* Settings */}
             {breakpoints !== 'phone' ? (
@@ -73,7 +132,7 @@ export default function User() {
             )}
             {/* Settings - END */}
 
-            <View className='w-[100%] h-[40px] overflow-visible flex-row items-center justify-between absolute bottom-[24px] left-[0px] px-[24px]'>
+            <View className='w-[100%] h-[40px] overflow-visible flex-row items-center justify-between absolute base:bottom-[24px] phone:bottom-[48px] left-[0px] z-[101] px-[24px]'>
               <View className='gap-[10px] flex-row items-center'>
                 <Text className='text-[24px] font-[600]' color='grey1_light2'>
                   {user?.activeCompanion?.name}

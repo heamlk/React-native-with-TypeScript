@@ -10,8 +10,8 @@ const SvgComponent = ({ width = svgIconDefaultProps.width, height = svgIconDefau
     </g>
     <defs>
       <radialGradient id='A' cx='0' cy='0' r='1' gradientUnits='userSpaceOnUse' gradientTransform='translate(5.50012 3) rotate(41.1859) scale(42.5206 44.0465)'>
-        <stop stop-color='#a948ff'></stop>
-        <stop offset='1' stop-color='#860fef' stop-opacity='0'></stop>
+        <stop stopColor='#a948ff'></stop>
+        <stop offset='1' stopColor='#860fef' stopOpacity='0'></stop>
       </radialGradient>
       <clipPath id='B'>
         <path fill='#fff' d='M0 0h30v30H0z'></path>
