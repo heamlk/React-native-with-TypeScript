@@ -364,6 +364,7 @@ export default function User() {
   }
 
   const handleCompanionMediaUpdate = async ({ companion_id, images }: { companion_id: string; images: any[] }) => {
+    updateMedia()
     console.log('handleCompanionMediaUpdateEvent: ', companion_id, images)
   }
 
@@ -437,7 +438,21 @@ export default function User() {
                 }
                 renderItem={({ item }) => (
                   <>
-                    <Image source={{ uri: item?.image }} style={{ width: breakpoints === 'desktop' ? 1172 : dimentions?.deviceWidth, height: breakpoints === 'desktop' ? 768 : (dimentions?.deviceWidth / 293) * 192 }} />
+                    {item?.animation_url ? (
+                      <Video
+                        ref={videoRef}
+                        source={{ uri: item?.animation_url }}
+                        resizeMode={ResizeMode.COVER}
+                        shouldPlay
+                        isLooping={false}
+                        isMuted
+                        useNativeControls={false}
+                        videoStyle={{ width: breakpoints === 'desktop' ? 1172 : dimentions?.deviceWidth, height: breakpoints === 'desktop' ? 768 : (dimentions?.deviceWidth / 293) * 192 }}
+                        style={{ width: breakpoints === 'desktop' ? 1172 : dimentions?.deviceWidth, height: breakpoints === 'desktop' ? 768 : (dimentions?.deviceWidth / 293) * 192 }}
+                      />
+                    ) : (
+                      <Image source={{ uri: item?.image }} style={{ width: breakpoints === 'desktop' ? 1172 : dimentions?.deviceWidth, height: breakpoints === 'desktop' ? 768 : (dimentions?.deviceWidth / 293) * 192 }} />
+                    )}
                   </>
                 )}
               />
@@ -520,7 +535,7 @@ export default function User() {
               <IconClose width={28} height={28} color='white' />
             </Pressable>
 
-            <View className='w-[100%] gap-[12px] px-[50px] mt-[30px]'>
+            <View className='w-[100%] gap-[12px] px-[40px] mt-[30px]'>
               <View className='flex-row items-center justify-between'>
                 <Text className='font-[600]' size='sm' color='grey1_light2'>
                   Shared images
@@ -657,7 +672,7 @@ export default function User() {
             </View>
           </View>
           {breakpoints === 'desktop' ? (
-            <View className='flex-1 gap-[12px] px-[50px]'>
+            <View className='flex-1 gap-[12px] px-[40px]'>
               <View className='flex-row items-center justify-between'>
                 <Text className='font-[600]' size='sm' color='grey1_light2'>
                   Shared images
