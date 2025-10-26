@@ -10,7 +10,7 @@ import IconSettings from '@/app/_assets/icons/settings.svg'
 import IconAnimationToggle from '@/app/_assets/icons/animations-toggle.svg'
 import IconClean from '@/app/_assets/icons/clean.svg'
 import IconChecked from '@/app/_assets/icons/check-circle.svg'
-import IconMicrophone from '@/app/_assets/icons/microphone'
+import IconLeft from '@/app/_assets/icons/iconLeft'
 import IconMessage from '@/app/_assets/icons/message'
 import themeVars from '../_styles/theme/themeVars'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -20,6 +20,7 @@ import { useApi } from '../_context/api'
 import { usePopup } from '../_context/popup'
 import Soul from '../_shared/components/Soul'
 import VoiceToText from '../_shared/components/voiceToText'
+import type { ImageMedia } from '../_context/auth.types'
 
 export default function User() {
   const { theme } = useTheme()
@@ -39,6 +40,7 @@ export default function User() {
 
   const [allowUser, setAllowUser] = useState(false)
   const [companionTyping, setCompanionTyping] = useState(false)
+  const [fetchingMedia, setFetchingMedia] = useState(false)
 
   const [defaultVideo, setDefaultVideo] = useState<string | null>(user?.activeCompanion?.emotions_animations?.urls?.blink || null)
   const [nextVideo, setNextVideo] = useState<string | null>(null)
@@ -54,6 +56,7 @@ export default function User() {
       type: 'text' | 'image'
     }[]
   >([])
+  const [conversationMedia, setConversationMedia] = useState<ImageMedia[]>([])
 
   const [clearingChat, setClearingChat] = useState(false)
   const [updatingEmotionsStatus, setUpdatingEmotionsStatus] = useState(false)
@@ -203,6 +206,26 @@ export default function User() {
     }
   }
 
+  const updateMedia = async () => {
+    if (fetchingMedia) {
+      return
+    }
+
+    try {
+      setFetchingMedia(true)
+      const req = await api.getConversationMedia({ companionId: user?.activeCompanion?.id || '' })
+      const data = req?.data
+      setFetchingMedia(false)
+
+      if (data?.status === 'OK') {
+        setConversationMedia(data?.images)
+      }
+    } catch (error) {
+      setFetchingMedia(false)
+      console.warn(error)
+    }
+  }
+
   useEffect(() => {
     if (!friendId) {
       router.push('/profile')
@@ -214,6 +237,7 @@ export default function User() {
       return
     }
 
+    updateMedia()
     updateUser()
     setAllowUser(true)
   }, [])
@@ -242,7 +266,7 @@ export default function User() {
     <AuthenticatedLayout keepSafePaddingOnMobile={false}>
       <View className='base:flex-col phone:flex-row base:rounded-[0px] phone:rounded-lg' style={{ width: containerWidth, height: containerHeight }} background='grey6_dark1'>
         {/* Character */}
-        <View className='base:p-[0] phone:p-[16px]' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth } : breakpoints === 'tablet' ? { width: 300 } : { width: 664 }}>
+        <View className='base:p-[0] phone:p-[16px] gap-[40px]' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth } : breakpoints === 'tablet' ? { width: 300 } : { width: 664 }}>
           <View className='base:rounded-t-[0px] phone:rounded-t-md relative overflow-hidden' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}>
             {emotionEnabled && user?.activeCompanion?.emotions_animations?.enabled && defaultVideo != null ? (
               <Video
@@ -327,6 +351,32 @@ export default function User() {
               </View>
             </View>
           </View>
+
+          <View className='flex-1 gap-[12px] px-[50px]'>
+            <View className='flex-row items-center justify-between'>
+              <Text className='font-[600]' size='sm' color='grey1_light2'>
+                Shared images
+              </Text>
+              <View className='flex-row items-center gap-[16px]'>
+                <Pressable>
+                  <IconLeft theme={theme} />
+                </Pressable>
+                <Pressable style={{ transform: [{ rotate: '180deg' }] }}>
+                  <IconLeft theme={theme} />
+                </Pressable>
+              </View>
+            </View>
+
+            <View className='flex-row flex-wrap gap-[10px]'>
+              {conversationMedia?.map((image, imageIndex) => {
+                return (
+                  <Pressable key={image?.created_at + String(imageIndex)} className='w-[121px] h-[81px] border-[1px] rounded-[12px] overflow-hidden' border='grey3_dark3'>
+                    <Image source={{ uri: image?.image }} style={{ width: 121, height: 81 }} />
+                  </Pressable>
+                )
+              })}
+            </View>
+          </View>
         </View>
         {/* Character - END */}
 
@@ -369,7 +419,7 @@ export default function User() {
                 return (
                   <View key={message?.content + messageIndex} className='gap-[16px] flex-row items-center justify-end'>
                     <View className='h-[44px] px-[20px] items-center justify-center rounded-[16px]' background='light1_dark2'>
-                      <Text className='font-[500]' size='md' color='light1'>
+                      <Text className='font-[500]' size='md' color='grey1_light1'>
                         {message?.content}
                       </Text>
                     </View>

@@ -73,6 +73,7 @@ export type ApiContextType = {
   postClearChat: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
   postSendMessage: ({ companionId, message }: { companionId: string; message: string }) => Promise<AxiosResponse<any, any, {}>>
   getConversationsHistory: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
+  getConversationMedia: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -468,6 +469,14 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const getConversationMedia = async ({ companionId }: { companionId: string }) => {
+    return await api.get(`companions/${companionId}/media`, {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
+
   useEffect(() => {
     const newSocket = socket
     setSocketState(newSocket)
@@ -519,6 +528,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     postClearChat,
     postSendMessage,
     getConversationsHistory,
+    getConversationMedia,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>

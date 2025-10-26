@@ -108,12 +108,12 @@ export interface CompanionAttributes {
 
 export interface ImageMedia {
   id: string
-  createdAt: Date
+  created_at: Date
   image: string
   thumbnail: string
-  isNSFW: boolean
-  animationUrl?: string
-  animationGenerationStatus?: string
+  is_nsfw: boolean
+  animation_url?: string
+  animation_generation_status?: string
 }
 
 export interface CompanionMedia {
