@@ -74,7 +74,7 @@ export default function User() {
     }[]
   >([])
   const [conversationMedia, setConversationMedia] = useState<ImageMedia[]>([])
-  const [mediaBlurOpen, setMediaBlurOpen] = useState(true)
+  const [mediaBlurOpen, setMediaBlurOpen] = useState(false)
 
   const updateConversationHistory = async () => {
     try {
@@ -221,31 +221,6 @@ export default function User() {
     }
   }
 
-  const handleCompanionTypingEvent = async ({ companion_id, is_typing }: { companion_id: string; is_typing: boolean }) => {
-    if (companion_id === user?.activeCompanion?.id) {
-      if (!is_typing) {
-        await updateConversationHistory()
-      }
-
-      setCompanionTyping(is_typing)
-    }
-  }
-
-  const handleCompanionEmotionEvent = async ({ companion_id, emotion }: { companion_id: string; emotion: string }) => {
-    if (companion_id !== user?.activeCompanion?.id) {
-      return
-    }
-
-    const blinkVideoUrl = user?.activeCompanion?.emotions_animations?.urls.blink
-    const smileVideoUrl = user?.activeCompanion?.emotions_animations?.urls.smile
-
-    if (emotion === 'blink') {
-      setNextVideo(() => blinkVideoUrl ?? '')
-    } else {
-      setNextVideo(() => smileVideoUrl ?? '')
-    }
-  }
-
   const updateMedia = async () => {
     if (fetchingMedia) {
       return
@@ -363,6 +338,35 @@ export default function User() {
     setMediaBlurOpen(false)
   }
 
+  const handleCompanionTypingEvent = async ({ companion_id, is_typing }: { companion_id: string; is_typing: boolean }) => {
+    if (companion_id === user?.activeCompanion?.id) {
+      if (!is_typing) {
+        await updateConversationHistory()
+      }
+
+      setCompanionTyping(is_typing)
+    }
+  }
+
+  const handleCompanionEmotionEvent = async ({ companion_id, emotion }: { companion_id: string; emotion: string }) => {
+    if (companion_id !== user?.activeCompanion?.id) {
+      return
+    }
+
+    const blinkVideoUrl = user?.activeCompanion?.emotions_animations?.urls.blink
+    const smileVideoUrl = user?.activeCompanion?.emotions_animations?.urls.smile
+
+    if (emotion === 'blink') {
+      setNextVideo(() => blinkVideoUrl ?? '')
+    } else {
+      setNextVideo(() => smileVideoUrl ?? '')
+    }
+  }
+
+  const handleCompanionMediaUpdate = async ({ companion_id, images }: { companion_id: string; images: any[] }) => {
+    console.log('handleCompanionMediaUpdateEvent: ', companion_id, images)
+  }
+
   useEffect(() => {
     if (!friendId) {
       router.push('/profile')
@@ -388,10 +392,14 @@ export default function User() {
     api.socketState?.on('companion_is_typing', (event) => {
       handleCompanionTypingEvent(event)
     })
+    api.socketState?.on('companion_media_update', (event) => {
+      handleCompanionMediaUpdate(event)
+    })
 
     return () => {
       api.socketState?.off('companion_emotion')
       api.socketState?.off('companion_is_typing')
+      api.socketState?.off('companion_media_update')
     }
   }, [])
 
