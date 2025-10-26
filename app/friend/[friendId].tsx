@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
 import { GradientPressable, Pressable, Text, TextInput, View } from '../_shared/components/reusable'
 import { useEffect, useRef, useState } from 'react'
-import { Image } from 'react-native'
+import { Image, ScrollView } from 'react-native'
 import { useUser } from '../_context/user'
 import useBreakpoints from '../_hooks/breakpoints'
 import useDimensions from '../_hooks/dimensions'
@@ -34,6 +34,7 @@ export default function User() {
   const { popup, setPopup } = usePopup()
 
   const videoRef = useRef<Video | null>(null)
+  const viewRef = useRef<ScrollView | null>(null)
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
@@ -53,7 +54,7 @@ export default function User() {
       content: string
       created_at: string
       role: 'customer' | 'companion'
-      type: 'text' | 'image'
+      type: 'text' | 'image' | 'error'
     }[]
   >([])
   const [conversationMedia, setConversationMedia] = useState<ImageMedia[]>([])
@@ -161,21 +162,47 @@ export default function User() {
     }
 
     const message = messageInput
-
-    setMessageInput('')
-    setMessages((prev) => [
-      ...prev,
+    const newMessages: any = [
+      ...messages,
       {
         content: message,
         created_at: new Date().toString(),
         role: 'customer',
         type: 'text',
       },
-    ])
+    ]
+
+    setMessageInput('')
+    setMessages(newMessages)
 
     try {
       const req = await api.postSendMessage({ companionId: user?.activeCompanion?.id || '', message: message })
       const data = req?.data
+      let errorMessage = ''
+
+      if (data === 'INAPPROPRIATE_MESSAGE') {
+        errorMessage = 'Message rejected due to inappropriate content'
+      } else if (data === 'CUSTOMER_AGE_NOT_VERIFIED') {
+        errorMessage = 'Please verify your age before sending NSFW messages'
+      } else if (data === 'MISSING_NSFW_SUBSCRIPTION_OPTION') {
+        errorMessage = 'Message rejected due to missing NSFW subscription option'
+      } else if (data === 'NSFW_DISABLED') {
+        errorMessage = 'Message rejected due to NSFW being disabled'
+      } else if (data !== 'OK') {
+        errorMessage = 'Error while sending message'
+      }
+
+      if (errorMessage) {
+        setMessages([
+          ...newMessages,
+          {
+            content: errorMessage,
+            created_at: new Date().toString(),
+            role: 'customer',
+            type: 'error',
+          },
+        ])
+      }
     } catch (error) {
       console.warn(error)
     }
@@ -257,6 +284,10 @@ export default function User() {
       api.socketState?.off('companion_is_typing')
     }
   }, [])
+
+  useEffect(() => {
+    viewRef?.current?.scrollToEnd({ animated: true })
+  }, [messages])
 
   if (!allowUser) {
     return <View></View>
@@ -388,7 +419,7 @@ export default function User() {
         <View className='flex-1 px-[16px] base:py-[24px] phone:py-[32px]'>
           <View className='flex-1'>
             {/* Chat area */}
-            <View className='w-[100%] max-w-[640px] mx-auto flex-1 gap-[16px] mb-[16px] overflow-y-auto scrollbar-hide'>
+            <ScrollView ref={viewRef} className='w-[100%] max-w-[640px] mx-auto flex-1 mb-[16px] overflow-y-auto scrollbar-hide' contentContainerClassName='gap-[16px]'>
               <View className='w-[100%] max-w-[496px] rounded-[16px] px-[20px] py-[12px] mx-auto mb-[16px]' background='grey5_dark2'>
                 <Text className='font-[500] text-center' size='md' color='grey2_light3'>
                   Please keep in mind that all of the interactions are fictional. Do not take actual advice you see in this chat.
@@ -414,6 +445,12 @@ export default function User() {
                       <Image style={{ width: 200, height: 150, borderRadius: 16 }} source={{ uri: message?.content }} />
                     </View>
                   )
+                } else if (message?.role === 'customer' && message?.type === 'error') {
+                  return (
+                    <Text key={message?.content + messageIndex} className='font-[500] text-end' size='md' color='red1'>
+                      {message?.content}
+                    </Text>
+                  )
                 }
 
                 return (
@@ -435,8 +472,7 @@ export default function User() {
               ) : (
                 <></>
               )}
-            </View>
-            {/* Chat area - END */}
+            </ScrollView>
           </View>
 
           {/* Input */}
