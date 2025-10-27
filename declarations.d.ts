@@ -10,6 +10,12 @@ declare module '*.mp4' {
   export default src
 }
 
+// Sounds
+declare module '*.mp3' {
+  const src: string
+  export default src
+}
+
 // Images
 declare module '*.svg' {
   import React from 'react'

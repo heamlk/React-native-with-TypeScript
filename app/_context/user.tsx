@@ -1,7 +1,8 @@
 import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext, useEffect, useState } from 'react'
 import storage from '@/app/_shared/storage/storage'
-import { useApi } from './api'
+import { ServerToClientEvents, useApi } from './api'
 import type { CompanionAttributes, CompanionInfos, CustomerProfile, MarketplaceProduct, SubscriptionOption } from './auth.types'
+import { useSounds } from '@/app/_hooks/useSounds'
 
 export type UserContextType = {
   user: UserType | null
@@ -22,6 +23,7 @@ export type UserContextType = {
     interests?: Record<string, string> | undefined
     companionAttributes?: CompanionAttributes
   }>
+  companionIsTyping: { companion_id: string; is_typing: boolean } | null
 }
 export type UserProviderProps = { children: ReactNode }
 
@@ -59,9 +61,11 @@ export const getStoredUser = (): UserType | null => {
 }
 
 export default function UserProvider({ children }: UserProviderProps) {
+  const sounds = useSounds()
   const api = useApi()
 
   const [user, setUser] = useState<UserType | null>(getStoredUser())
+  const [companionIsTyping, setCompanionIsTyping] = useState<{ companion_id: string; is_typing: boolean } | null>(null)
 
   const updateUser = async () => {
     const [getProfileRes, getLifetimeInfoRes] = await Promise.all([api.getProfile(), api.getLifetimeInfo()])
@@ -134,20 +138,49 @@ export default function UserProvider({ children }: UserProviderProps) {
     setUser(user)
   }, [user])
 
-  useEffect(() => {
-    const handler = ({ customer }: any) => {
-      console.log('Socket event (customer_update): ', customer)
-      // api.socketState?.customer = parseCustomerProfile(rawCustomer)
-    }
+  // useEffect(() => {
+  //   // api.socketState?.on('customer_update', (event) => {
+  //   //   console.log('Socket event (customer_update): ', event)
+  //   // })
 
-    api.socketState?.on('customer_update', handler)
+  //   // api.socketState?.on('new_chat_message', (event) => {
+  //   //   console.log('Socket event (new_chat_message): ', event)
+  //   //   // sounds?.newMessage()
+  //   // })
+
+  //   // api.socketState?.on('companion_update', (event) => {
+  //   //   console.log('Socket event (companion_update): ', event)
+  //   // })
+
+  //   // api.socketState?.on('companion_media_update', (event) => {
+  //   //   console.log('Socket event (companion_media_update): ', event)
+  //   // })
+
+  //   api.socketState?.on('companion_is_typing', (event) => {
+  //     setCompanionIsTyping(event)
+  //     console.log('Socket event (companion_is_typing): ', event)
+  //   })
+
+  //   return () => {
+  //     // api.socketState?.off('customer_update')
+  //     // api.socketState?.off('new_chat_message')
+  //     // api.socketState?.off('companion_update')
+  //     // api.socketState?.off('companion_media_update')
+  //     api.socketState?.off('companion_is_typing')
+  //   }
+  // }, [])
+
+  useEffect(() => {
+    api.socketState?.on('companion_is_typing', (event) => {
+      setCompanionIsTyping(event)
+    })
 
     return () => {
-      api.socketState?.off('customer_update', handler)
+      api.socketState?.off('companion_is_typing')
     }
-  }, [])
+  }, [api.socketState?.active])
 
-  const value = { user, setUser, updateUser, getSubscriptionOption, isSubscriptionOptionActive, hasAdditionalAISubscription, friendLimitReached, friendLimitReachedDialog, isPurchaseActive }
+  const value = { user, companionIsTyping, setUser, updateUser, getSubscriptionOption, isSubscriptionOptionActive, hasAdditionalAISubscription, friendLimitReached, friendLimitReachedDialog, isPurchaseActive }
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }

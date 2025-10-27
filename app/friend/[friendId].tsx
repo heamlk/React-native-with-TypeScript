@@ -26,13 +26,15 @@ import VoiceToText from '../_shared/components/voiceToText'
 import type { ImageMedia } from '../_context/auth.types'
 import { BlurView } from 'expo-blur'
 import Carousel, { type ICarouselInstance } from 'react-native-reanimated-carousel'
+import { useSounds } from '../_hooks/useSounds'
 
 export default function User() {
+  const sounds = useSounds()
   const { theme } = useTheme()
   const router = useRouter()
   const params = useLocalSearchParams<{ friendId: string }>()
   const friendId = params.friendId
-  const { user, setUser, updateUser } = useUser()
+  const { user, setUser, updateUser, companionIsTyping } = useUser()
   const breakpoints = useBreakpoints()
   const dimentions = useDimensions()
   const api = useApi()
@@ -51,7 +53,6 @@ export default function User() {
     defaultIndex: 0,
   })
   const [allowUser, setAllowUser] = useState(false)
-  const [companionTyping, setCompanionTyping] = useState(false)
   const [fetchingMedia, setFetchingMedia] = useState(false)
   const [fetchingMediaAnimation, setFetchingMediaAnimation] = useState(false)
   const [deletingMedia, setDeletingMedia] = useState(false)
@@ -83,7 +84,10 @@ export default function User() {
 
       if (data?.status === 'OK') {
         setMessages(data?.conversation)
+        return data?.conversation
       }
+
+      return []
     } catch (error) {
       console.warn(error)
     }
@@ -189,9 +193,11 @@ export default function User() {
     setMessages(newMessages)
 
     try {
+      setSendingMessage(true)
       const req = await api.postSendMessage({ companionId: user?.activeCompanion?.id || '', message: message })
       const data = req?.data
       let errorMessage = ''
+      setSendingMessage(false)
 
       if (data === 'INAPPROPRIATE_MESSAGE') {
         errorMessage = 'Message rejected due to inappropriate content'
@@ -217,6 +223,7 @@ export default function User() {
         ])
       }
     } catch (error) {
+      setSendingMessage(false)
       console.warn(error)
     }
   }
@@ -339,12 +346,24 @@ export default function User() {
   }
 
   const handleCompanionTypingEvent = async ({ companion_id, is_typing }: { companion_id: string; is_typing: boolean }) => {
-    if (companion_id === user?.activeCompanion?.id) {
-      if (!is_typing) {
-        await updateConversationHistory()
-      }
+    if (companion_id === user?.activeCompanion?.id && !is_typing) {
+      const newHistory = await updateConversationHistory()
 
-      setCompanionTyping(is_typing)
+      if (newHistory && newHistory?.length > 0) {
+        const lastMessage = newHistory?.[newHistory?.length - 1]
+
+        if (lastMessage?.role === 'customer') {
+          return
+        }
+
+        if (lastMessage?.type === 'text') {
+          sounds?.newMessage()
+        } else if (lastMessage?.type === 'image') {
+          sounds?.newImage()
+        } else {
+          sounds?.error()
+        }
+      }
     }
   }
 
@@ -365,7 +384,6 @@ export default function User() {
 
   const handleCompanionMediaUpdate = async ({ companion_id, images }: { companion_id: string; images: any[] }) => {
     updateMedia()
-    console.log('handleCompanionMediaUpdateEvent: ', companion_id, images)
   }
 
   useEffect(() => {
@@ -390,23 +408,25 @@ export default function User() {
     api.socketState?.on('companion_emotion', (event) => {
       handleCompanionEmotionEvent(event)
     })
-    api.socketState?.on('companion_is_typing', (event) => {
-      handleCompanionTypingEvent(event)
-    })
     api.socketState?.on('companion_media_update', (event) => {
       handleCompanionMediaUpdate(event)
     })
 
     return () => {
       api.socketState?.off('companion_emotion')
-      api.socketState?.off('companion_is_typing')
       api.socketState?.off('companion_media_update')
     }
   }, [])
 
   useEffect(() => {
     viewRef?.current?.scrollToEnd({ animated: true })
-  }, [messages])
+  }, [messages, companionIsTyping])
+
+  useEffect(() => {
+    if (companionIsTyping) {
+      handleCompanionTypingEvent(companionIsTyping)
+    }
+  }, [companionIsTyping])
 
   if (!allowUser) {
     return <View></View>
@@ -560,7 +580,6 @@ export default function User() {
                 autoPlayInterval={2000}
                 data={conversationMedia}
                 style={{ width: '100%' }}
-                onSnapToItem={(index) => console.log('current index:', index)}
                 renderItem={({ item, index }) => (
                   <Pressable className='w-[121px] h-[81px] border-[1px] rounded-[12px] overflow-hidden' border='grey3_dark3' onPress={() => handleBlurOpen({ index })}>
                     <Image source={{ uri: item?.thumbnail }} style={{ width: 121, height: 81 }} />
@@ -697,7 +716,6 @@ export default function User() {
                 autoPlayInterval={2000}
                 data={conversationMedia}
                 style={{ width: '100%' }}
-                onSnapToItem={(index) => console.log('current index:', index)}
                 renderItem={({ item, index }) => (
                   <Pressable className='w-[121px] h-[81px] border-[1px] rounded-[12px] overflow-hidden' border='grey3_dark3' onPress={() => handleBlurOpen({ index })}>
                     <Image source={{ uri: item?.thumbnail }} style={{ width: 121, height: 81 }} />
@@ -731,8 +749,8 @@ export default function User() {
                   return (
                     <View key={message?.content + messageIndex} className='gap-[16px] flex-row items-center'>
                       <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto' />
-                      <GradientPressable combinedClassname='flex-1 min-h-[44px] h-[unset] px-[10px] py-[6px] items-center justify-center' gradientClassname='rounded-[16px]' type='primary' isPressable={false}>
-                        <Text className='font-[500]' size='md' color='light1'>
+                      <GradientPressable combinedClassname='flex-[unset] min-h-[32px] h-[unset] px-[10px] py-[6px] items-center justify-center' gradientClassname='rounded-[16px]' type='primary' isPressable={false}>
+                        <Text className='font-[500] flex-1' size='md' color='light1'>
                           {message?.content}
                         </Text>
                       </GradientPressable>
@@ -764,7 +782,7 @@ export default function User() {
                 )
               })}
 
-              {companionTyping ? (
+              {companionIsTyping?.is_typing ? (
                 <View className='gap-[16px] flex-row items-center'>
                   <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px]' />
                   <Soul width={44} height={44} soulSize={44} />
