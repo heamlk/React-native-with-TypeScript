@@ -138,45 +138,26 @@ export default function UserProvider({ children }: UserProviderProps) {
     setUser(user)
   }, [user])
 
-  // useEffect(() => {
-  //   // api.socketState?.on('customer_update', (event) => {
-  //   //   console.log('Socket event (customer_update): ', event)
-  //   // })
-
-  //   // api.socketState?.on('new_chat_message', (event) => {
-  //   //   console.log('Socket event (new_chat_message): ', event)
-  //   //   // sounds?.newMessage()
-  //   // })
-
-  //   // api.socketState?.on('companion_update', (event) => {
-  //   //   console.log('Socket event (companion_update): ', event)
-  //   // })
-
-  //   // api.socketState?.on('companion_media_update', (event) => {
-  //   //   console.log('Socket event (companion_media_update): ', event)
-  //   // })
-
-  //   api.socketState?.on('companion_is_typing', (event) => {
-  //     setCompanionIsTyping(event)
-  //     console.log('Socket event (companion_is_typing): ', event)
-  //   })
-
-  //   return () => {
-  //     // api.socketState?.off('customer_update')
-  //     // api.socketState?.off('new_chat_message')
-  //     // api.socketState?.off('companion_update')
-  //     // api.socketState?.off('companion_media_update')
-  //     api.socketState?.off('companion_is_typing')
-  //   }
-  // }, [])
-
   useEffect(() => {
     api.socketState?.on('companion_is_typing', (event) => {
       setCompanionIsTyping(event)
     })
 
+    api.socketState?.on('new_chat_message', (event) => {
+      if (event?.message?.role === 'companion') {
+        if (event?.message?.type === 'text') {
+          sounds?.newMessage()
+        } else if (event?.message?.type === 'image') {
+          sounds?.newImage()
+        } else {
+          sounds?.error()
+        }
+      }
+    })
+
     return () => {
       api.socketState?.off('companion_is_typing')
+      api.socketState?.off('new_chat_message')
     }
   }, [api.socketState?.active])
 

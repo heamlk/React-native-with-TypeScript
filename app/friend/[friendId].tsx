@@ -345,28 +345,6 @@ export default function User() {
     setMediaBlurOpen(false)
   }
 
-  const handleCompanionTypingEvent = async ({ companion_id, is_typing }: { companion_id: string; is_typing: boolean }) => {
-    if (companion_id === user?.activeCompanion?.id && !is_typing) {
-      const newHistory = await updateConversationHistory()
-
-      if (newHistory && newHistory?.length > 0) {
-        const lastMessage = newHistory?.[newHistory?.length - 1]
-
-        if (lastMessage?.role === 'customer') {
-          return
-        }
-
-        if (lastMessage?.type === 'text') {
-          sounds?.newMessage()
-        } else if (lastMessage?.type === 'image') {
-          sounds?.newImage()
-        } else {
-          sounds?.error()
-        }
-      }
-    }
-  }
-
   const handleCompanionEmotionEvent = async ({ companion_id, emotion }: { companion_id: string; emotion: string }) => {
     if (companion_id !== user?.activeCompanion?.id) {
       return
@@ -423,8 +401,8 @@ export default function User() {
   }, [messages, companionIsTyping])
 
   useEffect(() => {
-    if (companionIsTyping) {
-      handleCompanionTypingEvent(companionIsTyping)
+    if (!companionIsTyping?.is_typing) {
+      updateConversationHistory()
     }
   }, [companionIsTyping])
 
