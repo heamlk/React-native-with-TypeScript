@@ -442,7 +442,7 @@ export default function User() {
                         source={{ uri: item?.animation_url }}
                         resizeMode={ResizeMode.COVER}
                         shouldPlay
-                        isLooping={false}
+                        isLooping={true}
                         isMuted
                         useNativeControls={false}
                         videoStyle={{ width: breakpoints === 'desktop' ? 1172 : dimentions?.deviceWidth, height: breakpoints === 'desktop' ? 768 : (dimentions?.deviceWidth / 293) * 192 }}
@@ -498,18 +498,22 @@ export default function User() {
               >
                 <IconTrash width={35} height={35} />
               </Pressable>
-              <Pressable className='w-[60px] h-[60px] items-center justify-center rounded-[9999]' background='black/50_dark1' onPress={() => handleGenerateCompanionAnimation({ mediaId: conversationMedia?.[carouselData?.defaultIndex]?.id })}>
-                {conversationMedia?.[carouselData?.defaultIndex]?.animation_generation_status === null ? (
-                  <>
-                    <IconAnimationToggle />
-                    <Text className='font-[600]' size='xs' color='grey6_light1'>
-                      {user?.profile?.animation_generation_quota}
-                    </Text>
-                  </>
-                ) : (
-                  <ActivityIndicator size='large' color={themeVars.colors.purple1} />
-                )}
-              </Pressable>
+              {conversationMedia?.[carouselData?.defaultIndex]?.animation_generation_status !== 'done' ? (
+                <Pressable className='w-[60px] h-[60px] items-center justify-center rounded-[9999]' background='black/50_dark1' onPress={() => handleGenerateCompanionAnimation({ mediaId: conversationMedia?.[carouselData?.defaultIndex]?.id })}>
+                  {conversationMedia?.[carouselData?.defaultIndex]?.animation_generation_status === null ? (
+                    <>
+                      <IconAnimationToggle />
+                      <Text className='font-[600]' size='xs' color='grey6_light1'>
+                        {user?.profile?.animation_generation_quota}
+                      </Text>
+                    </>
+                  ) : (
+                    <ActivityIndicator size='large' color={themeVars.colors.purple1} />
+                  )}
+                </Pressable>
+              ) : (
+                <></>
+              )}
             </View>
             {/* Controls - END */}
 
