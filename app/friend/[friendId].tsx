@@ -27,6 +27,7 @@ import type { ImageMedia } from '../_context/auth.types'
 import { BlurView } from 'expo-blur'
 import Carousel, { type ICarouselInstance } from 'react-native-reanimated-carousel'
 import { useSounds } from '../_hooks/useSounds'
+import { resizeToFitScreen, scaleToFit } from '../_lib/utils'
 
 export default function User() {
   const sounds = useSounds()
@@ -423,7 +424,7 @@ export default function User() {
                 ref={carouselRef}
                 loop
                 width={breakpoints === 'desktop' ? 1172 : dimentions?.deviceWidth}
-                height={breakpoints === 'desktop' ? 768 : (dimentions?.deviceWidth / 293) * 192}
+                height={breakpoints === 'desktop' ? 768 : dimentions?.deviceHeight}
                 autoPlay={true}
                 data={conversationMedia}
                 defaultIndex={carouselData?.defaultIndex}
@@ -435,25 +436,31 @@ export default function User() {
                     defaultIndex: reduceByLimit({ number: event, limit: conversationMedia?.length }),
                   })
                 }
-                renderItem={({ item }) => (
-                  <>
-                    {item?.animation_url ? (
-                      <Video
-                        ref={videoRef}
-                        source={{ uri: item?.animation_url }}
-                        resizeMode={ResizeMode.COVER}
-                        shouldPlay
-                        isLooping={true}
-                        isMuted
-                        useNativeControls={false}
-                        videoStyle={{ width: breakpoints === 'desktop' ? 1172 : dimentions?.deviceWidth, height: breakpoints === 'desktop' ? 768 : (dimentions?.deviceWidth / 293) * 192 }}
-                        style={{ width: breakpoints === 'desktop' ? 1172 : dimentions?.deviceWidth, height: breakpoints === 'desktop' ? 768 : (dimentions?.deviceWidth / 293) * 192 }}
-                      />
-                    ) : (
-                      <Image source={{ uri: item?.image }} style={{ width: breakpoints === 'desktop' ? 1172 : dimentions?.deviceWidth, height: breakpoints === 'desktop' ? 768 : (dimentions?.deviceWidth / 293) * 192 }} />
-                    )}
-                  </>
-                )}
+                renderItem={({ item, index }) => {
+                  const [size, setSize] = useState([121, 81])
+
+                  Image.getSize(
+                    item?.image,
+                    (width, height) => {
+                      const { width: newWidth, height: newHeight } = scaleToFit({ width, height, targetWidth: 1172, targetHeight: 768 })
+                      const qwd = resizeToFitScreen({ imgWidth: newWidth, imgHeight: newHeight, screenWidth: dimentions.deviceWidth, screenHeight: dimentions.deviceHeight })
+                      setSize(breakpoints === 'desktop' ? [newWidth, newHeight] : [qwd.width, qwd.height])
+                    },
+                    (error) => {
+                      console.warn('Failed to get image size:', error)
+                    }
+                  )
+
+                  return (
+                    <>
+                      {item?.animation_url ? (
+                        <Video key={item?.created_at.toLocaleString() + index} source={{ uri: item?.animation_url }} resizeMode={ResizeMode.COVER} shouldPlay isLooping={true} isMuted useNativeControls={false} videoStyle={{ width: size[0], height: size[1] }} style={{ width: size[0], height: size[1], margin: 'auto' }} />
+                      ) : (
+                        <Image key={item?.created_at.toLocaleString() + index} source={{ uri: item?.image }} style={{ width: size[0], height: size[1], margin: 'auto' }} />
+                      )}
+                    </>
+                  )
+                }}
               />
             ) : (
               <></>
@@ -673,7 +680,7 @@ export default function User() {
               </View>
             </View>
           </View>
-          {breakpoints === 'desktop' ? (
+          {breakpoints !== 'phone' ? (
             <View className='flex-1 gap-[12px] px-[40px]'>
               <View className='flex-row items-center justify-between'>
                 <Text className='font-[600]' size='sm' color='grey1_light2'>
