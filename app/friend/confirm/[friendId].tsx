@@ -54,6 +54,7 @@ export default function NewFriendPage() {
 
   useEffect(() => {
     const onCompanionUpdateEvent: any = async ({ companion }: { companion: CompanionInfos }) => {
+      console.log('companion: ', companion)
       const newUser = await updateUser()
       setUpdatingImage(false)
 
@@ -70,7 +71,7 @@ export default function NewFriendPage() {
     return () => {
       api.socketState?.off('companion_update')
     }
-  }, [])
+  }, [api.socketState?.active])
 
   const handleMakeChanges = () => {
     router.push(`/friend/edit/${friend?.id}`)
@@ -100,10 +101,23 @@ export default function NewFriendPage() {
     }
   }, [])
 
+  useEffect(() => {
+    const fn = async () => {
+      const updatedUser = await updateUser()
+      const newFriend = updatedUser?.companions?.find((obj) => obj?.id === friendId)
+
+      if (newFriend) {
+        setFriend(newFriend)
+      }
+    }
+
+    fn()
+  }, [])
+
   return (
     <AuthenticatedLayout disableRelative={true} keepSafePaddingOnMobile={true}>
       <View className='base:py-[40px] phone:py-[0px] flex-1'>
-        <View className='base:flex-col tablet:flex-row justify-center base:items-center base:gap-[30px] tablet:gap-[90px] flex-1'>
+        <View className='base:flex-col tablet:flex-row base:justify-between phone:justify-center base:items-center phone:items-center base:gap-[30px] tablet:gap-[90px] phone:mt-[60px] base:flex-1 phone:flex-[unset]'>
           {/* Logo */}
           <View className='base:w-[100%] phone:max-w-[300px] tablet:max-w-[500px] base:max-h-[unset] items-center justify-center rounded-md'>
             <Image
@@ -113,6 +127,13 @@ export default function NewFriendPage() {
                 ...(breakpoints === 'phone' ? { width: dimentions?.deviceWidth - 48 - 32, height: dimentions?.deviceWidth - 48 - 32 } : breakpoints === 'tablet' ? { width: 300, height: 300 } : { width: 500, height: 500 }),
               }}
             />
+            {breakpoints === 'phone' ? (
+              <Text className='text-center font-[600] mt-[32px]' size='xl' color='grey1_light1'>
+                {friend?.name}, {friend?.age}
+              </Text>
+            ) : (
+              <></>
+            )}
 
             <Pressable className='w-[48px] h-[48px] rounded-[20px] items-center justify-center absolute top-[12px] base:right-[32px] phone:right-[12px]' background='grey6/40_dark6/40' onPress={handleRefreshImage}>
               <IconRefresh />
@@ -129,15 +150,7 @@ export default function NewFriendPage() {
           {/* Logo - END */}
 
           {/* Form */}
-          <View className='w-[100%] flex-1 gap-[100px]'>
-            {breakpoints === 'phone' ? (
-              <Text className='text-center font-[600]' size='xl' color='grey1_light1'>
-                {friend?.name}, {friend?.age}
-              </Text>
-            ) : (
-              <></>
-            )}
-
+          <View className='w-[100%] max-w-[600px] gap-[100px] base:my-[unset] phone:my-auto'>
             {breakpoints === 'phone' ? (
               <></>
             ) : (

@@ -373,9 +373,9 @@ export default function NewFriendPage() {
     api.socketState?.on('companion_update', onCompanionUpdateEvent)
 
     return () => {
-      api.socketState?.off('companion_update', onCompanionUpdateEvent)
+      api.socketState?.off('companion_update')
     }
-  }, [])
+  }, [api.socketState?.active])
 
   useEffect(() => {
     if (friendId && friendId !== 'new') {
