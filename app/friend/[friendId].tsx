@@ -48,6 +48,7 @@ export default function User() {
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
 
+  const [friend, setFriend] = useState(user?.companions?.find((obj) => obj?.id === friendId))
   const [carouselData, setCarouselData] = useState({
     open: false,
     defaultIndex: 0,
@@ -60,11 +61,11 @@ export default function User() {
   const [updatingEmotionsStatus, setUpdatingEmotionsStatus] = useState(false)
   const [sendingMessage, setSendingMessage] = useState(false)
 
-  const [defaultVideo, setDefaultVideo] = useState<string | null>(user?.activeCompanion?.emotions_animations?.urls?.blink || null)
+  const [defaultVideo, setDefaultVideo] = useState<string | null>(friend?.emotions_animations?.urls?.blink || null)
   const [nextVideo, setNextVideo] = useState<string | null>(null)
 
   const [isVideoReady, setIsVideoReady] = useState(false)
-  const [emotionEnabled, setEmotionEnabled] = useState(user?.activeCompanion?.emotions_animations?.enabled || false)
+  const [emotionEnabled, setEmotionEnabled] = useState(friend?.emotions_animations?.enabled || false)
   const [messageInput, setMessageInput] = useState('')
   const [messages, setMessages] = useState<
     {
@@ -79,7 +80,7 @@ export default function User() {
 
   const updateConversationHistory = async () => {
     try {
-      const req = await api.getConversationsHistory({ companionId: user?.activeCompanion?.id || '' })
+      const req = await api.getConversationsHistory({ companionId: friend?.id || '' })
       const data = req?.data
 
       if (data?.status === 'OK') {
@@ -94,7 +95,7 @@ export default function User() {
   }
 
   const handleEdit = () => {
-    router.push(`/friend/edit/${user?.activeCompanion?.id}`)
+    router.push(`/friend/edit/${friend?.id}`)
   }
 
   const handleAnimationToggle = async () => {
@@ -104,7 +105,7 @@ export default function User() {
 
     try {
       setUpdatingEmotionsStatus(true)
-      const req = await api.postUpdateAnimationStatue({ companionId: user?.activeCompanion?.id || '', enabled: !emotionEnabled })
+      const req = await api.postUpdateAnimationStatue({ companionId: friend?.id || '', enabled: !emotionEnabled })
       const data = req?.data
 
       setEmotionEnabled(!emotionEnabled)
@@ -127,7 +128,7 @@ export default function User() {
     try {
       setPopup({ open: false })
       setClearingChat(true)
-      const req = await api.postClearChat({ companionId: user?.activeCompanion?.id || '' })
+      const req = await api.postClearChat({ companionId: friend?.id || '' })
       const data = req?.data
       setClearingChat(false)
 
@@ -194,7 +195,7 @@ export default function User() {
 
     try {
       setSendingMessage(true)
-      const req = await api.postSendMessage({ companionId: user?.activeCompanion?.id || '', message: message })
+      const req = await api.postSendMessage({ companionId: friend?.id || '', message: message })
       const data = req?.data
       let errorMessage = ''
       setSendingMessage(false)
@@ -235,7 +236,7 @@ export default function User() {
 
     try {
       setFetchingMedia(true)
-      const req = await api.getConversationMedia({ companionId: user?.activeCompanion?.id || '' })
+      const req = await api.getConversationMedia({ companionId: friend?.id || '' })
       const data = req?.data
       setFetchingMedia(false)
 
@@ -263,7 +264,7 @@ export default function User() {
 
     try {
       setDeletingMedia(true)
-      const req = await api.deleteConversationMedia({ companionId: user?.activeCompanion?.id || '', mediaId })
+      const req = await api.deleteConversationMedia({ companionId: friend?.id || '', mediaId })
       const data = req?.data
       setDeletingMedia(false)
 
@@ -323,7 +324,7 @@ export default function User() {
 
     try {
       setFetchingMediaAnimation(true)
-      const req = await api.postGenerateCompanionMediaAnimation({ companionId: user?.activeCompanion?.id || '', mediaId: mediaId })
+      const req = await api.postGenerateCompanionMediaAnimation({ companionId: friend?.id || '', mediaId: mediaId })
       const data = req?.data
       setFetchingMediaAnimation(false)
 
@@ -346,12 +347,12 @@ export default function User() {
   }
 
   const handleCompanionEmotionEvent = async ({ companion_id, emotion }: { companion_id: string; emotion: string }) => {
-    if (companion_id !== user?.activeCompanion?.id) {
+    if (companion_id !== friend?.id) {
       return
     }
 
-    const blinkVideoUrl = user?.activeCompanion?.emotions_animations?.urls.blink
-    const smileVideoUrl = user?.activeCompanion?.emotions_animations?.urls.smile
+    const blinkVideoUrl = friend?.emotions_animations?.urls.blink
+    const smileVideoUrl = friend?.emotions_animations?.urls.smile
 
     if (emotion === 'blink') {
       setNextVideo(() => blinkVideoUrl ?? '')
@@ -581,7 +582,7 @@ export default function User() {
         {/* Character */}
         <View className='base:p-[0] phone:p-[16px] gap-[40px]' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth } : breakpoints === 'tablet' ? { width: 300 } : { width: 664 }}>
           <View className='base:rounded-t-[0px] phone:rounded-t-md relative overflow-hidden' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}>
-            {emotionEnabled && user?.activeCompanion?.emotions_animations?.enabled && defaultVideo != null ? (
+            {emotionEnabled && friend?.emotions_animations?.enabled && defaultVideo != null ? (
               <Video
                 ref={videoRef}
                 source={{ uri: defaultVideo }}
@@ -599,7 +600,7 @@ export default function User() {
                   }
 
                   if (status.isLoaded && status.didJustFinish) {
-                    const blinkVideoUrl = user?.activeCompanion?.emotions_animations?.urls?.blink || ''
+                    const blinkVideoUrl = friend?.emotions_animations?.urls?.blink || ''
 
                     if (nextVideo !== defaultVideo) {
                       setDefaultVideo(nextVideo)
@@ -611,7 +612,7 @@ export default function User() {
                 }}
               />
             ) : (
-              <Image source={{ uri: user?.activeCompanion?.profile_picture?.image }} className='base:rounded-t-[0px] phone:rounded-t-md' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }} />
+              <Image source={{ uri: friend?.profile_picture?.image }} className='base:rounded-t-[0px] phone:rounded-t-md' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }} />
             )}
 
             <LinearGradient className='flex-1 h-[100px] absolute bottom-[0px] left-[0px] z-[100]' colors={[theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7, 'transparent']} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={{ width: dimentions.deviceWidth }} />
@@ -637,7 +638,7 @@ export default function User() {
             <View className='w-[100%] h-[40px] overflow-visible flex-row items-center justify-between absolute bottom-[24px] left-[0px] z-[101] px-[24px]'>
               <View className='gap-[10px] flex-row items-center'>
                 <Text className='text-[24px] font-[600]' color='grey1_light2'>
-                  {user?.activeCompanion?.name}
+                  {friend?.name}
                 </Text>
                 {breakpoints === 'phone' ? (
                   <Pressable className='w-[20px] h-[20px] rounded-[9999px] items-center justify-center mt-[6px]' background='grey6/40_dark6/40' onPress={handleEdit}>
@@ -730,7 +731,7 @@ export default function User() {
                 if (message?.role === 'companion' && message?.type === 'text') {
                   return (
                     <View key={message?.content + messageIndex} className='gap-[16px] flex-row items-center'>
-                      <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto' />
+                      <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto' />
                       <GradientPressable combinedClassname='flex-[unset] min-h-[32px] h-[unset] px-[10px] py-[6px] items-center justify-center' gradientClassname='rounded-[16px]' type='primary' isPressable={false}>
                         <Text className='font-[500] flex-1' size='md' color='light1'>
                           {message?.content}
@@ -741,7 +742,7 @@ export default function User() {
                 } else if (message?.role === 'companion' && message?.type === 'image') {
                   return (
                     <View key={message?.content + messageIndex} className='gap-[16px] flex-row items-center'>
-                      <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto' />
+                      <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto' />
                       <Image style={{ width: 200, height: 150, borderRadius: 16 }} source={{ uri: message?.content }} />
                     </View>
                   )
@@ -766,7 +767,7 @@ export default function User() {
 
               {companionIsTyping?.is_typing ? (
                 <View className='gap-[16px] flex-row items-center'>
-                  <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px]' />
+                  <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px]' />
                   <Soul width={44} height={44} soulSize={44} />
                 </View>
               ) : (

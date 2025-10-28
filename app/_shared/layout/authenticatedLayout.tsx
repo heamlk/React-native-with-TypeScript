@@ -11,7 +11,7 @@ import IconPersonFilled from '@/app/_assets/icons/person-filled.svg'
 
 import IconMarket from '@/app/_assets/icons/market.svg'
 import IconMarketFilled from '@/app/_assets/icons/market-filled.svg'
-import { usePathname, useRouter } from 'expo-router'
+import { useLocalSearchParams, usePathname, useRouter } from 'expo-router'
 import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
 import { type ReactNode, useRef } from 'react'
@@ -19,6 +19,7 @@ import { Animated, Image } from 'react-native'
 import IconMenu from '@/app/_assets/icons/menu.svg'
 import { usePopup } from '@/app/_context/popup'
 import { useUser } from '@/app/_context/user'
+import themeVars from '@/app/_styles/theme/themeVars'
 
 export type AuthenticatedLayoutProps = {
   children: ReactNode
@@ -36,6 +37,9 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   const breakpoints = useBreakpoints()
   const popup = usePopup()
   const { user } = useUser()
+
+  const params = useLocalSearchParams<{ friendId: string }>()
+  const friendId = params.friendId
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
@@ -117,8 +121,8 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
     router.navigate(url as any)
   }
 
-  const handleCompanionPress = () => {
-    router.push(`/friend/${user?.activeCompanion?.id}`)
+  const handleCompanionPress = ({ id }: { id: string }) => {
+    router.push(`/friend/${id}`)
   }
 
   return (
@@ -132,13 +136,13 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
             </Pressable>
             <View className='flex-row items-center gap-[12px]'>
               <ThemeToggle />
-              {user?.activeCompanion?.profile_picture?.thumbnail ? (
-                <Pressable onPress={handleCompanionPress}>
-                  <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} style={{ width: 48, height: 48, borderRadius: 9999 }} />
-                </Pressable>
-              ) : (
-                <></>
-              )}
+              {user?.companions?.map((obj) => {
+                return (
+                  <Pressable key={obj?.id} onPress={() => handleCompanionPress({ id: obj?.id })}>
+                    <Image className='border-[2px]' source={{ uri: obj?.profile_picture?.thumbnail }} style={{ width: 48, height: 48, borderRadius: 9999, borderColor: friendId === obj?.id ? (theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.purple1) : 'transparent' }} />
+                  </Pressable>
+                )
+              })}
             </View>
           </View>
         ) : (
@@ -190,13 +194,13 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
               {breakpoints === 'phone' ? (
                 <>
                   <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'grey4_dark4' }) }}></View>
-                  {user?.activeCompanion?.profile_picture?.thumbnail ? (
-                    <Pressable onPress={handleCompanionPress}>
-                      <Image source={{ uri: user?.activeCompanion?.profile_picture?.thumbnail }} style={{ width: 48, height: 48, borderRadius: 9999 }} />
-                    </Pressable>
-                  ) : (
-                    <></>
-                  )}
+                  {user?.companions?.map((obj) => {
+                    return (
+                      <Pressable key={obj?.id} onPress={() => handleCompanionPress({ id: obj?.id })}>
+                        <Image className='border-[2px]' source={{ uri: obj?.profile_picture?.thumbnail }} style={{ width: 48, height: 48, borderRadius: 9999, borderColor: friendId === obj?.id ? (theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.purple1) : 'transparent' }} />
+                      </Pressable>
+                    )
+                  })}
                   <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'grey4_dark4' }) }}></View>
                   <ThemeToggle />
                 </>

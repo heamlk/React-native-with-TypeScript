@@ -49,6 +49,7 @@ export default function NewFriendPage() {
   const { user, setUser, updateUser } = useUser()
   const api = useApi()
 
+  const [friend, setFriend] = useState(user?.companions?.find((obj) => obj?.id === friendId))
   const [updatingImage, setUpdatingImage] = useState(false)
 
   useEffect(() => {
@@ -57,10 +58,9 @@ export default function NewFriendPage() {
       setUpdatingImage(false)
 
       if (friendId) {
-        const activeCompanion = newUser?.companions?.find((companion) => companion?.id === friendId)
-        if (activeCompanion) {
-          // @ts-ignore
-          setUser({ ...newUser, activeCompanion })
+        const newFriend = newUser?.companions?.find((companion) => companion?.id === friendId)
+        if (newFriend) {
+          setFriend(newFriend)
         }
       }
     }
@@ -68,22 +68,22 @@ export default function NewFriendPage() {
     api.socketState?.on('companion_update', onCompanionUpdateEvent)
 
     return () => {
-      api.socketState?.off('companion_update', onCompanionUpdateEvent)
+      api.socketState?.off('companion_update')
     }
   }, [])
 
   const handleMakeChanges = () => {
-    router.push(`/friend/edit/${user?.activeCompanion?.id}`)
+    router.push(`/friend/edit/${friend?.id}`)
   }
 
   const handleStartChatting = () => {
-    router.push(`/friend/${user?.activeCompanion?.id}`)
+    router.push(`/friend/${friend?.id}`)
   }
 
   const handleRefreshImage = async () => {
     try {
       setUpdatingImage(true)
-      const req = await api.postRegenerateCompanionPicture({ companionId: user?.activeCompanion?.id || '' })
+      const req = await api.postRegenerateCompanionPicture({ companionId: friend?.id || '' })
       const data = req?.data
     } catch (error) {
       console.warn(error)
@@ -93,9 +93,9 @@ export default function NewFriendPage() {
 
   useEffect(() => {
     if (friendId && friendId !== 'new') {
-      const activeCompanion = user?.companions?.find((companion) => companion?.id === friendId)
-      if (activeCompanion) {
-        setUser((prev) => ({ ...(prev as UserType), activeCompanion: activeCompanion }))
+      const activeFriend = user?.companions?.find((companion) => companion?.id === friendId)
+      if (activeFriend) {
+        setFriend(activeFriend)
       }
     }
   }, [])
@@ -107,7 +107,7 @@ export default function NewFriendPage() {
           {/* Logo */}
           <View className='base:w-[100%] phone:max-w-[300px] tablet:max-w-[500px] base:max-h-[unset] items-center justify-center rounded-md'>
             <Image
-              source={{ uri: user?.activeCompanion?.profile_picture?.image }}
+              source={{ uri: friend?.profile_picture?.image }}
               style={{
                 borderRadius: themeVars.borderRadius.md,
                 ...(breakpoints === 'phone' ? { width: dimentions?.deviceWidth - 48 - 32, height: dimentions?.deviceWidth - 48 - 32 } : breakpoints === 'tablet' ? { width: 300, height: 300 } : { width: 500, height: 500 }),
@@ -132,7 +132,7 @@ export default function NewFriendPage() {
           <View className='w-[100%] flex-1 gap-[100px]'>
             {breakpoints === 'phone' ? (
               <Text className='text-center font-[600]' size='xl' color='grey1_light1'>
-                {user?.activeCompanion?.name}, {user?.activeCompanion?.age}
+                {friend?.name}, {friend?.age}
               </Text>
             ) : (
               <></>
@@ -143,7 +143,7 @@ export default function NewFriendPage() {
             ) : (
               <View className='gap-[4px]'>
                 <Text className='text-center font-[600]' size='3xl' color='grey1_light3'>
-                  {user?.activeCompanion?.name}
+                  {friend?.name}
                 </Text>
                 <Text className='text-center font-[600]' size='lg' color='grey2_light3/50'>
                   {user?.profile?.first_name}’s new friend

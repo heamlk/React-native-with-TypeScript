@@ -18,7 +18,6 @@ export type UserContextType = {
     lifetimeInfo: any
     customerId?: string | undefined
     companions?: CompanionInfos[] | undefined
-    activeCompanion?: CompanionInfos | null
     products?: MarketplaceProduct[] | undefined
     interests?: Record<string, string> | undefined
     companionAttributes?: CompanionAttributes
@@ -32,7 +31,6 @@ const UserContext = createContext<UserContextType | null>(null)
 export type UserType = {
   customerId: string
   companions: CompanionInfos[]
-  activeCompanion?: CompanionInfos | null
   profile: CustomerProfile
   products: MarketplaceProduct[]
   interests: Record<string, string>
@@ -69,7 +67,7 @@ export default function UserProvider({ children }: UserProviderProps) {
 
   const updateUser = async () => {
     const [getProfileRes, getLifetimeInfoRes] = await Promise.all([api.getProfile(), api.getLifetimeInfo()])
-    const newUser = { ...user, profile: getProfileRes?.data?.customer, companions: getProfileRes?.data?.companions, lifetimeInfo: getLifetimeInfoRes?.data, activeCompanion: null }
+    const newUser = { ...user, profile: getProfileRes?.data?.customer, companions: getProfileRes?.data?.companions, lifetimeInfo: getLifetimeInfoRes?.data }
     setUser(newUser as UserType)
     return newUser
   }
@@ -128,14 +126,6 @@ export default function UserProvider({ children }: UserProviderProps) {
     }
 
     storage.set('user', JSON.stringify(user))
-
-    if (!user?.activeCompanion && user?.companions?.length > 0) {
-      const newUser = { ...user, activeCompanion: user?.companions?.[0] }
-      setUser(newUser)
-      return
-    }
-
-    setUser(user)
   }, [user])
 
   useEffect(() => {

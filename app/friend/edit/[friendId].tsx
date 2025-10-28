@@ -56,8 +56,8 @@ export default function NewFriendPage() {
   const api = useApi()
   const { setPopup } = usePopup()
 
+  const [friend, setFriend] = useState(user?.companions?.find((obj) => obj?.id === friendId))
   const [socketEvent, setSocketEvent] = useState('')
-
   const [blurActive, setBlurActive] = useState(false)
   const [mainZIndex, setMainZIndex] = useState<0 | 10>(0)
   const [inputSelect, setInputSelect] = useState<SelcetInputType>(defaultSelcetInput)
@@ -179,7 +179,7 @@ export default function NewFriendPage() {
       return
     }
 
-    if (user?.activeCompanion?.id) {
+    if (friend?.id) {
       // Updating companion
       try {
         setSocketEvent('Editing friend...')
@@ -196,7 +196,7 @@ export default function NewFriendPage() {
           personality: selectedAttributes?.personality,
           skin_tone: selectedAttributes?.skin_tone,
           universe: selectedAttributes?.universe,
-          companionId: user?.activeCompanion?.id,
+          companionId: friend?.id,
         })
         const getProfileReq = await api.getProfile()
         const newUser = { ...user, profile: getProfileReq.data?.customer, companions: getProfileReq?.data?.companions } as UserType
@@ -270,7 +270,7 @@ export default function NewFriendPage() {
     try {
       setSocketEvent('Deleting friend...')
 
-      const req = await api.deleteCompanion({ id: user?.activeCompanion?.id || '' })
+      const req = await api.deleteCompanion({ id: friend?.id || '' })
       const data = req?.data
 
       if (data === 'OK') {
@@ -379,22 +379,22 @@ export default function NewFriendPage() {
 
   useEffect(() => {
     if (friendId && friendId !== 'new') {
-      const activeCompanion = user?.companions?.find((companion) => companion?.id === friendId)
-      if (activeCompanion) {
-        setUser((prev) => ({ ...(prev as UserType), activeCompanion: activeCompanion }))
+      const activeFriend = user?.companions?.find((companion) => companion?.id === friendId)
+      if (activeFriend) {
+        setFriend(activeFriend)
         setSelectedAttributes({
-          name: activeCompanion?.name || '',
-          gender: activeCompanion?.gender || '',
-          universe: activeCompanion?.universe || '',
-          age: String(activeCompanion?.age) || '21',
-          hair_color: activeCompanion?.hair_color || '',
-          hair_length: activeCompanion?.hair_length || '',
-          facial_hair: activeCompanion?.facial_hair || '',
-          skin_tone: activeCompanion?.skin_tone || '',
-          eye_color: activeCompanion?.eye_color || '',
-          ancestral_region: activeCompanion?.ancestral_region || '',
-          attire: activeCompanion?.attire || '',
-          personality: activeCompanion?.personality || '',
+          name: activeFriend?.name || '',
+          gender: activeFriend?.gender || '',
+          universe: activeFriend?.universe || '',
+          age: String(activeFriend?.age) || '21',
+          hair_color: activeFriend?.hair_color || '',
+          hair_length: activeFriend?.hair_length || '',
+          facial_hair: activeFriend?.facial_hair || '',
+          skin_tone: activeFriend?.skin_tone || '',
+          eye_color: activeFriend?.eye_color || '',
+          ancestral_region: activeFriend?.ancestral_region || '',
+          attire: activeFriend?.attire || '',
+          personality: activeFriend?.personality || '',
         })
       }
     }
@@ -475,9 +475,9 @@ export default function NewFriendPage() {
           <View className='base:flex-col tablet:flex-row justify-center base:items-center base:gap-[30px] tablet:gap-[90px]'>
             {/* Soul */}
             <View className='base:w-[100%] base:w-[unset] phone:min-w-[300px] tablet:min-w-[500px] desktop:min-w-[500px] base:h-[300px] tablet:h-[500px] items-center justify-center rounded-md' background={breakpoints === 'phone' ? 'transparent' : 'grey3_dark1'}>
-              {friendId !== 'new' && user?.activeCompanion?.profile_picture?.image ? (
+              {friendId !== 'new' && friend?.profile_picture?.image ? (
                 <Image
-                  source={{ uri: user?.activeCompanion?.profile_picture?.image }}
+                  source={{ uri: friend?.profile_picture?.image }}
                   style={{
                     ...(breakpoints === 'phone' ? { width: dimentions?.deviceWidth, height: 300, borderRadius: 0 } : breakpoints === 'tablet' ? { width: 300, height: 300, borderRadius: themeVars.borderRadius.md } : { width: 500, height: 500, borderRadius: themeVars.borderRadius.md }),
                   }}
@@ -611,7 +611,7 @@ export default function NewFriendPage() {
                     </Text>
                   </Pressable>
 
-                  {user?.activeCompanion && friendId !== 'new' ? (
+                  {friend && friendId !== 'new' ? (
                     <Pressable className='w-[100%] max-w-[290px] h-[92px] items-center justify-center rounded-md border-[2px]' background='transparent_dark1' border='red1' onPress={handleDeletePopup}>
                       <Text className='text-[24px] font-[600]' color='red1'>
                         Delete
@@ -644,8 +644,8 @@ export default function NewFriendPage() {
             {/* Form - END */}
 
             {breakpoints === 'phone' ? (
-              <Pressable className='w-[48px] h-[48px] bg-dark2/60 items-center justify-center rounded-[20px] absolute top-[24px] right-[24px]' onPress={user?.activeCompanion && friendId !== 'new' ? handleDelete : handleRandomize}>
-                {user?.activeCompanion && friendId !== 'new' ? <IconTrash /> : <IconDices />}
+              <Pressable className='w-[48px] h-[48px] bg-dark2/60 items-center justify-center rounded-[20px] absolute top-[24px] right-[24px]' onPress={friend && friendId !== 'new' ? handleDelete : handleRandomize}>
+                {friend && friendId !== 'new' ? <IconTrash /> : <IconDices />}
               </Pressable>
             ) : (
               <></>
