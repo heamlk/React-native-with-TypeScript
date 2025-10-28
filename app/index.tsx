@@ -247,7 +247,7 @@ export default function IndexPage() {
             height={breakpoints === 'desktop' ? 576 : 290}
             autoPlay={true}
             data={carouselItems}
-            autoPlayInterval={9995000}
+            autoPlayInterval={5000}
             scrollAnimationDuration={1000}
             renderItem={({ item }) => (
               <View className='w-[100%] h-[100%] absolute z-[11] top-[0] left-[0] rounded-md'>
