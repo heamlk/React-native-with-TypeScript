@@ -26,20 +26,18 @@ import VoiceToText from '../_shared/components/voiceToText'
 import type { ImageMedia } from '../_context/auth.types'
 import { BlurView } from 'expo-blur'
 import Carousel, { type ICarouselInstance } from 'react-native-reanimated-carousel'
-import { useSounds } from '../_hooks/useSounds'
 import { resizeToFitScreen, scaleToFit } from '../_lib/utils'
 
 export default function User() {
-  const sounds = useSounds()
   const { theme } = useTheme()
   const router = useRouter()
   const params = useLocalSearchParams<{ friendId: string }>()
   const friendId = params.friendId
-  const { user, setUser, updateUser, companionIsTyping } = useUser()
+  const { user, updateUser, companionIsTyping } = useUser()
   const breakpoints = useBreakpoints()
   const dimentions = useDimensions()
   const api = useApi()
-  const { popup, setPopup } = usePopup()
+  const { setPopup } = usePopup()
 
   const videoRef = useRef<Video | null>(null)
   const viewRef = useRef<ScrollView | null>(null)
@@ -62,10 +60,9 @@ export default function User() {
   const [updatingEmotionsStatus, setUpdatingEmotionsStatus] = useState(false)
   const [sendingMessage, setSendingMessage] = useState(false)
 
-  const [defaultVideo, setDefaultVideo] = useState<string | null>(friend?.emotions_animations?.urls?.blink || null)
+  const [activeVideo, setActiveVideo] = useState(friend?.emotions_animations?.urls?.blink || null)
   const [nextVideo, setNextVideo] = useState<string | null>(null)
 
-  const [isVideoReady, setIsVideoReady] = useState(false)
   const [emotionEnabled, setEmotionEnabled] = useState(friend?.emotions_animations?.enabled || false)
   const [messageInput, setMessageInput] = useState('')
   const [messages, setMessages] = useState<
@@ -78,6 +75,10 @@ export default function User() {
   >([])
   const [conversationMedia, setConversationMedia] = useState<ImageMedia[]>([])
   const [mediaBlurOpen, setMediaBlurOpen] = useState(false)
+
+  const blinkVideoUrl = friend?.emotions_animations?.urls?.blink
+  const smileVideoUrl = friend?.emotions_animations?.urls?.smile
+  const friendBackgroundUrl = friend?.profile_picture?.image
 
   const updateConversationHistory = async () => {
     try {
@@ -352,12 +353,9 @@ export default function User() {
       return
     }
 
-    const blinkVideoUrl = friend?.emotions_animations?.urls.blink
-    const smileVideoUrl = friend?.emotions_animations?.urls.smile
-
     if (emotion === 'blink') {
       setNextVideo(() => blinkVideoUrl ?? '')
-    } else {
+    } else if (emotion === 'smile') {
       setNextVideo(() => smileVideoUrl ?? '')
     }
   }
@@ -588,38 +586,47 @@ export default function User() {
       <View className='base:flex-col phone:flex-row base:rounded-[0px] phone:rounded-lg' style={{ width: containerWidth, height: containerHeight }} background='grey6_dark1'>
         {/* Character */}
         <View className='base:p-[0] phone:p-[16px] gap-[40px]' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth } : breakpoints === 'tablet' ? { width: 300 } : { width: 664 }}>
-          <View className='base:rounded-t-[0px] phone:rounded-t-md relative overflow-hidden' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}>
-            {emotionEnabled && friend?.emotions_animations?.enabled && defaultVideo != null ? (
-              <Video
-                ref={videoRef}
-                source={{ uri: defaultVideo }}
-                resizeMode={ResizeMode.COVER}
-                shouldPlay={isVideoReady}
-                isLooping={false}
-                isMuted
-                useNativeControls={false}
-                onLoad={() => setIsVideoReady(true)}
-                videoStyle={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}
-                style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}
-                onPlaybackStatusUpdate={(status) => {
-                  if (status.isLoaded && !isVideoReady) {
-                    setIsVideoReady(true)
-                  }
-
-                  if (status.isLoaded && status.didJustFinish) {
-                    const blinkVideoUrl = friend?.emotions_animations?.urls?.blink || ''
-
-                    if (nextVideo !== defaultVideo) {
-                      setDefaultVideo(nextVideo)
-                      setNextVideo(blinkVideoUrl)
+          <View className='base:rounded-t-[0px] phone:rounded-t-md relative overflow-hidden relative' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}>
+            {emotionEnabled && friend?.emotions_animations?.enabled && activeVideo != null ? (
+              <>
+                <Video
+                  ref={videoRef}
+                  source={{ uri: activeVideo }}
+                  posterSource={{ uri: friendBackgroundUrl }}
+                  resizeMode={ResizeMode.COVER}
+                  shouldPlay={true}
+                  isLooping={false}
+                  isMuted
+                  useNativeControls={false}
+                  videoStyle={{
+                    ...(breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 270, height: 440 } : { width: 634, height: 440 }),
+                  }}
+                  style={{
+                    ...(breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 270, height: 440 } : { width: 634, height: 440 }),
+                    zIndex: 11,
+                    position: 'absolute',
+                  }}
+                  onPlaybackStatusUpdate={(status) => {
+                    if (status.isLoaded && status.didJustFinish) {
+                      if (activeVideo === nextVideo) {
+                        videoRef?.current?.playAsync()
+                      } else {
+                        if (nextVideo === blinkVideoUrl) {
+                          setActiveVideo(blinkVideoUrl)
+                          setNextVideo(blinkVideoUrl)
+                        } else if (nextVideo === smileVideoUrl) {
+                          setActiveVideo(smileVideoUrl)
+                          setNextVideo(blinkVideoUrl ?? '')
+                        }
+                        videoRef?.current?.playAsync()
+                      }
                     }
-
-                    videoRef?.current?.playAsync()
-                  }
-                }}
-              />
+                  }}
+                />
+                <Image source={{ uri: friendBackgroundUrl }} className='base:rounded-t-[0px] phone:rounded-t-md absolute z-[10]' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }} />
+              </>
             ) : (
-              <Image source={{ uri: friend?.profile_picture?.image }} className='base:rounded-t-[0px] phone:rounded-t-md' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }} />
+              <Image source={{ uri: friendBackgroundUrl }} className='base:rounded-t-[0px] phone:rounded-t-md' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }} />
             )}
 
             <LinearGradient className='flex-1 h-[100px] absolute bottom-[0px] left-[0px] z-[100]' colors={[theme === 'light' ? themeVars.colors.grey6 : themeVars.colors.dark7, 'transparent']} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={{ width: dimentions.deviceWidth }} />
