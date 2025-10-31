@@ -633,7 +633,7 @@ export default function User() {
 
             {/* Settings */}
             {breakpoints !== 'phone' ? (
-              <Pressable className='w-[40px] h-[40px] absolute top-[24px] right-[24px] rounded-[9999px] items-center justify-center pt-[3px] pr-[1px]' background='grey6/40_dark6/40' onPress={handleEdit}>
+              <Pressable className='w-[40px] h-[40px] absolute z-[999] top-[24px] right-[24px] rounded-[9999px] items-center justify-center pt-[3px] pr-[1px]' background='grey6/40_dark6/40' onPress={handleEdit}>
                 <IconSettings />
               </Pressable>
             ) : (
