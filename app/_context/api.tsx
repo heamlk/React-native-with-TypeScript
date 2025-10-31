@@ -76,6 +76,7 @@ export type ApiContextType = {
   getConversationMedia: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
   deleteConversationMedia: ({ companionId, mediaId }: { companionId: string; mediaId: string }) => Promise<AxiosResponse<any, any, {}>>
   postGenerateCompanionMediaAnimation: ({ companionId, mediaId }: { companionId: string; mediaId: string }) => Promise<AxiosResponse<any, any, {}>>
+  postUpdateNsfwSettings: ({ nsfw_status }: { nsfw_status: boolean }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -502,6 +503,18 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  const postUpdateNsfwSettings = async ({ nsfw_status }: { nsfw_status: boolean }) => {
+    return await api.post(
+      `customers/set-nsfw-status`,
+      { nsfw_status },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
   useEffect(() => {
     const newSocket = socket
     setSocketState(newSocket)
@@ -556,6 +569,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     getConversationMedia,
     deleteConversationMedia,
     postGenerateCompanionMediaAnimation,
+    postUpdateNsfwSettings,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>

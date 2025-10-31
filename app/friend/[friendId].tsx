@@ -8,6 +8,7 @@ import useBreakpoints from '../_hooks/breakpoints'
 import useDimensions from '../_hooks/dimensions'
 import IconSettings from '@/app/_assets/icons/settings.svg'
 import IconAnimationToggle from '@/app/_assets/icons/animations-toggle.svg'
+import IconNsfwToggle from '@/app/_assets/icons/nsfw-toggle.svg'
 import IconClean from '@/app/_assets/icons/clean.svg'
 import IconChecked from '@/app/_assets/icons/check-circle.svg'
 import IconLeft from '@/app/_assets/icons/iconLeft'
@@ -57,6 +58,7 @@ export default function User() {
   const [fetchingMediaAnimation, setFetchingMediaAnimation] = useState(false)
   const [deletingMedia, setDeletingMedia] = useState(false)
   const [clearingChat, setClearingChat] = useState(false)
+  const [updatingNsfwStatus, setUpdatingNsfwStatus] = useState(false)
   const [updatingEmotionsStatus, setUpdatingEmotionsStatus] = useState(false)
   const [sendingMessage, setSendingMessage] = useState(false)
 
@@ -64,6 +66,7 @@ export default function User() {
   const [nextVideo, setNextVideo] = useState<string | null>(null)
 
   const [emotionEnabled, setEmotionEnabled] = useState(friend?.emotions_animations?.enabled || false)
+  const [nsfwEnabled, setNsfwEnabled] = useState(user?.profile?.nsfw_disabled_since === null)
   const [messageInput, setMessageInput] = useState('')
   const [messages, setMessages] = useState<
     {
@@ -98,6 +101,28 @@ export default function User() {
 
   const handleEdit = () => {
     router.push(`/friend/edit/${friend?.id}`)
+  }
+
+  const handleNsfwToggle = async () => {
+    if (updatingNsfwStatus) {
+      return
+    }
+
+    try {
+      setUpdatingNsfwStatus(true)
+      const req = await api.postUpdateNsfwSettings({ nsfw_status: !nsfwEnabled })
+      const data = req?.data
+
+      setNsfwEnabled(!nsfwEnabled)
+      setUpdatingNsfwStatus(false)
+
+      if (data === 'OK') {
+        await updateUser()
+      }
+    } catch (error) {
+      setUpdatingNsfwStatus(false)
+      console.warn(error)
+    }
   }
 
   const handleAnimationToggle = async () => {
@@ -666,6 +691,21 @@ export default function User() {
               </View>
 
               <View className='flex-row items-center gap-[8px]'>
+                <Pressable className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' background='black/50_dark1' onPress={handleNsfwToggle}>
+                  {nsfwEnabled ? (
+                    <>
+                      <IconNsfwToggle />
+                      <View className='border-[2px] rounded-[999px] absolute bottom-[-2px] right-[-2px]' border='transparent_dark1'>
+                        <IconChecked className='rounded-[999px]' />
+                      </View>
+                    </>
+                  ) : (
+                    <View className='opacity-[0.4]'>
+                      <IconNsfwToggle />
+                    </View>
+                  )}
+                </Pressable>
+
                 <Pressable className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' background='black/50_dark1' onPress={handleAnimationToggle}>
                   {emotionEnabled ? (
                     <>
