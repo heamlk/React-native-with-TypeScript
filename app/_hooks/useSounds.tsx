@@ -61,3 +61,5 @@ export const useSounds = () => {
     newImage: () => playSound('newImage'),
   }
 }
+
+export default function Blank() {}

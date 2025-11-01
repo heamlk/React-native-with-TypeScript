@@ -520,7 +520,14 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     setSocketState(newSocket)
 
     const handleError = (err: any) => {
-      console.error('Socket error:', err)
+      console.group('Socket error details')
+      console.error(err)
+      console.log('Keys:', Object.keys(err))
+      console.dir(err, { depth: null })
+      if (err?.message) console.log('Message:', err.message)
+      if (err?.description) console.log('Description:', err.description)
+      if (err?.context) console.log('Context:', err.context)
+      console.groupEnd()
     }
 
     newSocket.on('connect_error', handleError)
