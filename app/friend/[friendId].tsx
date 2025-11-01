@@ -691,20 +691,24 @@ export default function User() {
               </View>
 
               <View className='flex-row items-center gap-[8px]'>
-                <Pressable className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' background='black/50_dark1' onPress={handleNsfwToggle}>
-                  {nsfwEnabled ? (
-                    <>
-                      <IconNsfwToggle />
-                      <View className='border-[2px] rounded-[999px] absolute bottom-[-2px] right-[-2px]' border='transparent_dark1'>
-                        <IconChecked className='rounded-[999px]' />
+                {user?.profile?.is_age_verified ? (
+                  <Pressable className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' background='black/50_dark1' onPress={handleNsfwToggle}>
+                    {nsfwEnabled ? (
+                      <>
+                        <IconNsfwToggle />
+                        <View className='border-[2px] rounded-[999px] absolute bottom-[-2px] right-[-2px]' border='transparent_dark1'>
+                          <IconChecked className='rounded-[999px]' />
+                        </View>
+                      </>
+                    ) : (
+                      <View className='opacity-[0.4]'>
+                        <IconNsfwToggle />
                       </View>
-                    </>
-                  ) : (
-                    <View className='opacity-[0.4]'>
-                      <IconNsfwToggle />
-                    </View>
-                  )}
-                </Pressable>
+                    )}
+                  </Pressable>
+                ) : (
+                  <></>
+                )}
 
                 <Pressable className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' background='black/50_dark1' onPress={handleAnimationToggle}>
                   {emotionEnabled ? (
