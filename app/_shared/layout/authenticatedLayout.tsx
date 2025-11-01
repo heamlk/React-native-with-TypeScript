@@ -14,7 +14,7 @@ import IconMarketFilled from '@/app/_assets/icons/market-filled.svg'
 import { useLocalSearchParams, usePathname, useRouter } from 'expo-router'
 import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
-import { type ReactNode, useRef } from 'react'
+import { type ReactNode, useEffect, useRef } from 'react'
 import { Animated, Image } from 'react-native'
 import IconMenu from '@/app/_assets/icons/menu.svg'
 import { usePopup } from '@/app/_context/popup'
@@ -124,6 +124,12 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   const handleCompanionPress = ({ id }: { id: string }) => {
     router.push(`/friend/${id}`)
   }
+
+  useEffect(() => {
+    if (breakpoints === 'phone') {
+      closeSidebar()
+    }
+  }, [breakpoints])
 
   return (
     <View className='base:p-[0] phone:p-[30px]' style={{ width: dimentions.deviceWidth, minHeight: dimentions.deviceHeight, position: disableRelative ? 'static' : 'relative' }}>
