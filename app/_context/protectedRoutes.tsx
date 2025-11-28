@@ -1,5 +1,5 @@
-import React, { createContext, useContext, type ReactNode } from 'react'
-import { Redirect, usePathname } from 'expo-router'
+import React, { createContext, useContext, useEffect, type ReactNode } from 'react'
+import { usePathname, useRouter } from 'expo-router'
 import { useUser } from './user'
 
 export type ProtectedRoutesContextType = {}
@@ -9,6 +9,7 @@ const ProtectedRoutesContext = createContext<ProtectedRoutesContextType | null>(
 export default function ProtectedRoutesProvider({ children }: { children: ReactNode }) {
   const { user, friendLimitReached } = useUser()
   const pathname = usePathname()
+  const router = useRouter()
 
   const authenticatedPaths = ['/friend', '/friend/new', '/profile', '/profile/edit', '/referral', '/subscription', '/subscription/mobile', '/marketplace', '/marketplace/mobile', '/model']
 
@@ -16,43 +17,51 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
     return authenticatedPaths.some((path) => pathname === path || pathname.startsWith('/friend/')) // match /friend/${companionId}
   }
 
-  const isAuthenticated = !!user?.customerId
-  const isOnboardingCompleted = !!user?.profile?.username
-  const isSubscribed = user?.profile?.is_subscribed
+  useEffect(() => {
+    const isAuthenticated = !!user?.customerId
+    const isOnboardingCompleted = !!user?.profile?.username
+    const isSubscribed = user?.profile?.is_subscribed
 
-  // Redirecting to onboarding if profile is not setup
-  if (pathname !== '/onboarding' && isAuthenticated && !isOnboardingCompleted) {
-    return <Redirect href={`/onboarding`} />
-  }
-
-  // Redirect to main page if authenticated, profile set, and on login page
-  if (!isPathAuthenticated(pathname) && pathname !== '/onboarding' && pathname === '/' && isAuthenticated && isOnboardingCompleted) {
-    if (user?.companions?.length > 0) {
-      return <Redirect href={`/friend/${user?.companions?.[0]?.id}`} />
-    } else {
-      return <Redirect href='/friend' />
+    // Redirecting to onboarding if profile is not setup
+    if (pathname !== '/onboarding' && isAuthenticated && !isOnboardingCompleted) {
+      setTimeout(() => router.push('/onboarding'), 0)
+      return
     }
-  }
 
-  // Redirect to profile page if authenticated, profile set, and on an incorrect page
-  if (!isPathAuthenticated(pathname) && pathname !== '/onboarding' && isAuthenticated && isOnboardingCompleted) {
-    return <Redirect href='/profile' />
-  }
+    // Redirect to main page if authenticated, profile set, and on login page
+    if (!isPathAuthenticated(pathname) && pathname !== '/onboarding' && pathname === '/' && isAuthenticated && isOnboardingCompleted) {
+      if (user?.companions?.length > 0) {
+        setTimeout(() => router.push(`/friend/${user?.companions?.[0]?.id}`), 0)
+      } else {
+        setTimeout(() => router.push('/friend'), 0)
+      }
+      return
+    }
 
-  // Redirecting to login page if not authenticated
-  if (pathname !== '/' && !isAuthenticated) {
-    return <Redirect href='/' />
-  }
+    // Redirect to profile page if authenticated, profile set, and on an incorrect page
+    if (!isPathAuthenticated(pathname) && pathname !== '/onboarding' && isAuthenticated && isOnboardingCompleted) {
+      setTimeout(() => router.push('/profile'), 0)
+      return
+    }
 
-  // Redirecting to /profile if free trial has ended
-  if (pathname === '/friend/new' && !isSubscribed) {
-    return <Redirect href='/profile' />
-  }
+    // Redirecting to login page if not authenticated
+    if (pathname !== '/' && !isAuthenticated) {
+      setTimeout(() => router.push('/'), 0)
+      return
+    }
 
-  // Redirecting to /profile if friend limit have reached
-  if (pathname === '/friend/new' && friendLimitReached()) {
-    return <Redirect href='/profile' />
-  }
+    // Redirecting to /profile if free trial has ended
+    if (pathname === '/friend/new' && !isSubscribed) {
+      setTimeout(() => router.push('/profile'), 0)
+      return
+    }
+
+    // Redirecting to /profile if friend limit have reached
+    if (pathname === '/friend/new' && friendLimitReached()) {
+      setTimeout(() => router.push('/profile'), 0)
+      return
+    }
+  }, [pathname, user])
 
   const value: ProtectedRoutesContextType = {}
   return <ProtectedRoutesContext.Provider value={value}>{children}</ProtectedRoutesContext.Provider>
