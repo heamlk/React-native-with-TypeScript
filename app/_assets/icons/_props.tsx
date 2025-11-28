@@ -1,8 +1,10 @@
+import { SvgProps } from 'react-native-svg'
+
 export type SvgIconType = {
   width?: string | number
   height?: string | number
   color?: string
-} & React.SVGProps<SVGSVGElement>
+} & SvgProps
 
 const svgIconDefaultProps: SvgIconType = {
   width: '20px',

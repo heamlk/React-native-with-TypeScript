@@ -1,8 +1,9 @@
-import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext, useEffect, useState } from 'react'
+import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext, useEffect, useRef, useState } from 'react'
 import storage from '@/app/_shared/storage/storage'
 import { ServerToClientEvents, useApi } from './api'
 import type { CompanionAttributes, CompanionInfos, CustomerProfile, MarketplaceProduct, SubscriptionOption } from './auth.types'
 import { useSounds } from '@/app/_hooks/useSounds'
+import { playArrayBuffer } from '../_lib/utils'
 
 export type UserContextType = {
   user: UserType | null
@@ -64,6 +65,8 @@ export default function UserProvider({ children }: UserProviderProps) {
 
   const [user, setUser] = useState<UserType | null>(getStoredUser())
   const [companionIsTyping, setCompanionIsTyping] = useState<{ companion_id: string; is_typing: boolean } | null>(null)
+  const audioQueueRef = useRef<any[]>([])
+  const isPlayingRef = useRef(false)
 
   const updateUser = async () => {
     const [getProfileRes, getLifetimeInfoRes] = await Promise.all([api.getProfile(), api.getLifetimeInfo()])
@@ -112,15 +115,28 @@ export default function UserProvider({ children }: UserProviderProps) {
     return user?.profile.purchases?.[purchaseId] != null
   }
 
-  useEffect(() => {
-    const user = getStoredUser()
-    if (user) {
-      setUser(user)
+  const enqueueAudio = (audio: any) => {
+    audioQueueRef.current.push(audio)
+    playQueue()
+  }
+
+  const playQueue = async () => {
+    if (isPlayingRef.current) return
+    isPlayingRef.current = true
+
+    while (audioQueueRef.current.length > 0) {
+      const nextAudio = audioQueueRef.current.shift()!
+      try {
+        await playArrayBuffer(nextAudio)
+      } catch (err) {
+        console.error('Error playing audio', err)
+      }
     }
-  }, [])
+
+    isPlayingRef.current = false
+  }
 
   useEffect(() => {
-    console.log('user: ', user)
     if (!user) {
       return
     }
@@ -133,14 +149,18 @@ export default function UserProvider({ children }: UserProviderProps) {
       setCompanionIsTyping(event)
     })
 
-    api.socketState?.on('new_chat_message', (event) => {
-      if (event?.message?.role === 'companion') {
-        if (event?.message?.type === 'text') {
-          sounds?.newMessage()
-        } else if (event?.message?.type === 'image') {
-          sounds?.newImage()
-        } else {
-          sounds?.error()
+    api.socketState?.on('new_chat_message', async (event) => {
+      if (event?.audio) {
+        enqueueAudio(event.audio)
+      } else {
+        if (event?.message?.role === 'companion') {
+          if (event?.message?.type === 'text') {
+            sounds?.newMessage()
+          } else if (event?.message?.type === 'image') {
+            sounds?.newImage()
+          } else {
+            sounds?.error()
+          }
         }
       }
     })

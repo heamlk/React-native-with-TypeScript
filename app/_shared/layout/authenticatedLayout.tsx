@@ -8,13 +8,13 @@ import IconSmileyFilled from '@/app/_assets/icons/smiley-filled.svg'
 
 import IconPerson from '@/app/_assets/icons/person.svg'
 import IconPersonFilled from '@/app/_assets/icons/person-filled.svg'
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import IconMarket from '@/app/_assets/icons/market.svg'
 import IconMarketFilled from '@/app/_assets/icons/market-filled.svg'
 import { useLocalSearchParams, usePathname, useRouter } from 'expo-router'
 import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
-import { type ReactNode, useEffect, useRef } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { Animated, Image } from 'react-native'
 import IconMenu from '@/app/_assets/icons/menu.svg'
 import { usePopup } from '@/app/_context/popup'
@@ -27,10 +27,12 @@ export type AuthenticatedLayoutProps = {
   keepSafePaddingOnMobile?: boolean
   disableRelative?: Boolean
   mainZIndex?: 10 | 0
+  hideSidebar?: boolean
 }
 
-export default function AuthenticatedLayout({ children, keepMarginsOnMobile = false, keepSafePaddingOnMobile = false, disableRelative = false, mainZIndex = 0 }: AuthenticatedLayoutProps) {
+export default function AuthenticatedLayout({ children, keepMarginsOnMobile = false, keepSafePaddingOnMobile = false, disableRelative = false, mainZIndex = 0, hideSidebar = false }: AuthenticatedLayoutProps) {
   const { theme } = useTheme()
+  const insets = useSafeAreaInsets()
   const pathname = usePathname()
   const dimentions = useDimensions()
   const router = useRouter()
@@ -41,8 +43,10 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   const params = useLocalSearchParams<{ friendId: string }>()
   const friendId = params.friendId
 
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
-  const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
+  const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight - insets.top - insets.bottom - 50 - 50 : dimentions.deviceHeight - 60 - 48 - 30
 
   const pages = [
     {
@@ -65,6 +69,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   const leftAnim = useRef(new Animated.Value(breakpoints === 'phone' ? -95 : 0)).current
 
   const closeSidebar = () => {
+    setSidebarOpen(false)
     Animated.timing(leftAnim, {
       toValue: -95,
       duration: 300,
@@ -73,6 +78,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   }
 
   const openSidebar = () => {
+    setSidebarOpen(true)
     Animated.timing(leftAnim, {
       toValue: 0,
       duration: 300,
@@ -95,7 +101,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
             </Text>
             <View className='flex-row gap-[16px]'>
               <GradientPressable
-                className='w-[150px] h-[48px]'
+                combinedClassname='max-w-[150px] h-[48px] flex-1'
                 type='dark'
                 onPress={() => {
                   popup.setPopup({ open: false })
@@ -106,7 +112,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
                   Ok
                 </Text>
               </GradientPressable>
-              <GradientPressable className='w-[150px] h-[48px]' type='dark' onPress={() => popup.setPopup({ open: false })}>
+              <GradientPressable combinedClassname='max-w-[150px] h-[48px] flex-1' type='dark' onPress={() => popup.setPopup({ open: false })}>
                 <Text className='font-[600]' size='md' color='grey1_light2'>
                   Cancel
                 </Text>
@@ -128,6 +134,8 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   useEffect(() => {
     if (breakpoints === 'phone') {
       closeSidebar()
+    } else {
+      openSidebar()
     }
   }, [breakpoints])
 
@@ -151,33 +159,27 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
               })}
             </View>
           </View>
-        ) : (
-          <></>
-        )}
+        ) : null}
         {/* Header - END */}
 
         <View className='h-[100%] flex-1 flex-row' style={{ position: disableRelative ? 'static' : 'relative' }}>
           {/* Mobile burger menu */}
-          {breakpoints === 'phone' ? (
-            <Pressable className='w-[48px] h-[48px] items-center justify-center bg-dark2/60 rounded-[20px] absolute top-[24px] left-[24px] z-[1]' onPress={openSidebar}>
+          {breakpoints === 'phone' && !hideSidebar ? (
+            <Pressable className='w-[48px] h-[48px] items-center justify-center bg-dark2/60 rounded-[20px] absolute left-[24px] z-[1]' style={{ top: 24 + insets.top }} onPress={openSidebar}>
               <IconMenu />
             </Pressable>
-          ) : (
-            <></>
-          )}
+          ) : null}
           {/* Mobile burger menu - END */}
 
           {/* Sidebar */}
-          <Animated.View style={{ height: '100%', left: leftAnim, top: 0, position: breakpoints === 'phone' ? 'absolute' : 'relative', zIndex: 2 }}>
-            <View className='h-[100%] base:p-[20px] phone:p-[0] base:mt-[0px] phone:mt-[30px] gap-[20px] base:rounded-r-md phone:rounded-[0]' background={breakpoints === 'phone' ? 'grey5_dark2' : 'transparent'}>
+          <Animated.View style={{ height: '100%', left: hideSidebar ? -95 : leftAnim, top: breakpoints === 'phone' ? 0 : 0, position: breakpoints === 'phone' ? 'absolute' : 'relative', zIndex: 2 }}>
+            <View className='h-[100%] base:p-[20px] phone:p-[0] base:mt-[0px] phone:mt-[30px] gap-[20px] base:rounded-r-md phone:rounded-[0] items-center' background={breakpoints === 'phone' ? 'grey5_dark2' : 'transparent'}>
               {breakpoints === 'phone' ? (
                 <>
-                  <IconLogo width={40} height={34} theme={theme} />
+                  <IconLogo width={40} height={34} theme={theme} style={{ marginTop: insets.top }} />
                   <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'grey4_dark4' }) }}></View>
                 </>
-              ) : (
-                <></>
-              )}
+              ) : null}
 
               {pages.map((page) => {
                 const isSelected = pathname.startsWith(page.href)
@@ -185,8 +187,8 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
                 return (
                   <GradientPressable
                     key={page.href + 63546}
-                    className='w-[48px] max-x-[48px] h-[48px] max-h-[48px] items-center justify-center'
-                    gradientClassname='w-[48px] max-x-[48px] h-[48px] max-h-[48px] rounded-[20px]'
+                    className='w-[48px] max-w-[48px] h-[48px] max-h-[48px] items-center justify-center'
+                    gradientClassname='w-[48px] max-w-[48px] h-[48px] max-h-[48px] rounded-[20px]'
                     type={isSelected ? 'primary' : 'extraDark'}
                     onPress={() => {
                       handleSidebarLinkPress({ url: page.href })
@@ -210,9 +212,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
                   <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'grey4_dark4' }) }}></View>
                   <ThemeToggle />
                 </>
-              ) : (
-                <></>
-              )}
+              ) : null}
             </View>
           </Animated.View>
           {/* Sidebar - END */}
@@ -224,7 +224,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
               cursor: 'auto',
               width: containerWidth,
               minHeight: containerHeight,
-              marginTop: keepMarginsOnMobile && breakpoints === 'phone' ? 30 + 34 + 30 : breakpoints === 'phone' ? 0 : 30,
+              marginTop: keepMarginsOnMobile && breakpoints === 'phone' ? 30 + 34 + 30 + insets.top : breakpoints === 'phone' ? 0 : 30,
               paddingHorizontal: keepSafePaddingOnMobile && breakpoints === 'phone' ? 24 : 0,
               position: disableRelative ? 'static' : 'relative',
               zIndex: mainZIndex,
@@ -235,7 +235,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
               }
             }}
           >
-            {children}
+            <>{children}</>
           </Pressable>
           {/* Main - END */}
         </View>

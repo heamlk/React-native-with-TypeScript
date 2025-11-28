@@ -6,8 +6,10 @@ import IconCheckGreen from '@/app/_assets/icons/check-green.svg'
 import { useEffect, useState } from 'react'
 import { useApi } from '../_context/api'
 import { usePopup } from '../_context/popup'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function SubscriptionPage() {
+  const insets = useSafeAreaInsets()
   const { user, updateUser } = useUser()
   const api = useApi()
   const { setPopup } = usePopup()
@@ -116,7 +118,7 @@ export default function SubscriptionPage() {
 
   return (
     <AuthenticatedLayout keepMarginsOnMobile={true} keepSafePaddingOnMobile={true}>
-      <View className='w-[100%] max-w-[500px] mx-auto gap-[32px]'>
+      <View className='w-[100%] max-w-[500px] mx-auto gap-[32px]' style={{ paddingBottom: insets.bottom + 25 }}>
         <Text className='font-[600] text-center' size='xl' color='grey1_light1'>
           Subscription
         </Text>

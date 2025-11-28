@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import IconMoon from '@/app/_assets/icons/moon.png'
 import IconSun from '@/app/_assets/icons/sun.png'
 import themeVars from '@/app/_styles/theme/themeVars'
+import { borderRadiusNative } from '@/app/_styles/theme/borderRadius'
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -33,12 +34,12 @@ export default function ThemeToggle() {
   })
 
   return (
-    <Pressable onPress={handleToggle} className='w-[55] min-w-[55] h-[30] cursor-pointer'>
+    <Pressable onPress={handleToggle} className='w-[55px] min-w-[55px] h-[30px] cursor-pointer'>
       <Animated.View
         style={{
           flex: 1,
           backgroundColor,
-          borderRadius: themeVars.borderRadius.md,
+          borderRadius: borderRadiusNative.md,
           justifyContent: 'center',
           paddingHorizontal: 3,
         }}

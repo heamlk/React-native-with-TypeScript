@@ -7,9 +7,9 @@ import breakpoints from './breakpoints'
 const themeVars = {
   colors,
   fontSize,
-  borderRadius,
   fonts,
   screens: breakpoints,
+  borderRadius,
 }
 
 export default themeVars

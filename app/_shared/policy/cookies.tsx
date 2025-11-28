@@ -1,8 +1,11 @@
-import { View } from 'react-native'
+import { View, Platform, ScrollView, ScrollViewComponent } from 'react-native'
 import { Text } from '../components/reusable'
+// Platform-aware line break: {BR} on web, newline on mobile
+const BR = Platform.OS === 'web' ? <br /> : '\n'
 
 export default function Cookies() {
   return (
+    <ScrollView showsVerticalScrollIndicator={true} contentContainerClassName='px-0 py-8 max-w-4xl mx-auto'>
     <View className='gap-[24px]'>
       <Text className='text-white' size='2xl'>
         Cookie Policy
@@ -57,13 +60,13 @@ export default function Cookies() {
 
       <Text className='text-white' size='lg'>
         We, our service providers, and our advertising partners automatically log information about an individual’s interactions with our Services, such as:
-        <br />
+        {BR}
         - Device information, such as computer or mobile device operating system type and version, manufacturer and model, browser type, screen resolution, RAM and disk size, CPU usage, device type (e.g., phone, tablet), IP address, unique identifiers (including identifiers used for advertising purposes), language
         settings, mobile device carrier, radio/network information (e.g., WiFi, LTE, 5G), and general location information such as city, state, or geographic area.
-        <br />
+        {BR}
         - Online activity information, such as pages or screens viewed, how long individuals spend on a page or screen, the website they visited before browsing to our Website, navigation paths between pages or screens, information about activity on a page or screen, access times and duration of access, and whether
         individuals open our marketing emails or click links within them.
-        <br />- We use both persistent cookies and session cookies. Persistent cookies stay on your device for a set period of time or until you delete them, while session cookies are deleted once you close your web browser. We use persistent cookies, for example, to remember any preferences you have or choices you
+        {BR}- We use both persistent cookies and session cookies. Persistent cookies stay on your device for a set period of time or until you delete them, while session cookies are deleted once you close your web browser. We use persistent cookies, for example, to remember any preferences you have or choices you
         make when you use our Website.
       </Text>
 
@@ -73,13 +76,13 @@ export default function Cookies() {
 
       <Text className='text-white' size='lg'>
         We use cookies for the following purposes:
-        <br />
+        {BR}
         Essential cookies: These cookies are strictly necessary to provide you with our Services. They provide page navigation and access to secure areas of the Services. You can set your browser to block these cookies, but then some parts of the Services will not work.
-        <br />
+        {BR}
         Performance and functionality cookies: These cookies are used to enhance the performance and functionality of Services but are non-essential to their use. However, without these cookies, certain functionality may become unavailable.
-        <br />
+        {BR}
         Analytics and customization cookies: These cookies collect information that is used either in aggregate form to help us understand how our Services are being used or how effective our marketing campaigns are, or to help us customize our Services for you.
-        <br />
+        {BR}
         Advertising cookies: These cookies are used to make advertising messages more relevant to you. They perform functions like preventing the same ad from continuously reappearing, ensuring that ads are properly displayed for advertisers, and in some cases selecting advertisements that are based on your interests.
       </Text>
 
@@ -99,24 +102,24 @@ export default function Cookies() {
 
       <Text className='text-white' size='lg'>
         You can also limit online tracking by:
-        <br />
+        {BR}
         - Blocking cookies in your browser. Most browsers let you remove or reject cookies, including cookies used for interest-based advertising. To do this, follow the instructions in your browser settings. Many browsers accept cookies by default until you change your settings. For more information about cookies,
         including how to see what cookies have been set on your device and how to manage and delete them, visit www.allaboutcookies.org.
-        <br />
+        {BR}
         - Blocking advertising ID use in your mobile settings. Your mobile device settings can provide functionality to limit use of the advertising ID associated with your mobile device for interest-based advertising purposes.
-        <br />- Using privacy plug-ins or browsers. You can block our Website from setting cookies used for interest-based ads by using a browser with privacy features, like Brave, or installing browser plugins like Privacy Badger, Ghostery, or uBlock Origin, and configuring them to block third party cookies/trackers.
+        {BR}- Using privacy plug-ins or browsers. You can block our Website from setting cookies used for interest-based ads by using a browser with privacy features, like Brave, or installing browser plugins like Privacy Badger, Ghostery, or uBlock Origin, and configuring them to block third party cookies/trackers.
         You can also opt out of Google Analytics by downloading and installing the browser plug-in available at: https://tools.google.com/dlpage/gaoptout.
       </Text>
 
       <Text className='text-white' size='lg'>
         Advertising industry opt-out tools. You can also use these opt-out options to limit use of your information for interest-based advertising by participating companies:
-        <br />
+        {BR}
         - Digital Advertising Alliance for Websites
-        <br />
+        {BR}
         - Network Advertising Initiative
-        <br />
+        {BR}
         - Platform opt-outs. Some of our advertising partners offer opt-out features that let you opt out of use of your information for interest-based advertising. For example, you can opt out of the use of Meta’s cookie for interest-based advertising here.
-        <br />- Note that because these opt-out mechanisms are specific to the device or browser on which they are exercised, you will need to opt out on each browser and device that you use.
+        {BR}- Note that because these opt-out mechanisms are specific to the device or browser on which they are exercised, you will need to opt out on each browser and device that you use.
       </Text>
 
       <Text className='text-white' size='lg'>
@@ -144,5 +147,6 @@ export default function Cookies() {
         If you have any questions about our use of cookies or other technologies, please email us at info@bffl.ai.
       </Text>
     </View>
+    </ScrollView>
   )
 }

@@ -77,6 +77,8 @@ export type ApiContextType = {
   deleteConversationMedia: ({ companionId, mediaId }: { companionId: string; mediaId: string }) => Promise<AxiosResponse<any, any, {}>>
   postGenerateCompanionMediaAnimation: ({ companionId, mediaId }: { companionId: string; mediaId: string }) => Promise<AxiosResponse<any, any, {}>>
   postUpdateNsfwSettings: ({ nsfw_status }: { nsfw_status: boolean }) => Promise<AxiosResponse<any, any, {}>>
+  postSendVoiceMessage: ({ companionId, audioBase64 }: { companionId: string; audioBase64: string }) => Promise<AxiosResponse<any, any, {}>>
+  getPingCompanion: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -93,6 +95,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
       token: (storage.getString('session') as any) || '',
     },
     transports: ['websocket', 'polling'],
+    forceNew: true,
   })
 
   const login = async () => {
@@ -143,6 +146,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     return await api.post('customers/confirm-account', formData, {
       headers: {
         'x-session-token': (storage.getString('session') as any) || '',
+        'Content-Type': 'multipart/form-data',
       },
     })
   }
@@ -161,6 +165,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     return await api.post('customers/update-profile', formData, {
       headers: {
         'x-session-token': (storage.getString('session') as any) || '',
+        'Content-Type': 'multipart/form-data',
       },
     })
   }
@@ -515,6 +520,26 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  const postSendVoiceMessage = async ({ companionId, audioBase64 }: { companionId: string; audioBase64: string }) => {
+    return await api.post(
+      `companions/${companionId}/send-voice-message`,
+      { audio: audioBase64 },
+      {
+        headers: {
+          'x-session-token': (storage.getString('session') as any) || '',
+        },
+      }
+    )
+  }
+
+  const getPingCompanion = async ({ companionId }: { companionId: string }) => {
+    return await api.get(`companions/${companionId}/ping`, {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
+
   useEffect(() => {
     const newSocket = socket
     setSocketState(newSocket)
@@ -524,9 +549,9 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
       console.error(err)
       console.log('Keys:', Object.keys(err))
       console.dir(err, { depth: null })
-      if (err?.message) console.log('Message:', err.message)
+      // if (err?.message) console.log('Message:', err.message)
       if (err?.description) console.log('Description:', err.description)
-      if (err?.context) console.log('Context:', err.context)
+      // if (err?.context) console.log('Context:', err.context)
       console.groupEnd()
     }
 
@@ -577,6 +602,8 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     deleteConversationMedia,
     postGenerateCompanionMediaAnimation,
     postUpdateNsfwSettings,
+    postSendVoiceMessage,
+    getPingCompanion,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>

@@ -1,5 +1,3 @@
-import * as AuthSession from 'expo-auth-session'
-import * as WebBrowser from 'expo-web-browser'
 import { createContext, type ReactNode, useContext, useEffect } from 'react'
 import axios from 'axios'
 import * as Linking from 'expo-linking'
@@ -7,11 +5,10 @@ import storage from '@/app/_shared/storage/storage'
 import { useRouter } from 'expo-router'
 import { useApi } from './api'
 import { getStoredUser, UserType, useUser } from './user'
-
-WebBrowser.maybeCompleteAuthSession()
+import { Platform } from 'react-native'
 
 export type AuthContextType = {
-  oAuth: ({ provider }: { provider: 'google' | 'microsoft' }) => Promise<void>
+  oAuth: any
   oAuthCodeExchange: ({ code }: { code: string }) => Promise<{ successful: boolean; data: any }>
   otp: ({ email }: { email: string }) => Promise<{ successful: boolean; data: any; error: null } | { successful: boolean; data: null; error: any }>
   otpVerify: ({ email, code }: { email: string; code: string }) => Promise<{ successful: boolean; data: any; error: null } | { successful: boolean; data: null; error: any }>
@@ -28,10 +25,17 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const descopeProjectId = process.env.EXPO_PUBLIC_DESCOPE_PROJECT_ID!
   const { user, setUser } = useUser()
 
+  const redirectUrl = (Platform.OS === 'web' ? process.env.EXPO_PUBLIC_WEB_BASE_URL : `${process.env.EXPO_PUBLIC_MOBILE_BASE_URL}index`) as string
+
   const oAuth = async ({ provider }: { provider: 'google' | 'microsoft' }) => {
-    axios.post(`https://api.descope.com/v1/auth/oauth/authorize?provider=${provider}&redirectUrl=${encodeURIComponent(AuthSession.makeRedirectUri({ scheme: 'bfflai' }))}`, { customClaims: { userEmail: '{{user.email}}' } }, { headers: { Authorization: `Bearer ${descopeProjectId}` } }).then((res) => {
-      Linking.openURL(res.data?.url)
-    })
+    axios
+      .post(`https://api.descope.com/v1/auth/oauth/authorize?provider=${provider}&redirectUrl=${encodeURIComponent(redirectUrl)}`, { customClaims: { userEmail: '{{user.email}}' } }, { headers: { Authorization: `Bearer ${descopeProjectId}` } })
+      .then((res) => {
+        Linking.openURL(res.data?.url)
+      })
+      .catch((err) => {
+        console.error('error: ', err.response?.data || err.message)
+      })
   }
 
   const oAuthCodeExchange = async ({ code }: { code: string }) => {
@@ -115,16 +119,24 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       products: getProductsRes?.data,
       interests: getAvailableInterestsRes?.data,
     }
-    storage.set('user', JSON.stringify(newUser))
     setUser(newUser)
+    storage.set('user', JSON.stringify(newUser))
   }
 
   const logout = () => {
     setUser(null)
     storage.delete('session')
     storage.delete('user')
-    router.push('/')
   }
+
+  // useEffect(() => {
+  //   setUser(null)
+  //   storage.delete('session')
+  //   storage.delete('user')
+
+  //   console.log('mmkw session: ', storage.getString('session'))
+  //   console.log('mmkw user: ', storage.getString('user'))
+  // }, [])
 
   useEffect(() => {
     const user = getStoredUser()
@@ -133,7 +145,16 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [])
 
-  const value = { oAuth, oAuthCodeExchange, otp, otpVerify, authenticate, logout, user, setUser }
+  const value = {
+    oAuth: oAuth,
+    oAuthCodeExchange,
+    otp,
+    otpVerify,
+    authenticate,
+    logout,
+    user,
+    setUser,
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

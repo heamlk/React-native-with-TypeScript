@@ -1,5 +1,5 @@
 import { Slot } from 'expo-router'
-import { View } from 'react-native'
+import { Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import DeeplinkProvider from './_context/deeplink'
 import AuthProvider from './_context/auth'

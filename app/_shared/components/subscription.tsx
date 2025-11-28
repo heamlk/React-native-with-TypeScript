@@ -5,12 +5,15 @@ import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
 import { useUser } from '@/app/_context/user'
 import { useApi } from '@/app/_context/api'
+import { Platform } from 'react-native'
 
 export default function Subscription() {
   const { user, updateUser } = useUser()
   const { theme } = useTheme()
   const api = useApi()
   const breakpoints = useBreakpoints()
+
+  const redirectUrl = Platform.OS === 'web' ? '/subscription' : `/subscription/mobile`
 
   const [selectedSubscription, setSelectedSubscription] = useState(0)
   const [fetchingMonthlySubscription, setFetchingMonthlySubscription] = useState(false)
@@ -26,7 +29,7 @@ export default function Subscription() {
 
     try {
       setFetchingMonthlySubscription(true)
-      const req = await api.postGetNewSubscriptionUrl({ mode: selectedSubscription === 0 ? 'monthly' : 'lifetime', cancel_url: '/subscription', success_url: '/subscription' })
+      const req = await api.postGetNewSubscriptionUrl({ mode: selectedSubscription === 0 ? 'monthly' : 'lifetime', cancel_url: redirectUrl, success_url: redirectUrl })
       const data = req?.data
       const url = data?.url
       setFetchingMonthlySubscription(false)
@@ -109,19 +112,15 @@ export default function Subscription() {
       {user?.profile?.subscription?.status !== 'active' ? (
         <>
           <View className='gap-[16px]'>
-            <View className='flex-row items-center gap-[10px]'>
-              <Pressable
-                className='w-[16px] h-[16px] rounded-[9999px] border-[1px] cursor-pointer'
-                style={{ borderColor: getThemeBackground({ theme, breakpoints, background: 'button' }), backgroundColor: selectedSubscription === 0 ? getThemeBackground({ theme, breakpoints, background: 'button' }) : 'transparent' }}
-                onPress={() => setSelectedSubscription(0)}
-              />
+            <Pressable className='flex-row items-center gap-[10px]' onPress={() => setSelectedSubscription(0)}>
+              <View className='w-[16px] h-[16px] rounded-[9999px] border-[1px] cursor-pointer' style={{ borderColor: getThemeBackground({ theme, breakpoints, background: 'button' }), backgroundColor: selectedSubscription === 0 ? getThemeBackground({ theme, breakpoints, background: 'button' }) : 'transparent' }} />
               <Text className='font-[600]' size='xl' color='grey1_light1'>
                 $7.00
                 <Text size='md' color='grey1_light1'>
                   /month
                 </Text>
               </Text>
-            </View>
+            </Pressable>
 
             <View className='gap-[8px]'>
               <View className='w-[100%] flex-row items-center justify-between'>
@@ -142,19 +141,15 @@ export default function Subscription() {
           <View className='w-[100%] h-[1px] mb-[16px] mt-[20px] border-t-[1px]' border='grey5_dark3'></View>
 
           <View className='gap-[16px]'>
-            <View className='flex-row items-center gap-[10px]'>
-              <Pressable
-                className='w-[16px] h-[16px] rounded-[9999px] border-[1px] cursor-pointer'
-                style={{ borderColor: getThemeBackground({ theme, breakpoints, background: 'button' }), backgroundColor: selectedSubscription === 1 ? getThemeBackground({ theme, breakpoints, background: 'button' }) : 'transparent' }}
-                onPress={() => setSelectedSubscription(1)}
-              />
+            <Pressable className='flex-row items-center gap-[10px]' onPress={() => setSelectedSubscription(1)}>
+              <View className='w-[16px] h-[16px] rounded-[9999px] border-[1px] cursor-pointer' style={{ borderColor: getThemeBackground({ theme, breakpoints, background: 'button' }), backgroundColor: selectedSubscription === 1 ? getThemeBackground({ theme, breakpoints, background: 'button' }) : 'transparent' }} />
               <Text className='font-[600] flex flex-col' size='xl' color='grey1_light1'>
                 250 for life
                 <Text className='font-[400]' size='sm' color='black_light5'>
-                  100 are left
+                  &nbsp;100 are left
                 </Text>
               </Text>
-            </View>
+            </Pressable>
 
             <View className='gap-[8px]'>
               <View className='w-[100%] flex-row items-center justify-between'>

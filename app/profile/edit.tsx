@@ -12,8 +12,10 @@ import { Controller, useForm } from 'react-hook-form'
 import { useApi } from '../_context/api'
 import { useRouter } from 'expo-router'
 import { useUser } from '../_context/user'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function EditProfilePage() {
+  const insets = useSafeAreaInsets()
   const { theme } = useTheme()
   const { user, updateUser } = useUser()
   const router = useRouter()
@@ -21,7 +23,7 @@ export default function EditProfilePage() {
   const api = useApi()
 
   const [avatar, setAvatar] = useState<File | null>(null)
-  const [preview, setPreview] = useState<string | null>(null)
+  const [preview, setPreview] = useState<string | null>(user?.profile?.avatar || null)
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
   const [confirmationError, setConfirmationError] = useState('')
 
@@ -49,9 +51,9 @@ export default function EditProfilePage() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       quality: 1,
-      allowsEditing: true,
+      allowsEditing: false,
     })
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -66,8 +68,8 @@ export default function EditProfilePage() {
         type,
       }
 
-      setPreview(uri)
       setAvatar(file)
+      setPreview(uri)
     }
   }
 
@@ -162,8 +164,8 @@ export default function EditProfilePage() {
   }, [])
 
   return (
-    <AuthenticatedLayout keepMarginsOnMobile={true} keepSafePaddingOnMobile={true}>
-      <View className='w-[100%] h-[100%] relative'>
+    <AuthenticatedLayout keepMarginsOnMobile={saving ? false : true} keepSafePaddingOnMobile={true}>
+      <View className='w-[100%] h-[100%] relative' style={{ paddingBottom: saving ? 0 : insets.bottom + 25 }}>
         {saving ? (
           <View className='w-[100%] h-[100%] absolute left-[0px] right-[0px] top-[0px] bottom-[0px] m-auto justify-center gap-[12px]'>
             <Text className='text-center font-[500]' size='3xl' color='grey3_light3'>
@@ -180,17 +182,19 @@ export default function EditProfilePage() {
             {/* Avatar */}
             <View className='w-[128px] h-[128px] relative mx-auto'>
               <View className='w-[128px] h-[128px] items-center justify-center border-[1px] rounded-[999999px] relative overflow-hidden' style={theme === 'light' ? { backgroundColor: themeVars.colors.grey6, borderColor: 'transparent' } : { borderColor: themeVars.colors.dark4 }}>
-                <View className='w-[128px] h-[128px] absoulte top-0 bottom-0 left-0 right-0 m-auto border-[8px] z-[1] rounded-[999999px]' style={{ borderColor: theme === 'light' ? themeVars.colors.grey6 : getThemeBackground({ theme, breakpoints, background: 'primary' }) }}></View>
+                <View className='w-[128px] h-[128px] absolute top-0 bottom-0 left-0 right-0 m-auto border-[8px] z-[1] rounded-[999999px]' style={{ borderColor: theme === 'light' ? themeVars.colors.grey6 : getThemeBackground({ theme, breakpoints, background: 'primary' }) }}></View>
 
                 {/* Profile picture */}
-                {preview || user?.profile?.avatar ? (
+                {preview ? (
                   Platform.OS === 'web' ? (
-                    <img src={preview || user?.profile?.avatar} className='w-[128px] h-[128px] object-cover absolute top-0 left-0' />
+                    <img src={preview} className='w-[128px] h-[128px] object-cover absolute top-0 left-0' />
                   ) : (
-                    <Image source={{ uri: preview || user?.profile?.avatar }} className='w-[128px] h-[128px] object-cover absolute top-0 left-0' />
+                    <Image source={{ uri: preview }} className='w-[128px] h-[128px] object-cover absolute top-0 left-0' />
                   )
                 ) : (
-                  <IconUser width={140} height={140} color={theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.dark4} className='absolute top-[20px]' />
+                  <View className='absolute top-[20px]'>
+                    <IconUser width={130} height={130} color={theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.dark4} />
+                  </View>
                 )}
               </View>
               {/* Profile picture - END */}
@@ -208,10 +212,6 @@ export default function EditProfilePage() {
                 <IconPencil style={{ transform: 'scale(0.9)' }} />
               </Pressable>
               {/* Pencil icon - END */}
-
-              {/* Hidden overlay */}
-              <Pressable style={{ opacity: 0, width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 11, borderRadius: '99999px', backgroundColor: 'red' }} onPress={handleImageChangePress}></Pressable>
-              {/* Hidden overlay - END */}
             </View>
             {/* Avatar - END */}
 

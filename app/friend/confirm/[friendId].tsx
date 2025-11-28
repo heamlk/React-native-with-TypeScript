@@ -7,9 +7,11 @@ import { useEffect, useState } from 'react'
 import themeVars from '@/app/_styles/theme/themeVars'
 import { Image, ActivityIndicator } from 'react-native'
 import { useApi } from '@/app/_context/api'
-import { useUser, UserType } from '@/app/_context/user'
-import { CompanionAttributes, CompanionInfos } from '@/app/_context/auth.types'
+import { useUser } from '@/app/_context/user'
+import { CompanionInfos } from '@/app/_context/auth.types'
 import IconRefresh from '@/app/_assets/icons/refresh.svg'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { borderRadiusNative } from '@/app/_styles/theme/borderRadius'
 
 export type SelcetInputType = {
   open: boolean
@@ -40,6 +42,7 @@ export const defaultSelcetInput: SelcetInputType = {
 export const asd = {}
 
 export default function NewFriendPage() {
+  const insets = useSafeAreaInsets()
   const params = useLocalSearchParams<{ friendId: string }>()
   const friendId = params.friendId
 
@@ -54,7 +57,6 @@ export default function NewFriendPage() {
 
   useEffect(() => {
     const onCompanionUpdateEvent: any = async ({ companion }: { companion: CompanionInfos }) => {
-      console.log('companion: ', companion)
       const newUser = await updateUser()
       setUpdatingImage(false)
 
@@ -115,15 +117,15 @@ export default function NewFriendPage() {
   }, [])
 
   return (
-    <AuthenticatedLayout disableRelative={true} keepSafePaddingOnMobile={true}>
-      <View className='base:py-[40px] phone:py-[0px] flex-1'>
+    <AuthenticatedLayout disableRelative={true} keepMarginsOnMobile={true} keepSafePaddingOnMobile={true}>
+      <View className='base:py-[40px] phone:py-[0px] flex-1' style={{ paddingBottom: insets.bottom + 25 }}>
         <View className='base:flex-col tablet:flex-row base:justify-between phone:justify-center base:items-center phone:items-center base:gap-[30px] tablet:gap-[90px] phone:mt-[60px] base:flex-1 phone:flex-[unset]'>
           {/* Logo */}
-          <View className='base:w-[100%] phone:max-w-[300px] tablet:max-w-[500px] base:max-h-[unset] items-center justify-center rounded-md'>
+          <View className='base:w-[100%] phone:max-w-[300px]  tablet:max-w-[500px] base:max-h-[unset] items-center justify-center rounded-md'>
             <Image
               source={{ uri: friend?.profile_picture?.image }}
               style={{
-                borderRadius: themeVars.borderRadius.md,
+                borderRadius: borderRadiusNative.md,
                 ...(breakpoints === 'phone' ? { width: dimentions?.deviceWidth - 48 - 32, height: dimentions?.deviceWidth - 48 - 32 } : breakpoints === 'tablet' ? { width: 300, height: 300 } : { width: 500, height: 500 }),
               }}
             />

@@ -3,11 +3,12 @@ import { View, Text, Pressable, GradientPressable, TextInput } from '../_shared/
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
 import { useForm, Controller } from 'react-hook-form'
 import { useApi } from '../_context/api'
-import ProtectedScreen from '../_shared/layout/protectedScreen'
 import type { OwnModelParams } from '../_context/auth.types'
 import { useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function SubscriptionPage() {
+  const insets = useSafeAreaInsets()
   const api = useApi()
   const router = useRouter()
 
@@ -64,17 +65,9 @@ export default function SubscriptionPage() {
     fetch()
   }, [])
 
-  if (!modelData) {
-    return (
-      <ProtectedScreen>
-        <Text></Text>
-      </ProtectedScreen>
-    )
-  }
-
   return (
     <AuthenticatedLayout keepMarginsOnMobile={true} keepSafePaddingOnMobile={true}>
-      <View className='w-[100%] max-w-[440px] mx-auto gap-[32px]'>
+      <View className='w-[100%] max-w-[440px] mx-auto gap-[32px]' style={{ paddingBottom: insets.bottom + 25 }}>
         <View className='gap-[16px]'>
           <Text className='font-[600] text-center' size='3xl' color='grey1_light1'>
             Bring your own model

@@ -10,8 +10,10 @@ import { useApi } from '../_context/api'
 import type { ReferralInfo } from '../_context/auth.types'
 import * as Clipboard from 'expo-clipboard'
 import { useUser } from '../_context/user'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function ReferralPage() {
+  const insets = useSafeAreaInsets()
   const { theme } = useTheme()
   const { setPopup } = usePopup()
   const { user } = useUser()
@@ -50,7 +52,7 @@ export default function ReferralPage() {
 
   return (
     <AuthenticatedLayout keepMarginsOnMobile={true} keepSafePaddingOnMobile={true}>
-      <View className='w-[100%] max-w-[500px] mx-auto'>
+      <View className='w-[100%] max-w-[500px] mx-auto' style={{ paddingBottom: insets.bottom + 25 }}>
         <View className='gap-[12px]'>
           <View className='p-[24px] rounded-[16px] items-center gap-[24px] border-[1px]' style={{ borderColor: theme === 'light' ? 'transparent' : themeVars.colors.purple2 + themeVars.colors.opacity20 }} background='grey6_transparent'>
             <Text className='text-center' size='md' color='grey1_light1'>

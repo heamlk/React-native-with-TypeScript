@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
 import { GradientPressable, Pressable, Text, TextInput, View } from '../_shared/components/reusable'
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Image, ScrollView } from 'react-native'
+import { ActivityIndicator, Image, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
 import { useUser } from '../_context/user'
 import useBreakpoints from '../_hooks/breakpoints'
 import useDimensions from '../_hooks/dimensions'
@@ -28,9 +28,12 @@ import type { ImageMedia } from '../_context/auth.types'
 import { BlurView } from 'expo-blur'
 import Carousel, { type ICarouselInstance } from 'react-native-reanimated-carousel'
 import { resizeToFitScreen, scaleToFit } from '../_lib/utils'
+import VoiceToTextMobile from '../_shared/components/voiceToTextMobile'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-export default function User() {
+export default function FriendIdPage() {
   const { theme } = useTheme()
+  const insets = useSafeAreaInsets()
   const router = useRouter()
   const params = useLocalSearchParams<{ friendId: string }>()
   const friendId = params.friendId
@@ -44,6 +47,7 @@ export default function User() {
   const viewRef = useRef<ScrollView | null>(null)
   const carouselRef = useRef<ICarouselInstance>(null)
   const carouselSmallRef = useRef<ICarouselInstance>(null)
+  const voiceBase64Ref = useRef('')
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
@@ -74,6 +78,7 @@ export default function User() {
       created_at: string
       role: 'customer' | 'companion'
       type: 'text' | 'image' | 'error'
+      media_id?: string
     }[]
   >([])
   const [conversationMedia, setConversationMedia] = useState<ImageMedia[]>([])
@@ -95,7 +100,7 @@ export default function User() {
 
       return []
     } catch (error) {
-      console.warn(error)
+      console.warn('updateConversationHistory error: ', error)
     }
   }
 
@@ -121,7 +126,7 @@ export default function User() {
       }
     } catch (error) {
       setUpdatingNsfwStatus(false)
-      console.warn(error)
+      console.warn('handleNsfwToggle error: ', error)
     }
   }
 
@@ -143,7 +148,7 @@ export default function User() {
       }
     } catch (error) {
       setUpdatingEmotionsStatus(false)
-      console.warn(error)
+      console.warn('handleAnimationToggle error: ', error)
     }
   }
 
@@ -164,7 +169,7 @@ export default function User() {
         await updateUser()
       }
     } catch (error) {
-      console.warn(error)
+      console.warn('handleClear error: ', error)
     }
   }
 
@@ -185,12 +190,12 @@ export default function User() {
             Are you sure you want to clear the chat?
           </Text>
           <View className='flex-row gap-[16px]'>
-            <GradientPressable className='w-[150px] h-[48px]' type='dark' onPress={handleClear}>
+            <GradientPressable className='w-[120px] h-[48px]' type='dark' onPress={handleClear}>
               <Text className='font-[600]' size='md' color='grey1_light2'>
                 Ok
               </Text>
             </GradientPressable>
-            <GradientPressable className='w-[150px] h-[48px]' type='dark' onPress={() => setPopup({ open: false })}>
+            <GradientPressable className='w-[120px] h-[48px]' type='dark' onPress={() => setPopup({ open: false })}>
               <Text className='font-[600]' size='md' color='grey1_light2'>
                 Cancel
               </Text>
@@ -202,57 +207,70 @@ export default function User() {
   }
 
   const handleSendMessage = async () => {
-    if (sendingMessage || !messageInput) {
+    if (sendingMessage) {
       return
     }
 
-    const message = messageInput
-    const newMessages: any = [
-      ...messages,
-      {
-        content: message,
-        created_at: new Date().toString(),
-        role: 'customer',
-        type: 'text',
-      },
-    ]
+    if (voiceBase64Ref.current) {
+      try {
+        const base64 = voiceBase64Ref.current
+        voiceBase64Ref.current = ''
+        const req = await api.postSendVoiceMessage({ companionId: friend?.id || '', audioBase64: base64 })
+        const data = req?.data
 
-    setMessageInput('')
-    setMessages(newMessages)
-
-    try {
-      setSendingMessage(true)
-      const req = await api.postSendMessage({ companionId: friend?.id || '', message: message })
-      const data = req?.data
-      let errorMessage = ''
-      setSendingMessage(false)
-
-      if (data === 'INAPPROPRIATE_MESSAGE') {
-        errorMessage = 'Message rejected due to inappropriate content'
-      } else if (data === 'CUSTOMER_AGE_NOT_VERIFIED') {
-        errorMessage = 'Please verify your age before sending NSFW messages'
-      } else if (data === 'MISSING_NSFW_SUBSCRIPTION_OPTION') {
-        errorMessage = 'Message rejected due to missing NSFW subscription option'
-      } else if (data === 'NSFW_DISABLED') {
-        errorMessage = 'Message rejected due to NSFW being disabled'
-      } else if (data !== 'OK') {
-        errorMessage = 'Error while sending message'
+        if (data !== 'OK') {
+          console.warn('Failed to send voice message')
+        }
+      } catch (error) {
+        console.warn('send message error: ', error)
       }
+    } else if (messageInput) {
+      const message = messageInput
+      const newMessages: any = [
+        ...messages,
+        {
+          content: message,
+          created_at: new Date().toString(),
+          role: 'customer',
+          type: 'text',
+        },
+      ]
 
-      if (errorMessage) {
-        setMessages([
-          ...newMessages,
-          {
-            content: errorMessage,
-            created_at: new Date().toString(),
-            role: 'customer',
-            type: 'error',
-          },
-        ])
+      setMessageInput('')
+      setMessages(newMessages)
+
+      try {
+        const req = await api.postSendMessage({ companionId: friend?.id || '', message: message })
+        const data = req?.data
+        let errorMessage = ''
+
+        if (data === 'INAPPROPRIATE_MESSAGE') {
+          errorMessage = 'Message rejected due to inappropriate content'
+        } else if (data === 'CUSTOMER_AGE_NOT_VERIFIED') {
+          errorMessage = 'Please verify your age before sending NSFW messages'
+        } else if (data === 'MISSING_NSFW_SUBSCRIPTION_OPTION') {
+          errorMessage = 'Message rejected due to missing NSFW subscription option'
+        } else if (data === 'NSFW_DISABLED') {
+          errorMessage = 'Message rejected due to NSFW being disabled'
+        } else if (data !== 'OK') {
+          errorMessage = 'Error while sending message'
+        }
+
+        if (errorMessage) {
+          setMessages([
+            ...newMessages,
+            {
+              content: errorMessage,
+              created_at: new Date().toString(),
+              role: 'customer',
+              type: 'error',
+            },
+          ])
+        }
+      } catch (error) {
+        setSendingMessage(false)
+        console.warn('send message error: ', error)
       }
-    } catch (error) {
-      setSendingMessage(false)
-      console.warn(error)
     }
   }
 
@@ -272,7 +290,7 @@ export default function User() {
       }
     } catch (error) {
       setFetchingMedia(false)
-      console.warn(error)
+      console.warn('updateMedia error: ', error)
     }
   }
 
@@ -300,7 +318,7 @@ export default function User() {
         setPopup({ open: false })
       }
     } catch (error) {
-      console.warn(error)
+      console.warn('handleCarouselDelete error: ', error)
     }
   }
 
@@ -317,12 +335,12 @@ export default function User() {
             Are you sure you want to delete this image?
           </Text>
           <View className='flex-row gap-[16px]'>
-            <GradientPressable className='w-[150px] h-[48px]' type='dark' onPress={() => handleCarouselDelete({ mediaId })}>
+            <GradientPressable className='w-[120px] h-[48px]' type='dark' onPress={() => handleCarouselDelete({ mediaId })}>
               <Text className='font-[600]' size='md' color='grey1_light2'>
                 Ok
               </Text>
             </GradientPressable>
-            <GradientPressable className='w-[150px] h-[48px]' type='dark' onPress={() => setPopup({ open: false })}>
+            <GradientPressable className='w-[120px] h-[48px]' type='dark' onPress={() => setPopup({ open: false })}>
               <Text className='font-[600]' size='md' color='grey1_light2'>
                 Cancel
               </Text>
@@ -361,7 +379,7 @@ export default function User() {
       }
     } catch (error) {
       setFetchingMediaAnimation(false)
-      console.warn(error)
+      console.warn('handleGenerateCompanionAnimation error: ', error)
     }
   }
 
@@ -407,6 +425,7 @@ export default function User() {
 
   useEffect(() => {
     updateConversationHistory()
+    api.getPingCompanion({ companionId: friend?.id || '' })
 
     api.socketState?.on('companion_emotion', (event) => {
       handleCompanionEmotionEvent(event)
@@ -436,7 +455,7 @@ export default function User() {
   }
 
   return (
-    <AuthenticatedLayout keepSafePaddingOnMobile={false} disableRelative={true} mainZIndex={carouselData?.open || mediaBlurOpen ? 10 : 0}>
+    <AuthenticatedLayout keepSafePaddingOnMobile={false} disableRelative={true} mainZIndex={carouselData?.open || mediaBlurOpen ? 10 : 0} hideSidebar={Platform.OS === 'web' ? false : mediaBlurOpen || carouselData?.open}>
       {/* Blur background */}
       {carouselData?.open ? (
         <View className='w-[100%] h-[100%] absolute top-[0] left-[0] z-[100]'>
@@ -477,22 +496,29 @@ export default function User() {
                   return (
                     <>
                       {item?.animation_url ? (
-                        <Video key={item?.created_at.toLocaleString() + index} source={{ uri: item?.animation_url }} resizeMode={ResizeMode.COVER} shouldPlay isLooping={true} isMuted useNativeControls={false} videoStyle={{ width: size[0], height: size[1] }} style={{ width: size[0], height: size[1], margin: 'auto' }} />
+                        <Video
+                          key={item?.created_at.toLocaleString() + index}
+                          source={{ uri: item?.animation_url }}
+                          resizeMode={ResizeMode.COVER}
+                          shouldPlay={true}
+                          isLooping={true}
+                          isMuted
+                          useNativeControls={false}
+                          videoStyle={{ width: size[0], height: size[1] }}
+                          style={{ width: size[0], height: size[1], margin: 'auto' }}
+                        />
                       ) : (
-                        <Image key={item?.created_at.toLocaleString() + index} source={{ uri: item?.image }} style={{ width: size[0], height: size[1], margin: 'auto' }} />
+                        <Image key={item?.id + item?.animation_url} source={{ uri: item?.image }} style={{ width: size[0], height: size[1], margin: 'auto' }} />
                       )}
                     </>
                   )
                 }}
               />
-            ) : (
-              <></>
-            )}
-
+            ) : null}
             {/* Carousel - END */}
 
             {/* Controls */}
-            <View className='flex-row gap-[20px] absolute bottom-[40px] justify-center'>
+            <View className='flex-row gap-[20px] absolute justify-center' style={{ bottom: 40 + insets.bottom }}>
               <Pressable
                 className='w-[60px] h-[60px] items-center justify-center rounded-[9999] pr-[10px]'
                 background='black/50_dark1'
@@ -542,29 +568,25 @@ export default function User() {
                     <ActivityIndicator size='large' color={themeVars.colors.purple1} />
                   )}
                 </Pressable>
-              ) : (
-                <></>
-              )}
+              ) : null}
             </View>
             {/* Controls - END */}
 
             {/* Close button */}
-            <Pressable className='w-[60px] h-[60px] absolute top-[40px] right-[40px] items-center justify-center rounded-[9999]' background='black/50_dark1' onPress={handleBlurClose}>
+            <Pressable className='w-[60px] h-[60px] absolute right-[40px] items-center justify-center rounded-[9999]' style={{ top: 40 + insets.top }} background='black/50_dark1' onPress={handleBlurClose}>
               <IconClose width={35} height={35} color={themeVars.colors.purple1} />
             </Pressable>
             {/* Close button - END */}
           </BlurView>
         </View>
-      ) : (
-        <></>
-      )}
+      ) : null}
       {/* Blur background - END */}
 
       {/* Media blur */}
       {mediaBlurOpen ? (
         <View className='w-[100%] h-[100%] absolute top-[0] left-[0] z-[99]'>
           <View className='w-[100%] h-[100%] items-center' background='grey6_dark7'>
-            <Pressable className='w-[48px] h-[48px] mt-[16px] ml-auto mr-[24px] rounded-[20px] items-center justify-center' background='dark2/60' onPress={handleMediaBlurClose}>
+            <Pressable className='w-[48px] h-[48px] ml-auto mr-[24px] rounded-[20px] items-center justify-center' style={{ marginTop: 16 + insets.top }} background='dark2/60' onPress={handleMediaBlurClose}>
               <IconClose width={28} height={28} color='white' />
             </Pressable>
 
@@ -602,13 +624,10 @@ export default function User() {
             </View>
           </View>
         </View>
-      ) : (
-        <></>
-      )}
-
+      ) : null}
       {/* Media blur - END */}
 
-      <View className='base:flex-col phone:flex-row base:rounded-[0px] phone:rounded-lg' style={{ width: containerWidth, height: containerHeight }} background='grey6_dark1'>
+      <View className='base:flex-col phone:flex-row base:rounded-[0px] phone:rounded-lg' style={{ width: containerWidth, height: containerHeight, paddingBottom: insets.bottom }} background='grey6_dark1'>
         {/* Character */}
         <View className='base:p-[0] phone:p-[16px] gap-[40px]' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth } : breakpoints === 'tablet' ? { width: 300 } : { width: 664 }}>
           <View className='base:rounded-t-[0px] phone:rounded-t-md relative overflow-hidden relative' style={breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: 240 } : breakpoints === 'tablet' ? { width: 300 - 30, height: 440 } : { width: 664 - 30, height: 440 }}>
@@ -661,18 +680,14 @@ export default function User() {
               <Pressable className='w-[40px] h-[40px] absolute z-[999] top-[24px] right-[24px] rounded-[9999px] items-center justify-center pt-[3px] pr-[1px]' background='grey6/40_dark6/40' onPress={handleEdit}>
                 <IconSettings />
               </Pressable>
-            ) : (
-              <></>
-            )}
+            ) : null}
             {/* Settings - END */}
 
             {breakpoints === 'phone' && conversationMedia?.length > 0 ? (
-              <Pressable className='w-[48px] h-[48px] absolute top-[16px] right-[24px] rounded-[20px] items-center justify-center' background='grey6/40_dark6/40' onPress={handleMediaBlurOpen}>
+              <Pressable className='w-[48px] h-[48px] absolute right-[24px] rounded-[20px] items-center justify-center' background='grey6/40_dark6/40' style={{ top: 16 + insets.top }} onPress={handleMediaBlurOpen}>
                 <IconMedia />
               </Pressable>
-            ) : (
-              <></>
-            )}
+            ) : null}
 
             <View className='w-[100%] h-[40px] overflow-visible flex-row items-center justify-between absolute bottom-[24px] left-[0px] z-[101] px-[24px]'>
               <View className='gap-[10px] flex-row items-center'>
@@ -685,9 +700,7 @@ export default function User() {
                       <IconSettings />
                     </View>
                   </Pressable>
-                ) : (
-                  <></>
-                )}
+                ) : null}
               </View>
 
               <View className='flex-row items-center gap-[8px]'>
@@ -706,24 +719,24 @@ export default function User() {
                       </View>
                     )}
                   </Pressable>
-                ) : (
-                  <></>
-                )}
+                ) : null}
 
-                <Pressable className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' background='black/50_dark1' onPress={handleAnimationToggle}>
-                  {emotionEnabled ? (
-                    <>
-                      <IconAnimationToggle />
-                      <View className='border-[2px] rounded-[999px] absolute bottom-[-2px] right-[-2px]' border='transparent_dark1'>
-                        <IconChecked className='rounded-[999px]' />
+                {blinkVideoUrl ? (
+                  <Pressable className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' background='black/50_dark1' onPress={handleAnimationToggle}>
+                    {emotionEnabled ? (
+                      <>
+                        <IconAnimationToggle />
+                        <View className='border-[2px] rounded-[999px] absolute bottom-[-2px] right-[-2px]' border='transparent_dark1'>
+                          <IconChecked className='rounded-[999px]' />
+                        </View>
+                      </>
+                    ) : (
+                      <View className='opacity-[0.4]'>
+                        <IconAnimationToggle />
                       </View>
-                    </>
-                  ) : (
-                    <View className='opacity-[0.4]'>
-                      <IconAnimationToggle />
-                    </View>
-                  )}
-                </Pressable>
+                    )}
+                  </Pressable>
+                ) : null}
 
                 <Pressable className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' background='black/50_dark1' onPress={handleClearClick}>
                   <IconClean />
@@ -731,6 +744,7 @@ export default function User() {
               </View>
             </View>
           </View>
+
           {breakpoints !== 'phone' ? (
             <View className='flex-1 gap-[12px] px-[40px]'>
               <View className='flex-row items-center justify-between'>
@@ -764,93 +778,110 @@ export default function User() {
                 )}
               />
             </View>
-          ) : (
-            <></>
-          )}
+          ) : null}
         </View>
         {/* Character - END */}
 
         {/* Divider */}
-        {breakpoints !== 'phone' ? <View className='w-[1px]' background='grey5_dark2' style={{ height: containerHeight }}></View> : <></>}
+        {breakpoints !== 'phone' ? <View className='w-[1px]' background='grey5_dark2' style={{ height: containerHeight }}></View> : null}
         {/* Divider - END */}
 
         {/* Chat container */}
-        <View className='flex-1 px-[16px] base:py-[24px] phone:py-[32px]'>
-          <View className='flex-1'>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={-24} style={{ flex: 1 }}>
+          <View className='flex-1 px-[16px]' style={{ paddingVertical: breakpoints === 'phone' ? 24 : 32 }}>
             {/* Chat area */}
-            <ScrollView ref={viewRef} className='w-[100%] max-w-[640px] mx-auto flex-1 mb-[16px] overflow-y-auto scrollbar-hide' contentContainerClassName='gap-[16px]'>
-              <View className='w-[100%] max-w-[496px] rounded-[16px] px-[20px] py-[12px] mx-auto mb-[16px]' background='grey5_dark2'>
-                <Text className='font-[500] text-center' size='md' color='grey2_light3'>
-                  Please keep in mind that all of the interactions are fictional. Do not take actual advice you see in this chat.
-                </Text>
-              </View>
+            <ScrollView ref={viewRef} className='scrollbar-hide'>
+              <View className='w-[100%] max-w-[640px] mx-auto gap-[16px]' onStartShouldSetResponder={() => true}>
+                <View className='w-[100%] max-w-[496px] rounded-[16px] px-[20px] py-[12px] mx-auto mb-[16px]' background='grey5_dark2'>
+                  <Text className='font-[500] text-center' size='md' color='grey2_light3'>
+                    Please keep in mind that all of the interactions are fictional. Do not take actual advice you see in this chat.
+                  </Text>
+                </View>
 
-              {messages?.map((message, messageIndex) => {
-                if (message?.role === 'companion' && message?.type === 'text') {
-                  return (
-                    <View key={message?.content + messageIndex} className='gap-[16px] flex-row items-center'>
-                      <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto' />
-                      <GradientPressable combinedClassname='flex-[unset] min-h-[32px] h-[unset] px-[10px] py-[6px] items-center justify-center' gradientClassname='rounded-[16px]' type='primary' isPressable={false}>
-                        <Text className='font-[500] flex-1' size='md' color='light1'>
-                          {message?.content}
-                        </Text>
-                      </GradientPressable>
-                    </View>
-                  )
-                } else if (message?.role === 'companion' && message?.type === 'image') {
-                  return (
-                    <View key={message?.content + messageIndex} className='gap-[16px] flex-row items-center'>
-                      <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto' />
-                      <Image style={{ width: 200, height: 150, borderRadius: 16 }} source={{ uri: message?.content }} />
-                    </View>
-                  )
-                } else if (message?.role === 'customer' && message?.type === 'error') {
-                  return (
-                    <Text key={message?.content + messageIndex} className='font-[500] text-end' size='md' color='red1'>
-                      {message?.content}
-                    </Text>
-                  )
-                }
-
-                return (
-                  <View key={message?.content + messageIndex} className='gap-[16px] flex-row items-center justify-end'>
-                    <View className='h-[44px] px-[20px] items-center justify-center rounded-[16px]' background='light1_dark2'>
-                      <Text className='font-[500]' size='md' color='grey1_light1'>
+                {messages?.map((message) => {
+                  if (message?.role === 'companion' && message?.type === 'text') {
+                    return (
+                      <View key={message?.content + message?.created_at} className='gap-[16px] flex-row'>
+                        <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto self-start' />
+                        <View className='flex flex-1' style={{ width: breakpoints === 'phone' ? dimentions.deviceWidth - 32 - 16 - 44 : 'auto' }}>
+                          <GradientPressable containerClassname='mr-auto' className='py-[10px]' type='primary' isPressable={false} gradientStyle={{ display: Platform.OS === 'web' ? 'flex' : 'contents' }}>
+                            <Text className='font-[500]' size='md' color='light1'>
+                              {message?.content}
+                            </Text>
+                          </GradientPressable>
+                        </View>
+                      </View>
+                    )
+                  } else if (message?.role === 'companion' && message?.type === 'image') {
+                    return (
+                      <View key={message?.content + message?.created_at} className='gap-[16px] flex-row items-center'>
+                        <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto' />
+                        <Pressable
+                          onPress={() => {
+                            handleBlurOpen({ index: [...conversationMedia]?.findIndex((obj) => obj?.id === message?.media_id) })
+                          }}
+                        >
+                          <Image source={{ uri: message?.content + `?cache=${message?.created_at}` }} style={{ width: 200, height: 150, borderRadius: 16 }} />
+                        </Pressable>
+                      </View>
+                    )
+                  } else if (message?.role === 'customer' && message?.type === 'error') {
+                    return (
+                      <Text key={message?.content + message?.created_at} className='font-[500] text-end' size='md' color='red1'>
                         {message?.content}
                       </Text>
+                    )
+                  }
+
+                  return (
+                    <View key={message?.content + message?.created_at} className='gap-[16px] ml-auto'>
+                      <View className=' px-[20px] py-[10px] rounded-[16px]' background='light1_dark2'>
+                        <Text className='font-[500]' size='md' color='grey1_light1'>
+                          {message?.content}
+                        </Text>
+                      </View>
                     </View>
+                  )
+                })}
+
+                {companionIsTyping?.is_typing && companionIsTyping?.companion_id === friend?.id ? (
+                  <View className='gap-[16px] flex-row items-center'>
+                    <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px]' />
+                    <Soul width={44} height={44} soulSize={44} />
                   </View>
-                )
-              })}
-
-              {companionIsTyping?.is_typing ? (
-                <View className='gap-[16px] flex-row items-center'>
-                  <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px]' />
-                  <Soul width={44} height={44} soulSize={44} />
-                </View>
-              ) : (
-                <></>
-              )}
+                ) : null}
+              </View>
             </ScrollView>
-          </View>
 
-          {/* Input */}
-          <View className='w-[100%] max-w-[640px] h-[60px] flex-row border-[1px] rounded-[31px] mx-auto relative' border='grey5_dark3' background='grey5_dark2'>
-            <TextInput className='h-[60px] flex-1 text-[16px] pl-[24px] pr-[12px]' color='grey1_light1' placeholder='Type a message…' value={messageInput} onChangeText={(event) => setMessageInput(event)} onSubmitEditing={handleSendMessage} returnKeyType='send' />
-            <View className='h-[60px] flex-row items-center gap-[10px] pr-[24px]'>
-              <VoiceToText
-                onChange={(text) => {
-                  setMessageInput((prev) => ' ' + prev + text)
-                }}
-              />
+            {/* Input */}
+            <View className='w-[100%] max-w-[640px] h-[60px] flex-row border-[1px] rounded-[31px] mx-auto mt-[24px] relative overflow-hidden' border='grey5_dark3' background='grey5_dark2'>
+              <TextInput className='text-[16px] flex-1 px-[24px] text-base' placeholder='Type a message…' color='grey1_light3' placeholderColor='grey1_light3' value={messageInput} onChangeText={setMessageInput} onSubmitEditing={handleSendMessage} returnKeyType='send' autoCorrect={true} />
 
-              <Pressable className='' onPress={handleSendMessage}>
-                <IconMessage width={30} height={30} color={themeVars.colors.purple1} />
-              </Pressable>
+              <View className='h-full flex-row items-center gap-[12px] pr-[20px]'>
+                {Platform.OS === 'web' ? (
+                  <VoiceToText
+                    onChange={(event) => {
+                      voiceBase64Ref.current = event?.audioBase64 || ''
+                      handleSendMessage()
+                    }}
+                  />
+                ) : (
+                  <VoiceToTextMobile
+                    onChange={(event) => {
+                      voiceBase64Ref.current = event?.audioBase64 || ''
+                      handleSendMessage()
+                    }}
+                  />
+                )}
+
+                <Pressable onPress={handleSendMessage} className='p-2'>
+                  <IconMessage width={30} height={30} color={themeVars.colors.purple1} />
+                </Pressable>
+              </View>
             </View>
+            {/* Input - END */}
           </View>
-          {/* Input - END */}
-        </View>
+        </KeyboardAvoidingView>
         {/* Chat container - END */}
       </View>
     </AuthenticatedLayout>

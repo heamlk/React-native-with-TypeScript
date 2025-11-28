@@ -1,8 +1,12 @@
-import { View } from 'react-native'
+import { View,  ScrollView } from 'react-native'
 import { Text } from '../components/reusable'
 
 export default function AboutUs() {
   return (
+    <ScrollView
+      showsVerticalScrollIndicator={true}
+      contentContainerClassName='py-8 max-w-5xl mx-auto'
+    >
     <View className='gap-[24px]'>
       <Text className='text-white' size='2xl'>
         About us
@@ -27,5 +31,6 @@ export default function AboutUs() {
         BFFL.AI is based in the U.S.A and registered as an LLC in Dover, DE © Copyright 2024 BFFL.AI, LLC
       </Text>
     </View>
+    </ScrollView>
   )
 }

@@ -1,77 +1,144 @@
-// VoiceToText.js
-import React, { useState, useEffect } from 'react'
-import { Button, Platform, View } from 'react-native'
-import { Pressable } from './reusable'
-import IconMicrophone from '@/app/_assets/icons/microphone'
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
+import { Text } from './reusable'
+import { Pressable as RNPressable } from 'react-native'
+import IconMicrophoneNew from '@/app/_assets/icons/ChatAudio.svg'
 import themeVars from '@/app/_styles/theme/themeVars'
+import { encodeArrayBufferToBase64, stopAllAudio } from '@/app/_lib/utils'
+import audioBufferToWav from 'audiobuffer-to-wav'
+import Tooltip from 'react-native-walkthrough-tooltip'
 
-export default function VoiceToText({ onChange }: { onChange: (str: string) => void }) {
-  const [text, setText] = useState('')
-  const [interimText, setInterimText] = useState('')
+const VoiceToText = forwardRef(({ onChange }: { onChange: (data: { text: string; audioBase64: string | null }) => void }, ref) => {
   const [isRecording, setIsRecording] = useState(false)
-  const [recognition, setRecognition] = useState(null)
+  const [interimText, setInterimText] = useState('')
+  const [voiceTooltipOpen, setVoiceTooltipOpen] = useState(false)
+  const recognitionRef = useRef<any>(null)
+  const finalTextRef = useRef<string>('')
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
 
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-        const recog = new SpeechRecognition()
-        recog.continuous = true
-        recog.interimResults = true
-        recog.lang = 'en-US'
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      const recog = new SpeechRecognition()
+      recog.continuous = true
+      recog.interimResults = true
+      recog.lang = 'en-US'
 
-        recog.onresult = (event: any) => {
-          let finalTranscript = ''
-          let tempInterim = ''
+      recog.onresult = (event: any) => {
+        let finalTranscript = ''
+        let tempInterim = ''
 
-          for (let i = event.resultIndex; i < event.results.length; ++i) {
-            const transcript = event.results[i][0].transcript
-            if (event.results[i].isFinal) {
-              finalTranscript += transcript + ' '
-            } else {
-              tempInterim += transcript
-            }
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' '
+          } else {
+            tempInterim += transcript
           }
-
-          if (finalTranscript) {
-            setText('')
-            onChange(finalTranscript)
-          }
-          setInterimText(tempInterim)
         }
 
-        setRecognition(recog)
-      } else {
-        alert('Web Speech API is not supported in this browser.')
+        if (finalTranscript) {
+          finalTextRef.current += finalTranscript.trim() + ' '
+          handleStop(true)
+          setTimeout(() => handleStart(), 500)
+        }
+        setInterimText(tempInterim)
       }
+
+      recog.onend = () => {
+        // Auto-restart if still recording
+        if (isRecording) recog.start()
+      }
+
+      recognitionRef.current = recog
+    } else {
+      alert('Web Speech API is not supported in this browser.')
     }
   }, [])
 
-  const handleStart = () => {
+  const handleStart = async () => {
     setIsRecording(true)
-    if (Platform.OS === 'web') {
-      ;(recognition as any)?.start()
+    finalTextRef.current = '' // reset transcript
+    audioChunksRef.current = []
+
+    // Start speech recognition
+    recognitionRef.current?.start()
+
+    // Start audio recording
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    const mediaRecorder = new MediaRecorder(stream)
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) audioChunksRef.current.push(e.data)
+    }
+
+    mediaRecorderRef.current = mediaRecorder
+    mediaRecorder.start()
+  }
+
+  const handleStop = async (returnOnchange?: boolean) => {
+    setIsRecording(false)
+    recognitionRef.current?.stop()
+    setInterimText('')
+
+    const mediaRecorder = mediaRecorderRef.current
+    if (!mediaRecorder) return
+
+    const stream = mediaRecorder.stream
+    stream.getTracks().forEach((track) => track.stop())
+
+    mediaRecorder.stop()
+    mediaRecorder.onstop = async () => {
+      const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+      const arrayBuffer = await blob.arrayBuffer()
+      const audioContext = new AudioContext()
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+      const wav = audioBufferToWav(audioBuffer)
+      const base64 = encodeArrayBufferToBase64(wav)
+
+      const finalText = finalTextRef.current.trim()
+
+      if (returnOnchange) {
+        onChange({
+          text: finalText,
+          audioBase64: base64,
+        })
+      }
+
+      finalTextRef.current = ''
+      audioChunksRef.current = []
     }
   }
 
-  const handleStop = () => {
-    setIsRecording(false)
-    if (Platform.OS === 'web') {
-      ;(recognition as any)?.stop()
-      setInterimText('')
-    }
-  }
+  useImperativeHandle(ref, () => ({
+    start: handleStart,
+    stop: handleStop,
+    isRecording,
+  }))
 
   return (
-    <>
-      <Pressable
+    <Tooltip isVisible={voiceTooltipOpen} content={<Text>Enable / Disable voice chat </Text>} backgroundColor='transparent'>
+      <RNPressable
         onPress={() => {
-          isRecording ? handleStop() : handleStart()
+          if (isRecording) {
+            handleStop(false)
+            setVoiceTooltipOpen(false)
+          } else {
+            handleStart()
+            setVoiceTooltipOpen(false)
+            stopAllAudio()
+          }
+        }}
+        onHoverIn={() => {
+          setVoiceTooltipOpen(true)
+        }}
+        onHoverOut={() => {
+          setVoiceTooltipOpen(false)
         }}
       >
-        <View style={{ width: 24, height: 24 }}></View>
-        <IconMicrophone style={{ position: 'absolute', bottom: 0, left: 0, pointerEvents: 'none' }} width={24} height={24} color={isRecording ? themeVars.colors.purple3 : themeVars.colors.purple5} hoverColor={themeVars.colors.purple3} />
-      </Pressable>
-    </>
+        <IconMicrophoneNew style={{ pointerEvents: 'none' }} fill={isRecording ? themeVars.colors.purple3 : themeVars.colors.purple5} width={40} height={40} />
+      </RNPressable>
+    </Tooltip>
   )
-}
+})
+
+export default VoiceToText

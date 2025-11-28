@@ -78,7 +78,7 @@ export default function FriendPage() {
           </View>
 
           <View className='items-center gap-[55px]'>
-            <View className='gap-[24px]'>
+            <View className='gap-[24px] w-[94%] phone:max-w-[85%]'>
               <Text className='text-center' color='grey2_light3' size='lg'>
                 In a world where AI excels at tasks, we've discovered its potential for something more profound - friendship. Our platform bridges the gap between human social bonds and AI's limitless potential, allowing you to craft a unique companion. Design their looks, choose their traits, and watch as they come to
                 life in a portrait of your making.
@@ -89,8 +89,8 @@ export default function FriendPage() {
             </View>
 
             {breakpoints === 'phone' ? (
-              <GradientPressable type='dark' combinedClassname='h-[48px] px-[12px]' onPress={onCreateFriend}>
-                <Text className='text-light2' size='xl'>
+              <GradientPressable type='dark' combinedClassname='h-[48px] w-3/4 phone:max-w-[85%] flex items-center justify-center' onPress={onCreateFriend}>
+                <Text className='text-light2 text-center' size='lg'>
                   Create a Friend
                 </Text>
               </GradientPressable>

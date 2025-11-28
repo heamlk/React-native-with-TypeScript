@@ -16,9 +16,12 @@ import { useUser } from '../_context/user'
 import IconCheckGreen from '@/app/_assets/icons/check-green.svg'
 import useAgeChecker from '../_hooks/useAgeChecker'
 import { useApi } from '../_context/api'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import storage from '../_shared/storage/storage'
 
 export default function ProfilePage() {
+  const insets = useSafeAreaInsets()
   const breakpoints = useBreakpoints()
   const router = useRouter()
   const { theme } = useTheme()
@@ -75,6 +78,12 @@ export default function ProfilePage() {
       return
     }
 
+    if (Platform.OS !== 'web') {
+      const url = process.env.EXPO_PUBLIC_WEB_BASE_URL + '/?age_verify=true&auth_session=' + storage.getString('session')
+      Linking.openURL(url)
+      return
+    }
+
     try {
       verifyAge()
     } catch (error) {
@@ -90,13 +99,28 @@ export default function ProfilePage() {
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
   }
 
+  // Automatically launching age verification script
+  useEffect(() => {
+    if (Platform.OS !== 'web') return
+
+    const url = new URL(window.location.href)
+    const ageVerifyValue = url.searchParams.get('age_verify')
+
+    if (ageVerifyValue === 'true') {
+      url.searchParams.delete('age_verify')
+      window.history.replaceState({}, '', url.toString())
+
+      handleVerifyAge()
+    }
+  }, [])
+
   return (
     <AuthenticatedLayout keepMarginsOnMobile={true} keepSafePaddingOnMobile={true}>
-      <View className='w-[100%] max-w-[500px] mx-auto'>
+      <View className='w-[100%] max-w-[500px] mx-auto' style={{ paddingBottom: insets.bottom + 25 }}>
         {/* Avatar */}
         <View className='w-[128px] h-[128px] relative mx-auto'>
           <View className='w-[128px] h-[128px] items-center justify-center border-[1px] rounded-[999999px] relative overflow-hidden' style={theme === 'light' ? { backgroundColor: themeVars.colors.grey6, borderColor: 'transparent' } : { borderColor: themeVars.colors.dark4 }}>
-            <View className='w-[128px] h-[128px] absoulte top-0 bottom-0 left-0 right-0 m-auto border-[8px] z-[1] rounded-[999999px]' style={{ borderColor: theme === 'light' ? themeVars.colors.grey6 : getThemeBackground({ theme, breakpoints, background: 'primary' }) }}></View>
+            <View className='w-[128px] h-[128px] absolute top-0 bottom-0 left-0 right-0 m-auto border-[8px] z-[1] rounded-[999999px]' style={{ borderColor: theme === 'light' ? themeVars.colors.grey6 : getThemeBackground({ theme, breakpoints, background: 'primary' }) }}></View>
 
             {/* Profile picture */}
             {user?.profile?.avatar ? (
@@ -106,7 +130,9 @@ export default function ProfilePage() {
                 <Image source={{ uri: user?.profile?.avatar }} className='w-[128px] h-[128px] object-cover absolute top-0 left-0' />
               )
             ) : (
-              <IconUser width={140} height={140} color={theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.dark4} className='absolute top-[20px]' />
+              <View className='absolute top-[20px]'>
+                <IconUser width={130} height={130} color={theme === 'light' ? themeVars.colors.grey3 : themeVars.colors.dark4} />
+              </View>
             )}
           </View>
           {/* Profile picture - END */}
@@ -286,7 +312,7 @@ export default function ProfilePage() {
             </Pressable>
           </View>
 
-          <View className='my-[12px]'>
+          <View className='mt-[12px]'>
             <GradientPressable type='dark' combinedClassname='w-[100%] h-[48px] items-center justify-center' onPress={() => logout()}>
               <Text size='md' color='grey1_light2' className='text-center font-[600]'>
                 Logout

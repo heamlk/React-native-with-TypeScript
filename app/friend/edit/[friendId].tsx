@@ -1,4 +1,4 @@
-import { GradientPressable, Pressable, Text, TextInput, View } from '@/app/_shared/components/reusable'
+import { getThemeColor, GradientPressable, Pressable, Text, TextInput, View } from '@/app/_shared/components/reusable'
 import Soul from '@/app/_shared/components/Soul'
 import AuthenticatedLayout from '@/app/_shared/layout/authenticatedLayout'
 import { BlurView } from 'expo-blur'
@@ -8,15 +8,17 @@ import useDimensions from '@/app/_hooks/dimensions'
 import useBreakpoints from '@/app/_hooks/breakpoints'
 import { useEffect, useState } from 'react'
 import themeVars from '@/app/_styles/theme/themeVars'
-import { findNodeHandle, type GestureResponderEvent, UIManager, Platform, Image } from 'react-native'
+import { findNodeHandle, type GestureResponderEvent, Platform, Image } from 'react-native'
 import { useApi } from '@/app/_context/api'
 import { capitalize, getRandomNumber } from '@/app/_lib/utils'
 import IconDices from '@/app/_assets/icons/dices.svg'
 import IconTrash from '@/app/_assets/icons/trash.svg'
 import { useUser, UserType } from '@/app/_context/user'
-import { CompanionAttributes, CompanionInfos } from '@/app/_context/auth.types'
+import { CompanionInfos } from '@/app/_context/auth.types'
 import { usePopup } from '@/app/_context/popup'
 import { LinearGradient } from 'expo-linear-gradient'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useLayout } from '@/app/_shared/layout/layout'
 
 export type SelcetInputType = {
   open: boolean
@@ -45,6 +47,8 @@ export const defaultSelcetInput: SelcetInputType = {
 }
 
 export default function NewFriendPage() {
+  const layout = useLayout()
+  const insets = useSafeAreaInsets()
   const params = useLocalSearchParams<{ friendId: string }>()
   const friendId = params.friendId
 
@@ -83,13 +87,6 @@ export default function NewFriendPage() {
       const rect = event?.currentTarget?.getBoundingClientRect?.()
       top = rect?.top || 0
       left = rect?.left || 0
-    } else {
-      // @ts-ignore
-      const handle = findNodeHandle(event?.currentTarget)
-      if (handle)
-        UIManager?.measure(handle, (x, y, width, height, pageX, pageY) => {
-          // console.log('Native measure:', { x, y, width, height, pageX, pageY })
-        })
     }
 
     if (type === 'select') {
@@ -324,11 +321,13 @@ export default function NewFriendPage() {
   const GetSelectedAttribute = ({ attribute, def }: { attribute: string; def: string }) => {
     const selectedAttribute = availableAttributes?.[attribute]?.find((att: any) => att?.key === selectedAttributes?.[attribute])?.value || selectedAttributes?.[attribute] || ''
     return breakpoints === 'phone' ? (
-      <GradientPressable type='dark' isPressable={false}>
-        <Text className='base:text-[20px] phone:text-[24px]' color='light1_light2'>
-          {selectedAttribute || def}
-        </Text>
-      </GradientPressable>
+      <View style={Platform.OS !== 'web' ? { position: 'relative', top: 8 } : {}}>
+        <GradientPressable type='dark' isPressable={false}>
+          <Text className='base:text-[20px] phone:text-[24px]' color='light1_light2'>
+            {selectedAttribute || def}
+          </Text>
+        </GradientPressable>
+      </View>
     ) : (
       <Text className='base:text-[20px] phone:text-[24px]' color='red1'>
         {selectedAttribute || def}
@@ -413,20 +412,23 @@ export default function NewFriendPage() {
       {/* Blur background - END */}
 
       {inputSelect?.open ? (
-        <View
-          className='w-[fit-content] h-[fit-content] absolute z-[101] border-[1px] rounded-sm m-auto'
-          style={{ ...(breakpoints === 'phone' ? { left: 0, right: 0, top: 0, bottom: 0 } : { left: inputSelect?.position?.x, top: inputSelect?.position?.y }), borderColor: theme === 'light' ? 'transparent' : themeVars.colors.purple2 + themeVars.colors.opacity40 }}
-          background='grey6_dark1'
+        <Pressable
+          className='z-[101]'
+          onPress={handleBlurClose}
+          style={{
+            ...{ position: 'absolute' },
+            ...(breakpoints === 'phone' ? { width: dimentions.deviceWidth, height: dimentions.deviceHeight, top: layout.scrollY, left: 0, alignItems: 'center', justifyContent: 'center' } : { top: inputSelect?.position?.y, left: inputSelect?.position?.x }),
+          }}
         >
           {inputSelect?.type === 'select' ? (
-            <View className=''>
+            <View className='border-[1px] rounded-sm' background='grey6_dark1' border='transparent_purple2/40'>
               {inputSelect?.selectOptions?.map((option, index) => {
                 const isSelected = selectedAttributes?.[inputSelect?.value] === option?.value
 
                 return (
                   <Pressable
                     key={option?.value + 72487}
-                    className='px-[16px] py-[8px]'
+                    className='h-[38px] px-[16px] py-[8px]'
                     hoverBackground='grey5_purple2/40'
                     background={isSelected ? 'grey5_purple2/40' : 'transparent'}
                     onPress={() => inputSelect?.onChange(option?.value)}
@@ -444,18 +446,26 @@ export default function NewFriendPage() {
           )}
 
           {inputSelect?.type === 'input' ? (
-            <View className='flex-row items-center'>
-              <TextInput className='max-h-[38px] px-[16px] text-[18px]' color='grey1_light3' placeholder={inputSelect?.inputPlaceholder} onChangeText={(newText) => inputSelect?.onChange(newText)} keyboardType={inputSelect?.value === 'age' ? 'numeric' : 'default'} />
+            <Pressable className='flex-row items-center border-[1px] rounded-sm' background='grey6_dark1' border='transparent_purple2/40' onPress={(event) => event.stopPropagation()}>
+              <TextInput
+                key={theme + inputSelect?.type}
+                className='!h-[38px] max-w-[240px] px-[16px] base:text-[16px] phone:text-[18px]'
+                color='grey1_light3'
+                placeholderColor='grey1_light3'
+                placeholder={inputSelect?.inputPlaceholder}
+                onChangeText={(newText) => inputSelect?.onChange(newText)}
+                keyboardType={inputSelect?.value === 'age' ? 'numeric' : 'default'}
+              />
               <Pressable onPress={() => handleBlurClose()}>
                 <Text className='pr-[16px]' size='md' color='grey1_light3'>
                   Ok
                 </Text>
               </Pressable>
-            </View>
+            </Pressable>
           ) : (
             <></>
           )}
-        </View>
+        </Pressable>
       ) : (
         <></>
       )}
@@ -493,7 +503,7 @@ export default function NewFriendPage() {
             {/* Form */}
             <View className='w-[100%] max-w-[600px] gap-[40px]'>
               <View className='px-[50px] base:gap-[24px] phone:gap-[0px]'>
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   Hi, I am from the{' '}
                   <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'universe', type: 'select' })}>
                     <GetSelectedAttribute attribute='universe' def='Universe' />
@@ -501,7 +511,7 @@ export default function NewFriendPage() {
                   universe.
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   My name is{' '}
                   <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'name', type: 'input', inputPlaceholder: 'First name' })}>
                     <GetSelectedAttribute attribute='name' def='First name' />
@@ -509,18 +519,18 @@ export default function NewFriendPage() {
                   .
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   I am excited to be your new best friend!
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   Let me tell you about myself, I am{' '}
                   <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'gender', type: 'select' })}>
                     <GetSelectedAttribute attribute='gender' def='Gender' />
                   </Pressable>
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   and I am{' '}
                   <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'age', type: 'input', inputPlaceholder: 'Age' })}>
                     <GetSelectedAttribute attribute='age' def='Age' />
@@ -528,7 +538,7 @@ export default function NewFriendPage() {
                   years old.
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   I have{' '}
                   <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'hair_color', type: 'select' })}>
                     <GetSelectedAttribute attribute='hair_color' def='Color' />
@@ -536,7 +546,7 @@ export default function NewFriendPage() {
                   hair.
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   I have{' '}
                   <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'hair_length', type: 'select' })}>
                     <GetSelectedAttribute attribute='hair_length' def='Length' />
@@ -544,7 +554,7 @@ export default function NewFriendPage() {
                   hair.
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   I have{' '}
                   <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'facial_hair', type: 'select' })}>
                     <GetSelectedAttribute attribute='facial_hair' def='Facial' />
@@ -552,7 +562,7 @@ export default function NewFriendPage() {
                   hair.
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   a{' '}
                   <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'skin_tone', type: 'select' })}>
                     <GetSelectedAttribute attribute='skin_tone' def='Color-ish' />
@@ -560,7 +570,7 @@ export default function NewFriendPage() {
                   skin tone.
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   My eyes are{' '}
                   <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'eye_color', type: 'select' })}>
                     <GetSelectedAttribute attribute='eye_color' def='Color' />
@@ -568,7 +578,7 @@ export default function NewFriendPage() {
                   .
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   My ancestral region is{' '}
                   <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'ancestral_region', type: 'select' })}>
                     <GetSelectedAttribute attribute='ancestral_region' def='Ancestral region' />
@@ -576,7 +586,7 @@ export default function NewFriendPage() {
                   .
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   I like to wear{' '}
                   <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'attire', type: 'select' })}>
                     <GetSelectedAttribute attribute='attire' def='Attire' />
@@ -584,7 +594,7 @@ export default function NewFriendPage() {
                   .
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px]' color='grey1_light1'>
+                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   I have a{' '}
                   <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'personality', type: 'select' })}>
                     <GetSelectedAttribute attribute='personality' def='Blank' />
@@ -630,7 +640,7 @@ export default function NewFriendPage() {
               )}
 
               {breakpoints === 'phone' ? (
-                <View className='px-[35px] gap-[10px]'>
+                <View className='px-[35px] gap-[10px]' style={{ marginBottom: insets.bottom + 24 }}>
                   <GradientPressable className='w-[100%] h-[70px]' type='primary' onPress={handleGo}>
                     <Text className='font-[600]' size='lg' color='light1_light2'>
                       Go
@@ -644,7 +654,7 @@ export default function NewFriendPage() {
             {/* Form - END */}
 
             {breakpoints === 'phone' ? (
-              <Pressable className='w-[48px] h-[48px] bg-dark2/60 items-center justify-center rounded-[20px] absolute top-[24px] right-[24px]' onPress={friend && friendId !== 'new' ? handleDelete : handleRandomize}>
+              <Pressable className='w-[48px] h-[48px] bg-dark2/60 items-center justify-center rounded-[20px] absolute top-[24px] right-[24px]' onPress={friend && friendId !== 'new' ? handleDelete : handleRandomize} style={{ marginTop: insets.top }}>
                 {friend && friendId !== 'new' ? <IconTrash /> : <IconDices />}
               </Pressable>
             ) : (

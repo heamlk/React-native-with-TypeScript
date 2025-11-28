@@ -1,26 +1,31 @@
 {
   "expo": {
     "name": "BFFL AI",
-    "slug": "BFFL AI",
+    "slug": "bfflai_native",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "app/_assets/project/favicon.png",
+    "icon": "app/_assets/project/icon.png",
     "scheme": "bfflai",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.bfflai-native",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Allow BFFL AI to access your microphone for voice messages."
+      }
     },
     "android": {
+      "icon": "app/_assets/project/icon.png",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "app/_assets/project/backgroundIcon.png",
-        "backgroundImage": "app/_assets/project/backgroundIcon.png",
-        "monochromeImage": "app/_assets/project/backgroundIcon.png"
+        "foregroundImage": "app/_assets/project/icon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.bfflai_native"
+      "package": "com.anonymous.bfflai_native",
+      "usesCleartextTraffic": true,
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "output": "single",
@@ -37,14 +42,20 @@
         }
       ],
       [
+        "expo-av",
+        {
+          "microphonePermission": "Allow BFFL AI to access your microphone for voice messages."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
-          "image": "app/_assets/project/favicon.png",
+          "image": "app/_assets/project/icon.png",
           "imageWidth": 200,
           "resizeMode": "contain"
         }
       ],
-      "expo-video"
+      "expo-speech-recognition"
     ],
     "experiments": {
       "typedRoutes": true,

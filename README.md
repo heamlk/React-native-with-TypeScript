@@ -1,15 +1,15 @@
-Instructions
+-- Getting started --
 
--- Web --
-
-1. Clone the repo into a folder
+1. Clone the repository
    git clone [repository link] .
 
 2. Install node_modules
    npm i
 
-3. Start the server
-   npm run start
+-- Web --
 
-4. Open web
-   Press (w) on terminal when it's ready
+1. npm run web
+
+-- Android --
+
+1. npm run android:build
