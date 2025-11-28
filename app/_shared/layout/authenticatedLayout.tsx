@@ -43,8 +43,6 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   const params = useLocalSearchParams<{ friendId: string }>()
   const friendId = params.friendId
 
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight - insets.top - insets.bottom - 50 - 50 : dimentions.deviceHeight - 60 - 48 - 30
 
@@ -69,7 +67,6 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   const leftAnim = useRef(new Animated.Value(breakpoints === 'phone' ? -95 : 0)).current
 
   const closeSidebar = () => {
-    setSidebarOpen(false)
     Animated.timing(leftAnim, {
       toValue: -95,
       duration: 300,
@@ -78,7 +75,6 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
   }
 
   const openSidebar = () => {
-    setSidebarOpen(true)
     Animated.timing(leftAnim, {
       toValue: 0,
       duration: 300,

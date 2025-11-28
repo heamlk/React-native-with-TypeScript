@@ -18,17 +18,18 @@ export default function DeeplinkProvider({ children }: DeeplinkProviderProps) {
     const handleDeeplink = async ({ url }: { url: string }) => {
       const { queryParams } = Linking.parse(url)
       if (queryParams?.code) {
-        const result = await auth.oAuthCodeExchange({ code: String(queryParams?.code) })
-        router.push('/')
+        await auth.oAuthCodeExchange({ code: String(queryParams?.code) })
       }
 
       if (queryParams?.auth_session) {
         storage.set('session', queryParams?.auth_session as string)
-        await auth.authenticate()
+        await auth.authenticate({})
 
         if (queryParams?.age_verify && queryParams?.age_verify === 'true') {
-          const url: any = process.env.EXPO_PUBLIC_WEB_BASE_URL + '/profile?age_verify=true'
-          Platform.OS === 'web' ? router.push(url) : Linking.openURL(url)
+          const redirectUrl: any = process.env.EXPO_PUBLIC_WEB_BASE_URL + '/profile?age_verify=true'
+          Platform.OS === 'web' ? router.push(redirectUrl) : Linking.openURL(redirectUrl)
+        } else {
+          Platform.OS === 'web' ? router.push('/profile') : Linking.openURL('/profile')
         }
       }
     }

@@ -8,7 +8,6 @@ const ProtectedRoutesContext = createContext<ProtectedRoutesContextType | null>(
 
 export default function ProtectedRoutesProvider({ children }: { children: ReactNode }) {
   const { user, friendLimitReached } = useUser()
-  const value: ProtectedRoutesContextType = {}
   const pathname = usePathname()
 
   const authenticatedPaths = ['/friend', '/friend/new', '/profile', '/profile/edit', '/referral', '/subscription', '/subscription/mobile', '/marketplace', '/marketplace/mobile', '/model']
@@ -55,6 +54,7 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
     return <Redirect href='/profile' />
   }
 
+  const value: ProtectedRoutesContextType = {}
   return <ProtectedRoutesContext.Provider value={value}>{children}</ProtectedRoutesContext.Provider>
 }
 

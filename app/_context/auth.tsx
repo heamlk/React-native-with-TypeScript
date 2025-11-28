@@ -12,7 +12,7 @@ export type AuthContextType = {
   oAuthCodeExchange: ({ code }: { code: string }) => Promise<{ successful: boolean; data: any }>
   otp: ({ email }: { email: string }) => Promise<{ successful: boolean; data: any; error: null } | { successful: boolean; data: null; error: any }>
   otpVerify: ({ email, code }: { email: string; code: string }) => Promise<{ successful: boolean; data: any; error: null } | { successful: boolean; data: null; error: any }>
-  authenticate: () => Promise<void>
+  authenticate: ({ next }: { next?: (() => void) | undefined }) => Promise<void>
   logout: () => void
 }
 export type AuthProviderProps = { children: ReactNode }
@@ -46,7 +46,15 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
       if (successful) {
         storage.set('session', data?.sessionJwt)
-        await authenticate()
+        await authenticate({
+          next: (user) => {
+            if (user?.companions?.length > 0) {
+              router.push(`/friend/${user?.companions?.[0]?.id}`)
+            } else {
+              router.push('/friend')
+            }
+          },
+        })
       }
 
       return {
@@ -91,7 +99,15 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
       if (successful) {
         storage.set('session', data?.sessionJwt)
-        await authenticate()
+        await authenticate({
+          next: (user) => {
+            if (user?.companions?.length > 0) {
+              router.push(`/friend/${user?.companions?.[0]?.id}`)
+            } else {
+              router.push('/friend')
+            }
+          },
+        })
       }
 
       return {
@@ -109,7 +125,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  const authenticate = async () => {
+  const authenticate = async ({ next }: { next?: (user: UserType) => void }) => {
     const [loginRes, getProfileRes, getProductsRes, getAvailableInterestsRes] = await Promise.all([api.login(), api.getProfile(), api.getProducts(), api.getAvailableInterests()])
 
     const newUser: UserType = {
@@ -121,6 +137,10 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
     setUser(newUser)
     storage.set('user', JSON.stringify(newUser))
+
+    if (next) {
+      next(newUser)
+    }
   }
 
   const logout = () => {

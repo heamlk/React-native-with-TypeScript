@@ -30,9 +30,7 @@ import Cookies from './_shared/policy/cookies'
 import useDimensions from './_hooks/dimensions'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import ProtectedScreen from './_shared/layout/protectedScreen'
 import { useUser } from './_context/user'
-import FriendIdPage from './friend/[friendId]'
 import { Redirect } from 'expo-router'
 
 export type HomeCarouselItemType = {
