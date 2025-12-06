@@ -450,6 +450,28 @@ export default function FriendIdPage() {
     }
   }, [companionIsTyping])
 
+  const intervalRef = useRef<any>(null)
+
+  useEffect(() => {
+    if (messages.length === 0 && intervalRef.current === null) {
+      intervalRef.current = setInterval(() => {
+        updateConversationHistory()
+      }, 1500)
+    }
+
+    if (messages.length > 0 && intervalRef.current !== null) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+
+    return () => {
+      if (intervalRef.current !== null) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+    }
+  }, [messages])
+
   if (!allowUser) {
     return <View></View>
   }

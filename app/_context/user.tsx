@@ -150,6 +150,7 @@ export default function UserProvider({ children }: UserProviderProps) {
     })
 
     api.socketState?.on('new_chat_message', async (event) => {
+      console.log('new_chat_message event: ', event)
       if (event?.audio) {
         enqueueAudio(event.audio)
       } else {
