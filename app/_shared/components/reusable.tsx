@@ -297,88 +297,14 @@ export function GradientPressable({ type, style, combinedStyle, gradientStyle, c
 
   const [hover, setHover] = useState(false)
 
-  const styles = {
-    primary: StyleSheet.create({
-      gradient: {
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        borderRadius: borderRadiusNative.md,
-      },
-      normal: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 20,
-        borderRadius: borderRadiusNative.md,
-      },
-    }),
-    secondary: StyleSheet.create({
-      gradient: {
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        borderRadius: borderRadiusNative.md,
-      },
-      normal: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 20,
-        borderRadius: borderRadiusNative.md,
-      },
-    }),
-    dark: StyleSheet.create({
-      gradient: {
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        borderRadius: borderRadiusNative.md,
-      },
-      normal: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 20,
-        borderRadius: borderRadiusNative.md,
-      },
-    }),
-    extraDark: StyleSheet.create({
-      gradient: {
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        borderRadius: borderRadiusNative.md,
-      },
-      normal: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 20,
-        borderRadius: borderRadiusNative.md,
-      },
-    }),
-    selected: StyleSheet.create({
-      gradient: {
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        borderRadius: borderRadiusNative.md,
-      },
-      normal: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 20,
-        borderRadius: borderRadiusNative.md,
-      },
-    }),
-  }
+  const styles = StyleSheet.create({
+    button: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 20,
+      borderRadius: borderRadiusNative.md,
+    },
+  })
 
   const gradientPrimary: any = theme === 'light' ? [themeVars.colors.grey3, themeVars.colors.grey3] : ['#aa4aff', '#860fef']
   const hoverGradientPrimary: any = theme === 'light' ? [themeVars.colors.grey2, themeVars.colors.grey2] : ['#d09aff', '#860fef']
@@ -395,32 +321,32 @@ export function GradientPressable({ type, style, combinedStyle, gradientStyle, c
   return (
     <RNView className={clsx('relative', combinedClassname, containerClassname)} style={[combinedStyle]}>
       <LinearGradient
-        className={clsx(gradientClassname)}
+        className={clsx('', combinedClassname, gradientClassname)}
         colors={type === 'primary' ? (hover ? hoverGradientPrimary : gradientPrimary) : type === 'secondary' ? gradientSecondary : type === 'dark' ? (hover ? hoverGradientDark : gradientDark) : type === 'extraDark' ? gradientExtraDark : gradientSelected}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
-        style={[styles[type]['gradient'], gradientStyle]}
-      />
-
-      {!isPressable ? (
-        <RNView {...props} className={clsx('', combinedClassname, className)} style={[{}, combinedStyle, styles[type]['normal'], style as ViewStyle]}>
-          {props?.children as any}
-        </RNView>
-      ) : (
-        <RNPressable
-          {...props}
-          className={clsx('', combinedClassname, className)}
-          style={typeof style === 'function' ? style : [{}, combinedStyle, styles[type]['normal'], style]}
-          onHoverIn={() => {
-            setHover(true)
-          }}
-          onHoverOut={() => {
-            setHover(false)
-          }}
-        >
-          {props?.children}
-        </RNPressable>
-      )}
+        style={[{ borderRadius: borderRadiusNative.md }, gradientStyle]}
+      >
+        {!isPressable ? (
+          <RNView {...props} className={clsx('', combinedClassname, className)} style={[{}, combinedStyle, styles.button, style as ViewStyle]}>
+            {props?.children as any}
+          </RNView>
+        ) : (
+          <RNPressable
+            {...props}
+            className={clsx('', combinedClassname, className)}
+            style={typeof style === 'function' ? style : [{}, combinedStyle, styles.button, style]}
+            onHoverIn={() => {
+              setHover(true)
+            }}
+            onHoverOut={() => {
+              setHover(false)
+            }}
+          >
+            {props?.children}
+          </RNPressable>
+        )}
+      </LinearGradient>
     </RNView>
   )
 }

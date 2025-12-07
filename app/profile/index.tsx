@@ -195,7 +195,7 @@ export default function ProfilePage() {
           </View>
 
           <View className='my-[12px]'>
-            <GradientPressable type='dark' combinedClassname='w-[100%] h-[48px] items-center justify-center' onPress={handleEditProfile}>
+            <GradientPressable type='dark' combinedClassname='w-[100%] h-[48px]' onPress={handleEditProfile}>
               <Text size='md' color='grey1_light2' className='text-center font-[600]'>
                 Edit profile
               </Text>
@@ -313,7 +313,7 @@ export default function ProfilePage() {
           </View>
 
           <View className='mt-[12px]'>
-            <GradientPressable type='dark' combinedClassname='w-[100%] h-[48px] items-center justify-center' onPress={() => logout()}>
+            <GradientPressable type='dark' combinedClassname='w-[100%] h-[48px]' onPress={() => logout()}>
               <Text size='md' color='grey1_light2' className='text-center font-[600]'>
                 Logout
               </Text>

@@ -364,7 +364,7 @@ export default function EditProfilePage() {
             </View>
             {/* Interests - END */}
 
-            <GradientPressable type='primary' combinedClassname='w-[100%] h-[48px] items-center justify-center' onPress={handleSaveChanges}>
+            <GradientPressable type='primary' combinedClassname='w-[100%] h-[48px]' onPress={handleSaveChanges}>
               <Text className='font-[600] text-white' size='md'>
                 Save Changes
               </Text>

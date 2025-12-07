@@ -472,7 +472,7 @@ export function LoginPage() {
                   <Text className='text font-[500] text-center mb-[20px]' size='lg' color='grey1_light1'>
                     Enter Code
                   </Text>
-                  <View className='w-fit flex-row items-center justify-center gap-[4px] relative'>
+                  <View className='flex-row items-center justify-center gap-[4px] relative mx-auto'>
                     {otpCode.map((value, index) => (
                       <TextInput
                         key={index}
@@ -482,7 +482,7 @@ export function LoginPage() {
                         value={value}
                         onChangeText={(text) => handleOtpNumberChange(text, index)}
                         onKeyPress={(e) => handleOtpKeyPress(e, index)}
-                        className='w-[50px] h-[50px] bg-[#181a1c] border-[1px] border-[#555f68] rounded-sm text-center text-white caret-white focus:outline-none'
+                        className='w-[100%] flex-1 max-w-[50px] h-[50px] bg-[#181a1c] border-[1px] border-[#555f68] rounded-sm text-center text-white caret-white focus:outline-none'
                         style={otpFetching ? { opacity: 0.15, pointerEvents: 'none' } : {}}
                         keyboardType='number-pad'
                         maxLength={1}

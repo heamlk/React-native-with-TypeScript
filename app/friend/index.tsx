@@ -89,7 +89,7 @@ export default function FriendPage() {
             </View>
 
             {breakpoints === 'phone' ? (
-              <GradientPressable type='dark' combinedClassname='h-[48px] w-3/4 phone:max-w-[85%] flex items-center justify-center' onPress={onCreateFriend}>
+              <GradientPressable type='dark' combinedClassname='h-[48px] base:w-[100%] phone:max-w-[85%]' onPress={onCreateFriend}>
                 <Text className='text-light2 text-center' size='lg'>
                   Create a Friend
                 </Text>

@@ -1,6 +1,6 @@
 import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
-import { View, Text, Pressable, TextInput, Logo, getThemeBackground, GradientPressable } from '@/app/_shared/components/reusable'
+import { View, Text, Pressable, TextInput, Logo, getThemeBackground, GradientPressable, getThemeColor } from '@/app/_shared/components/reusable'
 import IconUser from '@/app/_assets/icons/user'
 import IconPencil from '@/app/_assets/icons/pencil.svg'
 import themeVars from '@/app/_styles/theme/themeVars'
@@ -9,8 +9,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useApi } from '@/app/_context/api'
 import { useRouter } from 'expo-router'
 import * as ImagePicker from 'expo-image-picker'
-import { Platform, Image, KeyboardAvoidingView } from 'react-native'
-import DateTimePicker from '@react-native-community/datetimepicker'
+import { Platform, Image, KeyboardAvoidingView, ActivityIndicator } from 'react-native'
 import Subscription from '../_shared/components/subscription'
 import { useUser } from '../_context/user'
 import { ScrollView } from 'react-native'
@@ -29,14 +28,13 @@ export default function OnboardingPage() {
 
   const [currentStep, setCurrentStep] = useState(0)
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
+  const [creatingAccount, setCreatingAccount] = useState(false)
 
   const [confirmationError, setConfirmationError] = useState('')
 
   const [avatar, setAvatar] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-
-  const [showDatePicker, setShowDatePicker] = useState(false)
 
   const {
     control,
@@ -125,7 +123,12 @@ export default function OnboardingPage() {
     }
 
     if (step === 2) {
+      if (creatingAccount) {
+        return
+      }
+
       try {
+        setCreatingAccount(true)
         const splitDateOfBirth = getValues('dateOfBirth').split('/')
         const payload = {
           username: getValues('username'),
@@ -150,39 +153,13 @@ export default function OnboardingPage() {
       } catch (error) {
         setConfirmationError('An error occurred while setting up your account')
         return
+      } finally {
+        setCreatingAccount(false)
       }
     }
 
     clearErrors()
     setCurrentStep(step)
-  }
-
-  const handleBackFromInterests = async () => {
-    try {
-      const splitDateOfBirth = getValues('dateOfBirth').split('/')
-      const payload = {
-        username: getValues('username'),
-        first_name: getValues('firstName'),
-        last_name: getValues('lastName'),
-        date_of_birth: [splitDateOfBirth[2], splitDateOfBirth[0], splitDateOfBirth[1]].join('-'),
-        referral_code: getValues('referalCode'),
-        interests: '',
-        avatar,
-      }
-
-      const res = await api.postConfirmAccount(payload)
-      const data = res?.data
-
-      if (data === 'OK') {
-        await updateUser()
-        setConfirmationError('')
-        router.push('/')
-      } else {
-        setConfirmationError('An error occurred while setting up your account')
-      }
-    } catch (error) {
-      setConfirmationError('An error occurred while setting up your account')
-    }
   }
 
   const handleInterestTrigger = (interest: string) => {
@@ -408,31 +385,31 @@ export default function OnboardingPage() {
                             },
                           }}
                           render={({ field: { value, onChange } }) => {
-                            const date = value ? new Date(value.split('/').reverse().join('-')) : new Date()
                             return (
-                              <View>
-                                <Pressable onPress={() => setShowDatePicker(true)}>
-                                  <TextInput className='h-[56px] border-[2px] rounded-[99999px] px-[24px]' background='input2' color='input2' placeholderColor='input2Placeholder' border='input2' borderFocus='input2Focus' placeholder='MM/DD/YYYY' editable={false} pointerEvents='none' value={value} />
-                                </Pressable>
-                                {showDatePicker && (
-                                  <DateTimePicker
-                                    value={date}
-                                    mode='date'
-                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                                    onChange={(event, selectedDate) => {
-                                      setShowDatePicker(Platform.OS === 'ios')
-                                      if (selectedDate && !isNaN(selectedDate.getTime())) {
-                                        const month = (selectedDate.getMonth() + 1).toString().padStart(2, '0')
-                                        const day = selectedDate.getDate().toString().padStart(2, '0')
-                                        const year = selectedDate.getFullYear()
-                                        const formatted = `${month}/${day}/${year}`
-                                        onChange(formatted)
-                                        trigger('dateOfBirth')
-                                      }
-                                    }}
-                                  />
-                                )}
-                              </View>
+                              <TextInput
+                                className='h-[56px] border-[2px] rounded-[99999px] px-[24px]'
+                                background='input2'
+                                color='input2'
+                                placeholderColor='input2Placeholder'
+                                border='input2'
+                                borderFocus='input2Focus'
+                                placeholder='MM/DD/YYYY'
+                                value={value}
+                                keyboardType='number-pad'
+                                inputMode='numeric'
+                                onChangeText={(text) => {
+                                  let cleaned = text.replace(/\D/g, '')
+
+                                  if (cleaned.length > 2 && cleaned.length <= 4) {
+                                    cleaned = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`
+                                  } else if (cleaned.length > 4) {
+                                    cleaned = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`
+                                  }
+
+                                  onChange(cleaned)
+                                  trigger('dateOfBirth')
+                                }}
+                              />
                             )
                           }}
                         />
@@ -515,9 +492,13 @@ export default function OnboardingPage() {
                           onStepChange({ step: currentStep + 1 })
                         }}
                       >
-                        <Text className='font-[600]' size='md' color='white_light2'>
-                          {currentStep === 0 ? 'Continue' : 'Get Started'}
-                        </Text>
+                        {creatingAccount ? (
+                          <ActivityIndicator size='small' color={getThemeColor({ theme, color: 'white_light2' })} />
+                        ) : (
+                          <Text className='font-[600]' size='md' color='white_light2'>
+                            {currentStep === 0 ? 'Continue' : 'Get Started'}
+                          </Text>
+                        )}
                       </GradientPressable>
 
                       <GradientPressable
@@ -533,7 +514,7 @@ export default function OnboardingPage() {
                       </GradientPressable>
 
                       {currentStep === 1 ? (
-                        <GradientPressable type='dark' className='h-[48px] items-center justify-center rounded-[99999px]' onPress={handleBackFromInterests}>
+                        <GradientPressable type='dark' className='h-[48px] items-center justify-center rounded-[99999px]' onPress={() => onStepChange({ step: 0 })}>
                           <Text className='font-[600]' size='md' color='white_light2'>
                             Back
                           </Text>

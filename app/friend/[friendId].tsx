@@ -825,10 +825,10 @@ export default function FriendIdPage() {
                     return (
                       <View key={message?.content + message?.created_at} className='gap-[16px] flex-row'>
                         <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto self-start' />
-                        <View className='flex flex-1' style={{ width: breakpoints === 'phone' ? dimentions.deviceWidth - 32 - 16 - 44 : 'auto' }}>
-                          <GradientPressable containerClassname='mr-auto' className='py-[10px]' type='primary' isPressable={false} gradientStyle={{ display: Platform.OS === 'web' ? 'flex' : 'contents' }}>
-                            <Text className='font-[500]' size='md' color='light1'>
-                              {message?.content}
+                        <View className='flex' style={{ width: breakpoints === 'phone' ? dimentions.deviceWidth - 32 - 16 - 44 : 'auto' }}>
+                          <GradientPressable containerClassname='mr-auto' className='py-[10px]' gradientClassname='' type='primary' isPressable={false}>
+                            <Text className='w-[auto] font-[500] ml-auto self-start shrink flex' size='md' color='light1'>
+                              {message?.content}3
                             </Text>
                           </GradientPressable>
                         </View>

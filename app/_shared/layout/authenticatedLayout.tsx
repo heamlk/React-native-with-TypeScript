@@ -183,8 +183,9 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
                 return (
                   <GradientPressable
                     key={page.href + 63546}
-                    className='w-[48px] max-w-[48px] h-[48px] max-h-[48px] items-center justify-center'
-                    gradientClassname='w-[48px] max-w-[48px] h-[48px] max-h-[48px] rounded-[20px]'
+                    className='items-center justify-center'
+                    gradientClassname='rounded-[20px]'
+                    style={{ width: 48, height: 48, maxWidth: 48, maxHeight: 48 }}
                     type={isSelected ? 'primary' : 'extraDark'}
                     onPress={() => {
                       handleSidebarLinkPress({ url: page.href })
