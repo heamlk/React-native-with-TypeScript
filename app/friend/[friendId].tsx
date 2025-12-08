@@ -823,12 +823,12 @@ export default function FriendIdPage() {
                 {messages?.map((message) => {
                   if (message?.role === 'companion' && message?.type === 'text') {
                     return (
-                      <View key={message?.content + message?.created_at} className='gap-[16px] flex-row'>
-                        <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px] mb-auto self-start' />
-                        <View className='flex' style={{ width: breakpoints === 'phone' ? dimentions.deviceWidth - 32 - 16 - 44 : 'auto' }}>
-                          <GradientPressable containerClassname='mr-auto' className='py-[10px]' gradientClassname='' type='primary' isPressable={false}>
+                      <View key={message?.content + message?.created_at} className='flex gap-[16px] flex-row'>
+                        <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] max-w-[44px] min-h-[44px] min-w-[44px] h-[44px] max-h-[44px] rounded-[9999px] mb-auto flex flex-1' />
+                        <View className='flex flex-1'>
+                          <GradientPressable combinedClassname='flex-1' containerClassname='mr-auto' className='py-[10px]' gradientClassname='' type='primary' isPressable={false}>
                             <Text className='w-[auto] font-[500] ml-auto self-start shrink flex' size='md' color='light1'>
-                              {message?.content}3
+                              {message?.content}
                             </Text>
                           </GradientPressable>
                         </View>
@@ -866,7 +866,7 @@ export default function FriendIdPage() {
                   )
                 })}
 
-                {companionIsTyping?.is_typing && companionIsTyping?.companion_id === friend?.id ? (
+                {(companionIsTyping?.is_typing && companionIsTyping?.companion_id === friend?.id) || messages?.length === 0 ? (
                   <View className='gap-[16px] flex-row items-center'>
                     <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] h-[44px] rounded-[9999px]' />
                     <Soul width={44} height={44} soulSize={44} />
