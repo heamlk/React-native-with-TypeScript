@@ -27,7 +27,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
   const redirectUrl = (Platform.OS === 'web' ? process.env.EXPO_PUBLIC_WEB_BASE_URL : `${process.env.EXPO_PUBLIC_MOBILE_BASE_URL}index`) as string
 
-  const oAuth = async ({ provider }: { provider: 'google' | 'microsoft' }) => {
+  const oAuth = async ({ provider }: { provider: 'google' | 'microsoft' | 'apple' }) => {
     axios
       .post(`https://api.descope.com/v1/auth/oauth/authorize?provider=${provider}&redirectUrl=${encodeURIComponent(redirectUrl)}`, { customClaims: { userEmail: '{{user.email}}' } }, { headers: { Authorization: `Bearer ${descopeProjectId}` } })
       .then((res) => {

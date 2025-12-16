@@ -19,6 +19,7 @@ import { getThemeBackground, getThemeBorder, getThemeColor, Logo, Text, View, Pr
 import themeVars from './_styles/theme/themeVars'
 import { BlurView } from 'expo-blur'
 import IconGoogle from '@/app/_assets/icons/google'
+import IconApple from '@/app/_assets/icons/appleLogo'
 import IconMicrosoft from '@/app/_assets/icons/microsoft'
 import { validateEmail } from './_shared/validation'
 import ThemeToggle from './_shared/components/themeToggle'
@@ -457,6 +458,27 @@ export function LoginPage() {
                           <IconMicrosoft width={24} height={24} />
                           <Text className='font-[600]' size='md' color='buttonOutline'>
                             Continue with Microsoft
+                          </Text>
+                        </>
+                      )}
+                    </Pressable>
+                    <Pressable
+                      background='buttonOutline'
+                      border='buttonOutline'
+                      className='w-full h-[46px] flex-row items-center justify-center gap-[10px] border-[1px] rounded-sm'
+                      onPress={async () => {
+                        setOAuthFetching(true)
+                        await auth.oAuth({ provider: 'apple' })
+                        setOAuthFetching(false)
+                      }}
+                    >
+                      {oAuthFetching ? (
+                        <ActivityIndicator size='small' color={getThemeColor({ theme, color: 'buttonOutline' })} />
+                      ) : (
+                        <>
+                          <IconApple width={24} height={24} color={theme === 'light' ? themeVars.colors.black : themeVars.colors.white} />
+                          <Text className='font-[600]' size='md' color='buttonOutline'>
+                            Continue with Apple
                           </Text>
                         </>
                       )}
