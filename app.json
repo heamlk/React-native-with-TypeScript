@@ -3,6 +3,7 @@
     "name": "BFFL AI",
     "slug": "bfflai_native",
     "version": "1.0.0",
+    "owner": "bfflai",
     "orientation": "portrait",
     "icon": "app/_assets/project/icon.png",
     "scheme": "bfflai",
@@ -12,7 +13,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.bfflai-native",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Allow BFFL AI to access your microphone for voice messages."
+        "NSMicrophoneUsageDescription": "Allow BFFL AI to access your microphone for voice messages.",
+        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to use speech recognition."
       }
     },
     "android": {
@@ -25,7 +27,10 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.bfflai_native",
       "usesCleartextTraffic": true,
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "output": "single",
@@ -64,7 +69,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "6738df97-f5ac-4675-8148-29371f277bbb"
+        "projectId": "77dd23e5-0332-4166-b9f6-dda6e0ac204f"
       }
     }
   }
