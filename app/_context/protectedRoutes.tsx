@@ -11,7 +11,7 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
   const pathname = usePathname()
   const router = useRouter()
 
-  const authenticatedPaths = ['/friend', '/friend/new', '/profile', '/profile/edit', '/referral', '/subscription', '/subscription/mobile', '/marketplace', '/marketplace/mobile', '/model']
+  const authenticatedPaths = ['/friend', '/friend/new', '/profile', '/profile/edit', '/referral', '/subscription', '/subscription/mobile', '/marketplace', '/marketplace/mobile', '/model', '/privacy']
 
   const isPathAuthenticated = (pathname: string) => {
     return authenticatedPaths.some((path) => pathname === path || pathname.startsWith('/friend/')) // match /friend/${companionId}
@@ -45,7 +45,7 @@ export default function ProtectedRoutesProvider({ children }: { children: ReactN
     }
 
     // Redirecting to login page if not authenticated
-    if (pathname !== '/' && !isAuthenticated) {
+    if (pathname !== '/' && pathname !== '/privacy' && !isAuthenticated) {
       setTimeout(() => router.push('/'), 0)
       return
     }

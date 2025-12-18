@@ -27,10 +27,7 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.bfflai_native",
       "usesCleartextTraffic": true,
-      "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
-      ]
+      "permissions": ["android.permission.RECORD_AUDIO", "android.permission.MODIFY_AUDIO_SETTINGS"]
     },
     "web": {
       "output": "single",

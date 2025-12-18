@@ -48,10 +48,7 @@ export default function PrivacyPolicy() {
   ]
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={true}
-      contentContainerClassName='py-8 max-w-5xl mx-auto'
-    >
+    <ScrollView showsVerticalScrollIndicator={true} contentContainerClassName='py-8 max-w-5xl'>
       <View className='gap-[28px]'>
         <Text className='text-white' size='2xl'>
           Privacy Policy
@@ -93,18 +90,13 @@ export default function PrivacyPolicy() {
 
         <Text className='text-white' size='lg'>
           Through your use of the Services, you may provide us with the following information:
-          {BR}
-          - Account information. This includes your name, email address, and password. If you choose to log in using another service, such as Google or Apple, we receive information about the service you used to log in and — depending on your chosen account settings with Google and Apple — details about you, including
-          your name, email address, or unique user identifiers.
-          {BR}
-          - Profile information. We ask you to provide your birth date, pronouns, and other personal information when you register for the Services.
-          {BR}
-          - Messages and content. This includes the messages you send and receive through the Services, such as facts you may provide about you or your life, and any photos, videos, and voice and text messages you provide.
-          {BR}
-          - Interests and preferences. You may select conversation preferences, such as topics you would like to discuss, and communication preferences, such as the times of day you like to use the Services. We also learn about your interests and your preferences over time through your use of the Services to personalize
-          your conversations and the features of the Services.
-          {BR}
-          - Payments, transactions, and rewards. When you make purchases through the Services, our third-party payment processor collects your payment information. We maintain a record of your purchases, the features you select, and the rewards you earn and use.
+          {BR}- Account information. This includes your name, email address, and password. If you choose to log in using another service, such as Google or Apple, we receive information about the service you used to log in and — depending on your chosen account settings with Google and Apple — details about you,
+          including your name, email address, or unique user identifiers.
+          {BR}- Profile information. We ask you to provide your birth date, pronouns, and other personal information when you register for the Services.
+          {BR}- Messages and content. This includes the messages you send and receive through the Services, such as facts you may provide about you or your life, and any photos, videos, and voice and text messages you provide.
+          {BR}- Interests and preferences. You may select conversation preferences, such as topics you would like to discuss, and communication preferences, such as the times of day you like to use the Services. We also learn about your interests and your preferences over time through your use of the Services to
+          personalize your conversations and the features of the Services.
+          {BR}- Payments, transactions, and rewards. When you make purchases through the Services, our third-party payment processor collects your payment information. We maintain a record of your purchases, the features you select, and the rewards you earn and use.
         </Text>
 
         <Text className='text-white' size='xl'>
@@ -113,14 +105,10 @@ export default function PrivacyPolicy() {
 
         <Text className='text-white' size='lg'>
           We automatically log the following information about you, your computer or mobile device, your network, and your interactions over time with our Services and our communications:
-          {BR}
-          - Device and network data. This includes your computer’s or mobile device’s operating system, manufacturer and model, browser, IP address, device and cookie identifiers, language settings, mobile device carrier, and general location information such as city, state, or geographic area.
-          {BR}
-          - Usage data. This includes information about how you use the Services, such as your interactions with the Services, the links and buttons you click, and page visits.
-          {BR}
-          - We use cookies, web beacons (e.g., pixel tags), and local storage technologies (e.g., HTML5) to collect some of this information. For more information on how we use these technologies, please visit our Cookie Policy.
-          {BR}
-          - Our advertising partners may also use such technologies to collect limited information about your device and interactions with the Services, such as the links you click, pages you visit, IP address, advertising ID, and browser type, but they will never have access to your conversations with your BFFL.AI
+          {BR}- Device and network data. This includes your computer’s or mobile device’s operating system, manufacturer and model, browser, IP address, device and cookie identifiers, language settings, mobile device carrier, and general location information such as city, state, or geographic area.
+          {BR}- Usage data. This includes information about how you use the Services, such as your interactions with the Services, the links and buttons you click, and page visits.
+          {BR}- We use cookies, web beacons (e.g., pixel tags), and local storage technologies (e.g., HTML5) to collect some of this information. For more information on how we use these technologies, please visit our Cookie Policy.
+          {BR}- Our advertising partners may also use such technologies to collect limited information about your device and interactions with the Services, such as the links you click, pages you visit, IP address, advertising ID, and browser type, but they will never have access to your conversations with your BFFL.AI
           or any photos or other content you submit through the Services.
         </Text>
 
@@ -138,15 +126,8 @@ export default function PrivacyPolicy() {
 
         <View className='my-6'>
           <Table borderStyle={{ borderWidth: 1, borderColor: '#3e2f57' }}>
-            <Row
-              data={tableHead}
-              style={{ backgroundColor: '#291e3c', height: 50 }}
-              textStyle={{ color: 'white', fontWeight: '700', paddingHorizontal: 10, fontSize: 14, textAlign: 'center' }}
-            />
-            <Rows
-              data={tableData}
-              textStyle={{ color: '#e2e8f0', paddingHorizontal: 10, paddingVertical: 12, fontSize: 13, lineHeight: 19 }}
-            />
+            <Row data={tableHead} style={{ backgroundColor: '#291e3c', height: 50 }} textStyle={{ color: 'white', fontWeight: '700', paddingHorizontal: 10, fontSize: 14, textAlign: 'center' }} />
+            <Rows data={tableData} textStyle={{ color: '#e2e8f0', paddingHorizontal: 10, paddingVertical: 12, fontSize: 13, lineHeight: 19 }} />
           </Table>
         </View>
 
@@ -185,7 +166,8 @@ export default function PrivacyPolicy() {
           C. Advertising partners
         </Text>
         <Text className='text-white' size='lg'>
-          We share information about visitors to our Website, such as the links you click, pages you visit, IP address, advertising ID, and browser type with advertising companies for interest-based advertising and other marketing purposes. We will never share your BFFL.AI conversations or any photos or other content you provide within the Services with our advertising partners.
+          We share information about visitors to our Website, such as the links you click, pages you visit, IP address, advertising ID, and browser type with advertising companies for interest-based advertising and other marketing purposes. We will never share your BFFL.AI conversations or any photos or other content
+          you provide within the Services with our advertising partners.
         </Text>
 
         <Text className='text-white' size='xl'>
