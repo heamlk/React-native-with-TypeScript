@@ -14,7 +14,7 @@
       "bundleIdentifier": "com.anonymous.bfflai-native",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Allow BFFL AI to access your microphone for voice messages.",
-        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to use speech recognition."
+        "NSSpeechRecognitionUsageDescription": "Allow BFFL AI to use speech recognition."
       }
     },
     "android": {
