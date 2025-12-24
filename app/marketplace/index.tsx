@@ -1,4 +1,4 @@
-import { Image, ImageBackground, Linking, Modal, Platform } from 'react-native'
+import { Image, ImageBackground, Modal } from 'react-native'
 import { GradientPressable, View, Text, getThemeBorder, Pressable, getThemeBackground } from '../_shared/components/reusable'
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
 import ImageMarketplace from '@/app/_assets/images/marketplace.jpg'
@@ -12,18 +12,16 @@ import { MarketplaceProduct, SubscriptionOption } from '../_context/auth.types'
 import { useUser } from '../_context/user'
 import { BlurView } from 'expo-blur'
 import IconBack from '@/app/_assets/icons/arrow-narrow-left.svg'
-import { useApi } from '../_context/api'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { usePayments } from '../_context/payments'
 
 export default function Marketplace() {
+  const { purchase } = usePayments()
   const insets = useSafeAreaInsets()
   const { theme } = useTheme()
   const dimentions = useDimensions()
   const breakpoints = useBreakpoints()
   const { user, updateUser } = useUser()
-  const api = useApi()
-
-  const redirectUrl = Platform.OS === 'web' ? '/marketplace' : `/marketplace/mobile`
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
@@ -52,32 +50,74 @@ export default function Marketplace() {
     setPopup(null)
   }
 
-  const activateSubscription = async ({ product, subscriptionOption }: { product: MarketplaceProduct; subscriptionOption: SubscriptionOption }) => {
-    if (activating) {
+  const activateSubscription = async ({ productId }: { productId: MarketplaceProduct['id'] }) => {
+    if (activating || !productId) {
       return
     }
 
-    const isSubscription = product?.type === 'subscription'
-    setActivating(product?.id)
-    const req = isSubscription ? await api.postAddSubscriptionOption({ productId: product?.id, success_url: redirectUrl, cancel_url: redirectUrl }) : await api.postGetPaymentUrl({ productId: product?.id, success_url: redirectUrl, cancel_url: redirectUrl })
-    const data = req?.data
-    setActivating(null)
+    setActivating(productId)
 
-    if (data !== 'OK' && data?.url !== null) {
-      if (Platform.OS === 'web') {
-        window.location.href = data?.url
-      } else {
-        await Linking.openURL(data.url)
-      }
-    } else {
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          handlePopupClose()
-        }, 3000)
-      })
-      await updateUser()
+    const offerings: { [key: string]: MarketplaceProduct['id'] } = {
+      nsfw_capability: 'nsfw_capability',
+      text_2_voice: 'advanced_voices',
+      additional_ai: 'monthly_subscription',
+      advanced_animation: 'advanced_animation',
+      anime_universe: 'anime_universe',
+      goth_universe: 'goth_universe',
+      neon_universe: 'neon_glow_universe',
+      fashion_universe: 'fashion_universe',
     }
+
+    const pkgIdentifiers: { [key: string]: MarketplaceProduct['id'] } = {
+      nsfw_capability: '$rc_monthly',
+      text_2_voice: '$rc_monthly',
+      additional_ai: '$rc_monthly',
+      advanced_animation: '$rc_monthly',
+      anime_universe: '$rc_lifetime',
+      goth_universe: '$rc_lifetime',
+      neon_universe: '$rc_lifetime',
+      fashion_universe: '$rc_lifetime',
+    }
+
+    const offering = offerings?.[productId]
+    const pkgIdentifier = pkgIdentifiers?.[productId]
+
+    console.log('offering: ', offering)
+    console.log('pkgIdentifier: ', pkgIdentifier)
+
+    const transaction = await purchase({ offering, pkgIdentifier })
+    console.log('transaction: ', transaction)
+
+    setActivating(null)
+    handlePopupClose()
   }
+
+  // const activateSubscription = async ({ product, subscriptionOption }: { product: MarketplaceProduct; subscriptionOption: SubscriptionOption }) => {
+  //   if (activating) {
+  //     return
+  //   }
+
+  //   const isSubscription = product?.type === 'subscription'
+  //   setActivating(product?.id)
+  //   const req = isSubscription ? await api.postAddSubscriptionOption({ productId: product?.id, success_url: redirectUrl, cancel_url: redirectUrl }) : await api.postGetPaymentUrl({ productId: product?.id, success_url: redirectUrl, cancel_url: redirectUrl })
+  //   const data = req?.data
+  //   setActivating(null)
+
+  //   if (data !== 'OK' && data?.url !== null) {
+  //     if (Platform.OS === 'web') {
+  //       window.location.href = data?.url
+  //     } else {
+  //       await Linking.openURL(data.url)
+  //     }
+  //   } else {
+  //     await new Promise((resolve) => {
+  //       setTimeout(() => {
+  //         handlePopupClose()
+  //       }, 3000)
+  //     })
+  //     await updateUser()
+  //   }
+  // }
 
   useEffect(() => {
     updateUser()
@@ -131,7 +171,7 @@ export default function Marketplace() {
                             </Text>
                           </Pressable>
                         ) : (
-                          <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type={theme === 'light' ? 'dark' : 'primary'} onPress={() => activateSubscription({ product: popup?.product, subscriptionOption: popup?.subscriptionOption })}>
+                          <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type={theme === 'light' ? 'dark' : 'primary'} onPress={() => activateSubscription({ productId: popup?.product?.id })}>
                             <Text className='font-[600] text-light1' size='sm'>
                               {activating ? 'Loading...' : 'Activate'}
                             </Text>

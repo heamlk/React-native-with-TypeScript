@@ -10,6 +10,7 @@ import PopupProvider from './_context/popup'
 import ProtectedRoutesProvider from './_context/protectedRoutes'
 import ApiProvider from './_context/api'
 import UserProvider from './_context/user'
+import PaymentsProvider from './_context/payments'
 
 export default function RootLayout() {
   return (
@@ -21,11 +22,13 @@ export default function RootLayout() {
               <AuthProvider>
                 <ProtectedRoutesProvider>
                   <DeeplinkProvider>
-                    <PopupProvider>
-                      <Layout>
-                        <Slot />
-                      </Layout>
-                    </PopupProvider>
+                    <PaymentsProvider>
+                      <PopupProvider>
+                        <Layout>
+                          <Slot />
+                        </Layout>
+                      </PopupProvider>
+                    </PaymentsProvider>
                   </DeeplinkProvider>
                 </ProtectedRoutesProvider>
               </AuthProvider>
