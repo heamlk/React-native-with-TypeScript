@@ -1,4 +1,4 @@
-import { Image, ImageBackground, Modal } from 'react-native'
+import { Image, ImageBackground, Modal, Platform } from 'react-native'
 import { GradientPressable, View, Text, getThemeBorder, Pressable, getThemeBackground } from '../_shared/components/reusable'
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
 import ImageMarketplace from '@/app/_assets/images/marketplace.jpg'
@@ -57,27 +57,51 @@ export default function Marketplace() {
 
     setActivating(productId)
 
-    const offerings: { [key: string]: MarketplaceProduct['id'] } = {
-      nsfw_capability: 'nsfw_capability',
-      text_2_voice: 'advanced_voices',
-      additional_ai: 'monthly_subscription',
-      advanced_animation: 'advanced_animation',
-      anime_universe: 'anime_universe',
-      goth_universe: 'goth_universe',
-      neon_universe: 'neon_glow_universe',
-      fashion_universe: 'fashion_universe',
-    }
+    const offerings: { [key: string]: MarketplaceProduct['id'] } =
+      Platform.OS === 'web'
+        ? {
+            nsfw_capability: 'nsfw_capability',
+            text_2_voice: 'advanced_voices',
+            additional_ai: 'monthly_subscription',
+            advanced_animation: 'advanced_animation',
+            anime_universe: 'anime_universe',
+            goth_universe: 'goth_universe',
+            neon_universe: 'neon_glow_universe',
+            fashion_universe: 'fashion_universe',
+          }
+        : {
+            nsfw_capability: 'nsfw_capability',
+            text_2_voice: 'advanced_voices',
+            additional_ai: 'monthly_subscription',
+            advanced_animation: 'advanced_animation',
+            anime_universe: 'anime_universe',
+            goth_universe: 'goth_universe',
+            neon_universe: 'neon_glow_universe',
+            fashion_universe: 'fashion_universe',
+          }
 
-    const pkgIdentifiers: { [key: string]: MarketplaceProduct['id'] } = {
-      nsfw_capability: '$rc_monthly',
-      text_2_voice: '$rc_monthly',
-      additional_ai: '$rc_monthly',
-      advanced_animation: '$rc_monthly',
-      anime_universe: '$rc_lifetime',
-      goth_universe: '$rc_lifetime',
-      neon_universe: '$rc_lifetime',
-      fashion_universe: '$rc_lifetime',
-    }
+    const pkgIdentifiers: { [key: string]: MarketplaceProduct['id'] } =
+      Platform.OS === 'web'
+        ? {
+            nsfw_capability: '$rc_monthly',
+            text_2_voice: '$rc_monthly',
+            additional_ai: '$rc_monthly',
+            advanced_animation: '$rc_monthly',
+            anime_universe: '$rc_lifetime',
+            goth_universe: '$rc_lifetime',
+            neon_universe: '$rc_lifetime',
+            fashion_universe: '$rc_lifetime',
+          }
+        : {
+            nsfw_capability: '$rc_monthly',
+            text_2_voice: '$rc_monthly',
+            additional_ai: '$rc_monthly',
+            advanced_animation: '$rc_monthly',
+            anime_universe: '$rc_lifetime',
+            goth_universe: '$rc_lifetime',
+            neon_universe: '$rc_lifetime',
+            fashion_universe: '$rc_lifetime',
+          }
 
     const offering = offerings?.[productId]
     const pkgIdentifier = pkgIdentifiers?.[productId]

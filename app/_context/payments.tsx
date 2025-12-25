@@ -1,11 +1,10 @@
-import { Dispatch, ReactNode, createContext, useContext, useEffect, useState } from 'react'
-import Purchases, { PurchasesPackage, CustomerInfo } from 'react-native-purchases'
+import { ReactNode, createContext, useContext, useEffect, useState } from 'react'
+import Purchases, { LOG_LEVEL, MakePurchaseResult } from 'react-native-purchases'
 import { useUser } from './user'
 import { Platform } from 'react-native'
-import { Purchases as RevenuecatPurchases } from '@revenuecat/purchases-js'
+import { PurchaseResult, Purchases as RevenuecatPurchases } from '@revenuecat/purchases-js'
 
 export type PaymentsContextType = {
-  payments: null | any
   purchase: ({ offering, pkgIdentifier }: { offering: string; pkgIdentifier: string }) => Promise<string | false>
 }
 
@@ -15,62 +14,11 @@ const PaymentsContext = createContext<PaymentsContextType | null>(null)
 
 export default function PaymentsProvider({ children }: PaymentsProviderProps) {
   const { user } = useUser()
-  if (!user) return <PaymentsContext.Provider value={{ payments: null as any, purchase: null as any }}>{children}</PaymentsContext.Provider>
+  if (!user) return <PaymentsContext.Provider value={{ purchase: null as any }}>{children}</PaymentsContext.Provider>
 
-  const [payments, setPayments] = useState<any>(null)
+  const [isPurchasesReady, setIsPurchasesReady] = useState(false)
   const [customerInfo, setCustomerInfo] = useState<any>(null)
   const [offerings, setOfferings] = useState<any>(null)
-
-  useEffect(() => {
-    const fn = async () => {
-      let p = null
-
-      if (Platform.OS === 'web') {
-        p = await RevenuecatPurchases.configure({
-          apiKey: process.env.EXPO_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY as string,
-          appUserId: user?.customerId as string,
-        })
-      }
-      // else if (Platform.OS === 'android') {
-      //   p = await Purchases.configure({
-      //     apiKey: process.env.EXPO_PUBLIC_REVENUECAT_PLAY_STORE_API_KEY as string,
-      //     appUserID: user?.customerId,
-      //   })
-      // }
-
-      setPayments(p)
-    }
-
-    fn()
-  }, [])
-
-  useEffect(() => {
-    if (!payments) return
-
-    const fn = async () => {
-      const i = await RevenuecatPurchases.getSharedInstance().getCustomerInfo()
-      setCustomerInfo(i)
-
-      const o = await RevenuecatPurchases.getSharedInstance().getOfferings()
-      setOfferings(o)
-    }
-
-    fn()
-  }, [payments])
-
-  // useEffect(() => {
-  //   console.log('customerInfo: ', customerInfo)
-  //   console.log('offerings: ', offerings)
-
-  //   if (!customerInfo || !offerings) {
-  //     return
-  //   }
-
-  //   const fn = async () => {
-  //     const customerInfo = await RevenuecatPurchases.getSharedInstance().getCustomerInfo()
-  //     console.log('customerInfo: ', customerInfo)
-  //   }
-  // }, [customerInfo, offerings])
 
   const purchase = async ({ offering, pkgIdentifier }: { offering: string; pkgIdentifier: string }) => {
     if (!customerInfo || !offerings) {
@@ -81,23 +29,95 @@ export default function PaymentsProvider({ children }: PaymentsProviderProps) {
     const selectedPackage = selectedOffering?.availablePackages?.find((pkg: any) => pkg?.identifier === pkgIdentifier)
 
     if (!selectedPackage) {
+      console.warn('No selected package found: ', selectedPackage)
       return false
     }
 
     try {
-      const purchase = await RevenuecatPurchases.getSharedInstance().purchase({
-        rcPackage: selectedPackage,
-      })
-      const transactionId = purchase?.storeTransaction?.storeTransactionId
+      const purchase =
+        Platform.OS === 'web'
+          ? await RevenuecatPurchases.getSharedInstance().purchase({
+              rcPackage: selectedPackage,
+            })
+          : await Purchases.purchasePackage(selectedPackage)
+
+      const transactionId = Platform.OS === 'web' ? (purchase as PurchaseResult)?.storeTransaction?.storeTransactionId : (purchase as MakePurchaseResult)?.transaction?.transactionIdentifier
       return transactionId
     } catch (e) {
-      console.warn(e)
+      console.warn('purchase error: ', e)
     }
 
     return false
   }
 
-  return <PaymentsContext.Provider value={{ payments, purchase }}>{children}</PaymentsContext.Provider>
+  useEffect(() => {
+    if (isPurchasesReady) return
+
+    const fn = async () => {
+      let p = null
+
+      if (Platform.OS === 'web') {
+        p = await RevenuecatPurchases.configure({
+          apiKey: process.env.EXPO_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY as string,
+          appUserId: user?.customerId as string,
+        })
+      } else {
+        Purchases.setLogLevel(LOG_LEVEL.VERBOSE)
+
+        if (Platform.OS === 'android') {
+          Purchases.configure({ apiKey: process.env.EXPO_PUBLIC_REVENUECAT_PLAY_STORE_API_KEY as string, appUserID: user?.customerId })
+        } else if (Platform.OS === 'ios') {
+          Purchases.configure({ apiKey: '' as string, appUserID: user?.customerId })
+        }
+      }
+
+      setIsPurchasesReady(true)
+    }
+
+    fn()
+  }, [])
+
+  useEffect(() => {
+    if (!isPurchasesReady) return
+
+    const fn = async () => {
+      if (Platform.OS === 'web') {
+        const i = await RevenuecatPurchases.getSharedInstance().getCustomerInfo()
+        setCustomerInfo(i)
+
+        const o = await RevenuecatPurchases.getSharedInstance().getOfferings()
+        setOfferings(o)
+      } else if (['android', 'ios'].includes(Platform.OS)) {
+        const i = await Purchases.getCustomerInfo()
+        setCustomerInfo(i)
+
+        const o = await Purchases.getOfferings()
+        setOfferings(o)
+      }
+    }
+
+    fn()
+  }, [isPurchasesReady])
+
+  // useEffect(() => {
+  //   console.log('customerInfo: ', customerInfo)
+  //   console.log('offerings: ', offerings)
+
+  //   if (!customerInfo || !offerings) {
+  //     return
+  //   }
+
+  //   // const fn = async () => {
+  //   //   console.log('purchasing')
+  //   //   const transaction = await purchase({ offering: 'TEST', pkgIdentifier: '$rc_monthly' } )
+  //   //   console.log('transaction QAQ: ', transaction)
+  //   //   // purchase({ offering: 'lifetime', pkgIdentifier: '$rc_lifetime' })
+  //   // }
+
+  //   // fn()
+  // }, [customerInfo, offerings])
+
+  return <PaymentsContext.Provider value={{ purchase }}>{children}</PaymentsContext.Provider>
 }
 
 export const usePayments = () => {

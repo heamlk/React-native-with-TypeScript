@@ -5,6 +5,7 @@ import { useTheme } from '@/app/_context/theme'
 import useBreakpoints from '@/app/_hooks/breakpoints'
 import { useUser } from '@/app/_context/user'
 import { usePayments } from '@/app/_context/payments'
+import { Platform } from 'react-native'
 
 export default function Subscription() {
   const { user, updateUser } = useUser()
@@ -19,8 +20,16 @@ export default function Subscription() {
   }
 
   const handlePurchase = async () => {
-    const offering = selectedSubscription === 0 ? 'monthly_subscription' : 'lifetime'
-    const pkgIdentifier = selectedSubscription === 0 ? '$rc_monthly' : '$rc_lifetime'
+    let offering = ''
+    let pkgIdentifier = ''
+
+    if (Platform.OS === 'web') {
+      offering = selectedSubscription === 0 ? 'monthly_subscription' : 'lifetime'
+      pkgIdentifier = selectedSubscription === 0 ? '$rc_monthly' : '$rc_lifetime'
+    } else if (Platform.OS === 'android') {
+      offering = selectedSubscription === 0 ? 'monthly_subscription' : 'lifetime'
+      pkgIdentifier = selectedSubscription === 0 ? '$rc_monthly' : '$rc_lifetime'
+    }
 
     const transaction = await purchase({ offering, pkgIdentifier })
   }
