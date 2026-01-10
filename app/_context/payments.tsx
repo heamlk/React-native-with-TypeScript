@@ -42,6 +42,10 @@ export default function PaymentsProvider({ children }: PaymentsProviderProps) {
           : await Purchases.purchasePackage(selectedPackage)
 
       const transactionId = Platform.OS === 'web' ? (purchase as PurchaseResult)?.storeTransaction?.storeTransactionId : (purchase as MakePurchaseResult)?.transaction?.transactionIdentifier
+      console.log('--------------------------------')
+      console.log('purchase: ', purchase)
+      console.log('transactionId: ', transactionId)
+      console.log('--------------------------------')
       return transactionId
     } catch (e) {
       console.warn('purchase error: ', e)
@@ -58,7 +62,7 @@ export default function PaymentsProvider({ children }: PaymentsProviderProps) {
 
       if (Platform.OS === 'web') {
         p = await RevenuecatPurchases.configure({
-          apiKey: process.env.EXPO_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY as string,
+          apiKey: process.env.EXPO_PUBLIC_REVENUECAT_TEST_STORE_API_KEY as string,
           appUserId: user?.customerId as string,
         })
       } else {
@@ -99,23 +103,23 @@ export default function PaymentsProvider({ children }: PaymentsProviderProps) {
     fn()
   }, [isPurchasesReady])
 
-  // useEffect(() => {
-  //   console.log('customerInfo: ', customerInfo)
-  //   console.log('offerings: ', offerings)
+  useEffect(() => {
+    console.log('customerInfo: ', customerInfo)
+    console.log('offerings: ', offerings)
 
-  //   if (!customerInfo || !offerings) {
-  //     return
-  //   }
+    if (!customerInfo || !offerings) {
+      return
+    }
 
-  //   // const fn = async () => {
-  //   //   console.log('purchasing')
-  //   //   const transaction = await purchase({ offering: 'TEST', pkgIdentifier: '$rc_monthly' } )
-  //   //   console.log('transaction QAQ: ', transaction)
-  //   //   // purchase({ offering: 'lifetime', pkgIdentifier: '$rc_lifetime' })
-  //   // }
+    const fn = async () => {
+      // console.log('purchasing')
+      const transaction = await purchase({ offering: 'TEST', pkgIdentifier: '$rc_monthly' })
+      // console.log('transaction: ', transaction)
+      // purchase({ offering: 'lifetime', pkgIdentifier: '$rc_lifetime' })
+    }
 
-  //   // fn()
-  // }, [customerInfo, offerings])
+    fn()
+  }, [customerInfo, offerings])
 
   return <PaymentsContext.Provider value={{ purchase }}>{children}</PaymentsContext.Provider>
 }
