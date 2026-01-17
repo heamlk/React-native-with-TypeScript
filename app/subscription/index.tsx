@@ -19,52 +19,52 @@ export default function SubscriptionPage() {
   const [fetchingSubscriptionBillingInfoUrl, setFetchingSubscriptionBillingInfoUrl] = useState<boolean | 'error'>(false)
 
   const handleUpdateSubscriptionOptionStatus = async ({ active, product_id }: { active: boolean; product_id: string }) => {
-    // if (updatingSubscriptionOptionStatus) {
-    //   return
-    // }
-    // setUpdatingSubscriptionOptionStatus(product_id)
-    // try {
-    //   await api.postUpdateSubscriptionOptionStatus({ active, product_id })
-    //   await updateUser()
-    //   setUpdatingSubscriptionOptionStatus('')
-    // } catch (error) {
-    //   console.warn(error)
-    //   setUpdatingSubscriptionOptionStatus('')
-    // }
+    if (updatingSubscriptionOptionStatus) {
+      return
+    }
+    setUpdatingSubscriptionOptionStatus(product_id)
+    try {
+      await api.postUpdateSubscriptionOptionStatus({ active, product_id })
+      await updateUser()
+      setUpdatingSubscriptionOptionStatus('')
+    } catch (error) {
+      console.warn(error)
+      setUpdatingSubscriptionOptionStatus('')
+    }
   }
 
   const handleChangeBillingInfo = async () => {
-    // if (fetchingSubscriptionBillingInfoUrl === true) {
-    //   return
-    // }
-    // setFetchingSubscriptionBillingInfoUrl(true)
-    // try {
-    //   const req = await api.postGetManageSubscriptionUrl()
-    //   const data = req?.data
-    //   const url = data?.url
-    //   setFetchingSubscriptionBillingInfoUrl(false)
-    //   if (url) {
-    //     window.location.href = url
-    //   }
-    // } catch (error) {
-    //   console.warn(error)
-    //   setFetchingSubscriptionBillingInfoUrl('error')
-    // }
+    if (fetchingSubscriptionBillingInfoUrl === true) {
+      return
+    }
+    setFetchingSubscriptionBillingInfoUrl(true)
+    try {
+      const req = await api.postGetManageSubscriptionUrl()
+      const data = req?.data
+      const url = data?.url
+      setFetchingSubscriptionBillingInfoUrl(false)
+      if (url) {
+        window.location.href = url
+      }
+    } catch (error) {
+      console.warn(error)
+      setFetchingSubscriptionBillingInfoUrl('error')
+    }
   }
 
   const handleCancelSubscription = async () => {
-    // if (updatingSubscriptionStatus === true) {
-    //   return
-    // }
-    // setUpdatingSubscriptionStatus(true)
-    // try {
-    //   await api.postUpdateSubscriptionStatus({ active: false })
-    //   await updateUser()
-    //   setUpdatingSubscriptionStatus(false)
-    // } catch (error) {
-    //   console.warn(error)
-    //   setUpdatingSubscriptionStatus('error')
-    // }
+    if (updatingSubscriptionStatus === true) {
+      return
+    }
+    setUpdatingSubscriptionStatus(true)
+    try {
+      await api.postUpdateSubscriptionStatus({ active: false })
+      await updateUser()
+      setUpdatingSubscriptionStatus(false)
+    } catch (error) {
+      console.warn(error)
+      setUpdatingSubscriptionStatus('error')
+    }
   }
 
   const handleCancelSubscriptionClick = () => {

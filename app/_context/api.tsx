@@ -2,7 +2,7 @@ import React, { createContext, Dispatch, SetStateAction, useContext, useEffect, 
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios'
 import storage from '../_shared/storage/storage'
 import { io, Socket } from 'socket.io-client'
-import type { ChatMessage, CompanionInfos, MarketplaceProduct, OwnModelParams } from './auth.types'
+import type { ChatMessage, CompanionInfos, CustomerProfile, MarketplaceProduct, OwnModelParams } from './auth.types'
 
 export interface ServerToClientEvents {
   new_chat_message: (eventData: { companion_id: string; message: ChatMessage; local_message_id?: string; audio?: Uint8Array }) => void
@@ -12,7 +12,7 @@ export interface ServerToClientEvents {
   companion_deletion: (eventData: { companion_id: string }) => void
   companion_media_update: (eventData: { companion_id: string; images: any[] }) => void
   companion_emotion: (eventData: { companion_id: string; emotion: string }) => void
-  customer_update: (eventData: { customer: any }) => void
+  customer_update: (eventData: { customer: CustomerProfile }) => void
 }
 
 export type ApiContextType = {

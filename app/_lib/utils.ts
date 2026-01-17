@@ -132,4 +132,22 @@ export async function stopAllAudio() {
   await new Promise((res) => setTimeout(res, 50))
 }
 
+type Primitive = string | number | boolean | null | undefined | symbol | bigint
+type JsonValue = Primitive | JsonValue[] | { [key: string]: JsonValue }
+export function findKeyWithValue(obj: Record<string, JsonValue>, target: JsonValue): string | null {
+  for (const [key, value] of Object.entries(obj)) {
+    if (Array.isArray(value)) {
+      if (value.includes(target)) {
+        return key
+      }
+    } else if (typeof value === 'object' && value !== null) {
+      const found = findKeyWithValue(value as Record<string, JsonValue>, target)
+      if (found !== null) return found
+    } else if (value === target) {
+      return key
+    }
+  }
+  return null
+}
+
 export default function blank() {}

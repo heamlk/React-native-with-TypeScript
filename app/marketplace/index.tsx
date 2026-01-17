@@ -57,91 +57,35 @@ export default function Marketplace() {
 
     setActivating(productId)
 
-    const offerings: { [key: string]: MarketplaceProduct['id'] } =
-      Platform.OS === 'web'
-        ? {
-            nsfw_capability: 'nsfw_capability',
-            text_2_voice: 'advanced_voices',
-            additional_ai: 'monthly_subscription',
-            advanced_animation: 'advanced_animation',
-            anime_universe: 'anime_universe',
-            goth_universe: 'goth_universe',
-            neon_universe: 'neon_glow_universe',
-            fashion_universe: 'fashion_universe',
-          }
-        : {
-            nsfw_capability: 'nsfw_capability',
-            text_2_voice: 'advanced_voices',
-            additional_ai: 'monthly_subscription',
-            advanced_animation: 'advanced_animation',
-            anime_universe: 'anime_universe',
-            goth_universe: 'goth_universe',
-            neon_universe: 'neon_glow_universe',
-            fashion_universe: 'fashion_universe',
-          }
+    const offerings: { [key: string]: MarketplaceProduct['id'] } = {
+      nsfw_capability: 'nsfw_capability',
+      text_2_voice: 'advanced_voices',
+      additional_ai: 'monthly_subscription',
+      advanced_animation: 'advanced_animation',
+      anime_universe: 'anime_universe',
+      goth_universe: 'goth_universe',
+      neon_universe: 'neon_glow_universe',
+      fashion_universe: 'fashion_universe',
+    }
 
-    const pkgIdentifiers: { [key: string]: MarketplaceProduct['id'] } =
-      Platform.OS === 'web'
-        ? {
-            nsfw_capability: '$rc_monthly',
-            text_2_voice: '$rc_monthly',
-            additional_ai: '$rc_monthly',
-            advanced_animation: '$rc_monthly',
-            anime_universe: '$rc_lifetime',
-            goth_universe: '$rc_lifetime',
-            neon_universe: '$rc_lifetime',
-            fashion_universe: '$rc_lifetime',
-          }
-        : {
-            nsfw_capability: '$rc_monthly',
-            text_2_voice: '$rc_monthly',
-            additional_ai: '$rc_monthly',
-            advanced_animation: '$rc_monthly',
-            anime_universe: '$rc_lifetime',
-            goth_universe: '$rc_lifetime',
-            neon_universe: '$rc_lifetime',
-            fashion_universe: '$rc_lifetime',
-          }
+    const pkgIdentifiers: { [key: string]: MarketplaceProduct['id'] } = {
+      nsfw_capability: '$rc_monthly',
+      text_2_voice: '$rc_monthly',
+      additional_ai: '$rc_monthly',
+      advanced_animation: '$rc_monthly',
+      anime_universe: '$rc_lifetime',
+      goth_universe: '$rc_lifetime',
+      neon_universe: '$rc_lifetime',
+      fashion_universe: '$rc_lifetime',
+    }
 
     const offering = offerings?.[productId]
     const pkgIdentifier = pkgIdentifiers?.[productId]
-
-    console.log('offering: ', offering)
-    console.log('pkgIdentifier: ', pkgIdentifier)
-
     const transaction = await purchase({ offering, pkgIdentifier })
-    console.log('transaction: ', transaction)
 
     setActivating(null)
     handlePopupClose()
   }
-
-  // const activateSubscription = async ({ product, subscriptionOption }: { product: MarketplaceProduct; subscriptionOption: SubscriptionOption }) => {
-  //   if (activating) {
-  //     return
-  //   }
-
-  //   const isSubscription = product?.type === 'subscription'
-  //   setActivating(product?.id)
-  //   const req = isSubscription ? await api.postAddSubscriptionOption({ productId: product?.id, success_url: redirectUrl, cancel_url: redirectUrl }) : await api.postGetPaymentUrl({ productId: product?.id, success_url: redirectUrl, cancel_url: redirectUrl })
-  //   const data = req?.data
-  //   setActivating(null)
-
-  //   if (data !== 'OK' && data?.url !== null) {
-  //     if (Platform.OS === 'web') {
-  //       window.location.href = data?.url
-  //     } else {
-  //       await Linking.openURL(data.url)
-  //     }
-  //   } else {
-  //     await new Promise((resolve) => {
-  //       setTimeout(() => {
-  //         handlePopupClose()
-  //       }, 3000)
-  //     })
-  //     await updateUser()
-  //   }
-  // }
 
   useEffect(() => {
     updateUser()
@@ -188,7 +132,7 @@ export default function Marketplace() {
                           {popup?.product?.type === 'subscription' ? '/Month' : ''}
                         </Text>
 
-                        {popup?.subscriptionOption?.active_until >= Math.floor(Date.now() / 1000) ? (
+                        {popup?.subscriptionOption?.active_until >= Math.floor(Date.now() / 1000) || (popup?.product?.id === 'additional_ai' && !!user?.profile?.lifetime_subscription) || Object.keys(user?.profile?.purchases || {})?.some((key) => key === popup?.product?.id) ? (
                           <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1'>
                             <Text className='font-[600]' size='xs' color='light1_light2'>
                               ACTIVE
@@ -252,6 +196,27 @@ export default function Marketplace() {
 
           {/* Market */}
           <View className='flex-1 gap-[64px] overflow-auto scrollbar-hide' style={breakpoints === 'phone' ? {} : { height: containerHeight - 230 - 24 }}>
+            <View>
+              <Pressable
+                className='text-white'
+                onPress={async () => {
+                  const transaction = await purchase({ offering: 'lifetime', pkgIdentifier: '$rc_lifetime' })
+                  console.log('transaction: ', transaction)
+                }}
+              >
+                <Text>Test lifetime</Text>
+              </Pressable>
+              <Pressable
+                className='text-white'
+                onPress={async () => {
+                  const transaction = await purchase({ offering: 'nsfw_capability', pkgIdentifier: '$rc_monthly' })
+                  console.log('transaction: ', transaction)
+                }}
+              >
+                <Text>Test nsfw</Text>
+              </Pressable>
+            </View>
+
             {activeFilters.includes('monthly') || !activeFilters.includes('oneTime') ? (
               <View className='base:gap-[16px] phone:gap-[24px]'>
                 <Text className='font-[600]' color='grey1_light1' size='sm'>
@@ -264,8 +229,8 @@ export default function Marketplace() {
                       user?.products?.filter((product) => {
                         if (product.type !== 'subscription') return false
                         if (activeFilters.includes('active') && product.status !== 'available') return false
-                        if (!user?.profile?.is_age_verified && product.is_nsfw) return false
-                        if (user?.profile?.nsfw_disabled_since && product.is_nsfw) return false
+                        // if (!user?.profile?.is_age_verified && product.is_nsfw) return false
+                        // if (user?.profile?.nsfw_disabled_since && product.is_nsfw) return false
                         return true
                       }) || []
 
@@ -297,6 +262,10 @@ export default function Marketplace() {
                               subscriptionOption = value
                               const active_until = value?.active_until
                               isSubscribed = active_until >= Math.floor(Date.now() / 1000)
+
+                              if (key === 'additional_ai' && !!user?.profile?.lifetime_subscription) {
+                                isSubscribed = true
+                              }
                             }
                           })
 
@@ -361,8 +330,8 @@ export default function Marketplace() {
                       user?.products?.filter((product) => {
                         if (product.type !== 'one_time') return false
                         if (activeFilters.includes('active') && product.status !== 'available') return false
-                        if (!user?.profile?.is_age_verified && product.is_nsfw) return false
-                        if (user?.profile?.nsfw_disabled_since && product.is_nsfw) return false
+                        // if (!user?.profile?.is_age_verified && product.is_nsfw) return false
+                        // if (user?.profile?.nsfw_disabled_since && product.is_nsfw) return false
                         return true
                       }) || []
 
@@ -389,12 +358,10 @@ export default function Marketplace() {
                           let isSubscribed = false
                           let subscriptionOption: any = {}
 
-                          Object.entries(user?.profile?.subscription?.options || {})?.forEach(([key, value]) => {
+                          Object.keys(user?.profile?.purchases || {})?.forEach((key) => {
                             if (product?.id === key) {
-                              subscriptionOption = value
-
-                              const active_until = value?.active_until
-                              isSubscribed = active_until >= Math.floor(Date.now() / 1000)
+                              subscriptionOption = key
+                              isSubscribed = true
                             }
                           })
 

@@ -92,7 +92,7 @@ export default function UserProvider({ children }: UserProviderProps) {
   }
 
   const hasAdditionalAISubscription = () => {
-    return isSubscriptionOptionActive({ subscriptionId: 'additional_ai' })
+    return isSubscriptionOptionActive({ subscriptionId: 'additional_ai' }) || !!user?.profile?.lifetime_subscription
   }
 
   const friendLimitReached = () => {
@@ -145,6 +145,11 @@ export default function UserProvider({ children }: UserProviderProps) {
   }, [user])
 
   useEffect(() => {
+    api.socketState?.on('customer_update', (event) => {
+      console.log('customer_update event: ', event)
+      setUser((prev) => ({ ...(prev as UserType), profile: event.customer }))
+    })
+
     api.socketState?.on('companion_is_typing', (event) => {
       setCompanionIsTyping(event)
     })
@@ -167,6 +172,7 @@ export default function UserProvider({ children }: UserProviderProps) {
     })
 
     return () => {
+      api.socketState?.off('customer_update')
       api.socketState?.off('companion_is_typing')
       api.socketState?.off('new_chat_message')
     }

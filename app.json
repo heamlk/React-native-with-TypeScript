@@ -14,7 +14,8 @@
       "bundleIdentifier": "com.anonymous.bfflai-native",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Allow BFFL AI to access your microphone for voice messages.",
-        "NSSpeechRecognitionUsageDescription": "Allow BFFL AI to use speech recognition."
+        "NSSpeechRecognitionUsageDescription": "Allow BFFL AI to use speech recognition.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -27,7 +28,8 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.bfflai_native",
       "usesCleartextTraffic": true,
-      "permissions": ["android.permission.RECORD_AUDIO", "android.permission.MODIFY_AUDIO_SETTINGS", "com.android.vending.BILLING"]
+      "permissions": ["android.permission.RECORD_AUDIO", "android.permission.MODIFY_AUDIO_SETTINGS", "com.android.vending.BILLING"],
+      "credentialsSource": "local"
     },
     "web": {
       "output": "single",

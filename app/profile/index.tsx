@@ -19,8 +19,10 @@ import { useApi } from '../_context/api'
 import { useEffect, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import storage from '../_shared/storage/storage'
+import { usePayments } from '../_context/payments'
 
 export default function ProfilePage() {
+  const { purchase } = usePayments()
   const insets = useSafeAreaInsets()
   const breakpoints = useBreakpoints()
   const router = useRouter()
