@@ -7,6 +7,15 @@ import { useEffect, useState } from 'react'
 import { useApi } from '../_context/api'
 import { usePopup } from '../_context/popup'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Linking, Platform } from 'react-native'
+
+export function openSubscriptions() {
+  if (Platform.OS === 'ios') {
+    Linking.openURL('itms-apps://apps.apple.com/account/subscriptions')
+  } else if (Platform.OS === 'android') {
+    Linking.openURL('market://subscriptions')
+  }
+}
 
 export default function SubscriptionPage() {
   const insets = useSafeAreaInsets()
@@ -19,52 +28,55 @@ export default function SubscriptionPage() {
   const [fetchingSubscriptionBillingInfoUrl, setFetchingSubscriptionBillingInfoUrl] = useState<boolean | 'error'>(false)
 
   const handleUpdateSubscriptionOptionStatus = async ({ active, product_id }: { active: boolean; product_id: string }) => {
-    if (updatingSubscriptionOptionStatus) {
-      return
-    }
-    setUpdatingSubscriptionOptionStatus(product_id)
-    try {
-      await api.postUpdateSubscriptionOptionStatus({ active, product_id })
-      await updateUser()
-      setUpdatingSubscriptionOptionStatus('')
-    } catch (error) {
-      console.warn(error)
-      setUpdatingSubscriptionOptionStatus('')
-    }
+    openSubscriptions()
+    // if (updatingSubscriptionOptionStatus) {
+    //   return
+    // }
+    // setUpdatingSubscriptionOptionStatus(product_id)
+    // try {
+    //   await api.postUpdateSubscriptionOptionStatus({ active, product_id })
+    //   await updateUser()
+    //   setUpdatingSubscriptionOptionStatus('')
+    // } catch (error) {
+    //   console.warn(error)
+    //   setUpdatingSubscriptionOptionStatus('')
+    // }
   }
 
   const handleChangeBillingInfo = async () => {
-    if (fetchingSubscriptionBillingInfoUrl === true) {
-      return
-    }
-    setFetchingSubscriptionBillingInfoUrl(true)
-    try {
-      const req = await api.postGetManageSubscriptionUrl()
-      const data = req?.data
-      const url = data?.url
-      setFetchingSubscriptionBillingInfoUrl(false)
-      if (url) {
-        window.location.href = url
-      }
-    } catch (error) {
-      console.warn(error)
-      setFetchingSubscriptionBillingInfoUrl('error')
-    }
+    openSubscriptions()
+    // if (fetchingSubscriptionBillingInfoUrl === true) {
+    //   return
+    // }
+    // setFetchingSubscriptionBillingInfoUrl(true)
+    // try {
+    //   const req = await api.postGetManageSubscriptionUrl()
+    //   const data = req?.data
+    //   const url = data?.url
+    //   setFetchingSubscriptionBillingInfoUrl(false)
+    //   if (url) {
+    //     window.location.href = url
+    //   }
+    // } catch (error) {
+    //   console.warn(error)
+    //   setFetchingSubscriptionBillingInfoUrl('error')
+    // }
   }
 
   const handleCancelSubscription = async () => {
-    if (updatingSubscriptionStatus === true) {
-      return
-    }
-    setUpdatingSubscriptionStatus(true)
-    try {
-      await api.postUpdateSubscriptionStatus({ active: false })
-      await updateUser()
-      setUpdatingSubscriptionStatus(false)
-    } catch (error) {
-      console.warn(error)
-      setUpdatingSubscriptionStatus('error')
-    }
+    openSubscriptions()
+    // if (updatingSubscriptionStatus === true) {
+    //   return
+    // }
+    // setUpdatingSubscriptionStatus(true)
+    // try {
+    //   await api.postUpdateSubscriptionStatus({ active: false })
+    //   await updateUser()
+    //   setUpdatingSubscriptionStatus(false)
+    // } catch (error) {
+    //   console.warn(error)
+    //   setUpdatingSubscriptionStatus('error')
+    // }
   }
 
   const handleCancelSubscriptionClick = () => {
