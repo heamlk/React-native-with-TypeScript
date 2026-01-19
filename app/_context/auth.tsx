@@ -147,6 +147,8 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     setUser(null)
     storage.delete('session')
     storage.delete('user')
+    storage.delete('activePurchases')
+    storage.delete('activeSubscriptions')
   }
 
   // useEffect(() => {

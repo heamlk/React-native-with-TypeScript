@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { usePayments } from '../_context/payments'
 
 export default function Marketplace() {
-  const { purchase } = usePayments()
+  const { purchase, refresh, activeSubscriptions, activePurchases } = usePayments()
   const insets = useSafeAreaInsets()
   const { theme } = useTheme()
   const dimentions = useDimensions()
@@ -26,7 +26,7 @@ export default function Marketplace() {
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
 
-  const [popup, setPopup] = useState<null | { product: MarketplaceProduct; subscriptionOption: SubscriptionOption }>(null)
+  const [popup, setPopup] = useState<null | { product: MarketplaceProduct }>(null)
   const [activating, setActivating] = useState<null | MarketplaceProduct['id']>(null)
 
   const [activeFilters, setActiveFilters] = useState<('monthly' | 'oneTime' | 'active')[]>([])
@@ -42,8 +42,8 @@ export default function Marketplace() {
     })
   }
 
-  const handlePopupOpen = ({ product, subscriptionOption }: { product: MarketplaceProduct; subscriptionOption: SubscriptionOption }) => {
-    setPopup({ product, subscriptionOption })
+  const handlePopupOpen = ({ product }: { product: MarketplaceProduct }) => {
+    setPopup({ product })
   }
 
   const handlePopupClose = () => {
@@ -83,6 +83,7 @@ export default function Marketplace() {
     const pkgIdentifier = pkgIdentifiers?.[productId]
     const transaction = await purchase({ offering, pkgIdentifier })
 
+    refresh()
     setActivating(null)
     handlePopupClose()
   }
@@ -132,7 +133,7 @@ export default function Marketplace() {
                           {popup?.product?.type === 'subscription' ? '/Month' : ''}
                         </Text>
 
-                        {popup?.subscriptionOption?.active_until >= Math.floor(Date.now() / 1000) || (popup?.product?.id === 'additional_ai' && !!user?.profile?.lifetime_subscription) || Object.keys(user?.profile?.purchases || {})?.some((key) => key === popup?.product?.id) ? (
+                        {(popup?.product?.id === 'additional_ai' && activePurchases.includes('lifetime_subscription')) || activePurchases.includes(popup?.product?.id) || activeSubscriptions.includes(popup?.product?.id) ? (
                           <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1'>
                             <Text className='font-[600]' size='xs' color='light1_light2'>
                               ACTIVE
@@ -229,8 +230,8 @@ export default function Marketplace() {
                       user?.products?.filter((product) => {
                         if (product.type !== 'subscription') return false
                         if (activeFilters.includes('active') && product.status !== 'available') return false
-                        // if (!user?.profile?.is_age_verified && product.is_nsfw) return false
-                        // if (user?.profile?.nsfw_disabled_since && product.is_nsfw) return false
+                        if (!user?.profile?.is_age_verified && product.is_nsfw) return false
+                        if (user?.profile?.nsfw_disabled_since && product.is_nsfw) return false
                         return true
                       }) || []
 
@@ -255,19 +256,9 @@ export default function Marketplace() {
                           }
 
                           let isSubscribed = false
-                          let subscriptionOption: any = {}
-
-                          Object.entries(user?.profile?.subscription?.options || {})?.forEach(([key, value]) => {
-                            if (product?.id === key) {
-                              subscriptionOption = value
-                              const active_until = value?.active_until
-                              isSubscribed = active_until >= Math.floor(Date.now() / 1000)
-
-                              if (key === 'additional_ai' && !!user?.profile?.lifetime_subscription) {
-                                isSubscribed = true
-                              }
-                            }
-                          })
+                          if (activeSubscriptions.includes(product?.id)) {
+                            isSubscribed = true
+                          }
 
                           return (
                             <View key={index + 99518} className='base:h-[118px] phone:h-[146px] flex-1 flex-row relative border-[1px] rounded-md' border='transparent_dark3' background='grey6_dark7'>
@@ -281,13 +272,13 @@ export default function Marketplace() {
                                 </Text>
                                 {product?.status === 'available' ? (
                                   isSubscribed ? (
-                                    <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1' onPress={() => handlePopupOpen({ product, subscriptionOption })}>
+                                    <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1' onPress={() => handlePopupOpen({ product })}>
                                       <Text className='font-[600]' size='xs' color='light1_light2'>
                                         ACTIVE
                                       </Text>
                                     </Pressable>
                                   ) : (
-                                    <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type='primary' onPress={() => handlePopupOpen({ product, subscriptionOption })}>
+                                    <GradientPressable className='px-[20px]' combinedClassname='self-start h-[32px]' type='primary' onPress={() => handlePopupOpen({ product })}>
                                       <Text className='font-[600] text-light1' size='sm'>
                                         ${product?.price}/Month
                                       </Text>
@@ -330,8 +321,8 @@ export default function Marketplace() {
                       user?.products?.filter((product) => {
                         if (product.type !== 'one_time') return false
                         if (activeFilters.includes('active') && product.status !== 'available') return false
-                        // if (!user?.profile?.is_age_verified && product.is_nsfw) return false
-                        // if (user?.profile?.nsfw_disabled_since && product.is_nsfw) return false
+                        if (!user?.profile?.is_age_verified && product.is_nsfw) return false
+                        if (user?.profile?.nsfw_disabled_since && product.is_nsfw) return false
                         return true
                       }) || []
 
@@ -356,14 +347,9 @@ export default function Marketplace() {
                           }
 
                           let isSubscribed = false
-                          let subscriptionOption: any = {}
-
-                          Object.keys(user?.profile?.purchases || {})?.forEach((key) => {
-                            if (product?.id === key) {
-                              subscriptionOption = key
-                              isSubscribed = true
-                            }
-                          })
+                          if (activePurchases.includes(product?.id)) {
+                            isSubscribed = true
+                          }
 
                           return (
                             <View key={index + 34668} className='base:h-[118px] phone:h-[146px] flex-1 flex-row relative border-[1px] rounded-md' border='transparent_dark3' background='grey6_dark7'>
@@ -377,13 +363,13 @@ export default function Marketplace() {
                                 </Text>
                                 {product?.status === 'available' ? (
                                   isSubscribed ? (
-                                    <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1' onPress={() => handlePopupOpen({ product, subscriptionOption })}>
+                                    <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1' onPress={() => handlePopupOpen({ product })}>
                                       <Text className='font-[600]' size='xs' color='light1_light2'>
                                         ACTIVE
                                       </Text>
                                     </Pressable>
                                   ) : (
-                                    <GradientPressable combinedClassname='base:max-w-[80px] h-[32px]' type='primary' onPress={() => handlePopupOpen({ product, subscriptionOption })}>
+                                    <GradientPressable combinedClassname='base:max-w-[80px] h-[32px]' type='primary' onPress={() => handlePopupOpen({ product })}>
                                       <Text className='font-[600] text-light1' size='sm'>
                                         ${product?.price}
                                       </Text>

@@ -5,12 +5,8 @@ import { Platform } from 'react-native'
 import { PurchaseResult, Purchases as RevenuecatPurchases } from '@revenuecat/purchases-js'
 import { useApi } from './api'
 import storage from '../_shared/storage/storage'
-import { findKeyWithValue } from '../_lib/utils'
 
 export const PRODUCT_IDENTIFYERS = {
-  lifetime: {
-    lifetime_subscription: ['lifetime_asd', 'prod_R8dMiUsbVeJ75e', 'lifetime'],
-  },
   subscription: {
     additional_ai: ['subscription_monthly', 'prod_Py4Ja13mrS8EKZ', 'monthly_subscription:monthly-subscription'],
     advanced_animation: ['test_advanced_animation', 'advanced_animation', 'advanced_animation:advanced-animation'],
@@ -18,6 +14,7 @@ export const PRODUCT_IDENTIFYERS = {
     text_2_voice: ['test_advanced_voices', 'prod_RLImEoMNQqKwcJ', 'advanced_voices:advanced-voices'],
   },
   purchases: {
+    lifetime_subscription: ['lifetime_asd', 'prod_R8dMiUsbVeJ75e', 'lifetime'],
     anime_universe: ['test_anime_universe', 'anime_universe', 'anime_universe'],
     goth_universe: ['test_goth_universe', 'goth_universe', 'goth_universe'],
     neon_universe: ['test_neon_glow_niverse', 'neon_glow_niverse', 'neon_glow_niverse'],
@@ -25,8 +22,29 @@ export const PRODUCT_IDENTIFYERS = {
   },
 }
 
+export const getStoredPayments = () => {
+  const purchases = storage.getString('activePurchases')
+  const subscriptions = storage.getString('activeSubscriptions')
+
+  try {
+    const parsetPurchases = JSON.parse(purchases as any)
+    const parsetSubscriptions = JSON.parse(subscriptions as any)
+
+    return {
+      parsetPurchases,
+      parsetSubscriptions,
+    }
+  } catch (error) {
+    console.warn(error)
+    return null
+  }
+}
+
 export type PaymentsContextType = {
+  refresh: () => void
   purchase: ({ offering, pkgIdentifier }: { offering: string; pkgIdentifier: string }) => Promise<string | false>
+  activeSubscriptions: string[]
+  activePurchases: string[]
 }
 
 export type PaymentsProviderProps = { children: ReactNode }
@@ -36,11 +54,15 @@ const PaymentsContext = createContext<PaymentsContextType | null>(null)
 export default function PaymentsProvider({ children }: PaymentsProviderProps) {
   const { user } = useUser()
   const { api } = useApi()
-  if (!user) return <PaymentsContext.Provider value={{ purchase: null as any }}>{children}</PaymentsContext.Provider>
+
+  if (!user) return <PaymentsContext.Provider value={{ purchase: null as any, refresh: () => {}, activePurchases: [], activeSubscriptions: [] }}>{children}</PaymentsContext.Provider>
 
   const [isPurchasesReady, setIsPurchasesReady] = useState(false)
   const [customerInfo, setCustomerInfo] = useState<any>(null)
   const [offerings, setOfferings] = useState<any>(null)
+  const [activeSubscriptions, setActiveSubscriptions] = useState<string[]>((getStoredPayments()?.parsetSubscriptions as string[] | null) || [])
+  const [activePurchases, setActivePurchases] = useState<string[]>((getStoredPayments()?.parsetSubscriptions as string[] | null) || [])
+  const [refreshKey, setRefreshKey] = useState(0)
 
   const purchase = async ({ offering, pkgIdentifier }: { offering: string; pkgIdentifier: string }) => {
     if (!customerInfo || !offerings) {
@@ -139,44 +161,44 @@ export default function PaymentsProvider({ children }: PaymentsProviderProps) {
     }
 
     fn()
-  }, [isPurchasesReady])
+  }, [refreshKey, isPurchasesReady])
 
-  // useEffect(() => {
-  //   console.log('user: ', user)
-  //   console.log('customerInfo: ', customerInfo)
-  //   console.log('offerings: ', offerings)
+  useEffect(() => {
+    // console.log('user: ', user)
+    // console.log('customerInfo: ', customerInfo)
+    // console.log('offerings: ', offerings)
 
-  //   if (!user || !customerInfo || !offerings) {
-  //     return
-  //   }
+    if (!user || !customerInfo || !offerings) {
+      return
+    }
 
-  //   // Checking if user have un-validated purchases
-  //   const fn = async () => {
-  //     const revenuecatSubscriptionKeys = Object.keys(customerInfo?.subscriptionsByProductIdentifier)
-  //       .filter((key) => customerInfo?.subscriptionsByProductIdentifier?.[key]?.isActive === true)
-  //       ?.filter(Boolean)
-  //     const revenuecatPurchaseKeys = customerInfo?.nonSubscriptionTransactions?.map((obj: any) => obj?.productIdentifier)?.filter(Boolean)
+    // Checking if user have un-validated purchases
+    const fn = async () => {
+      const revenuecatSubscriptionKeys = Object.keys(customerInfo?.subscriptionsByProductIdentifier)
+        .filter((key) => customerInfo?.subscriptionsByProductIdentifier?.[key]?.isActive === true)
+        ?.filter(Boolean)
+      const revenuecatPurchaseKeys = customerInfo?.nonSubscriptionTransactions?.map((obj: any) => obj?.productIdentifier)?.filter(Boolean)
 
-  //     revenuecatSubscriptionKeys?.forEach((key) => {
-  //       const bfflKey = findKeyWithValue(PRODUCT_IDENTIFYERS.subscription, key)
-  //       const userHaveBfflKey = !!user?.profile?.subscription?.options?.bfflKey
+      const matchedSubscriptions = Object.entries(PRODUCT_IDENTIFYERS.subscription)
+        .filter(([_, values]) => values.some((value) => revenuecatSubscriptionKeys.includes(value)))
+        .map(([key]) => key)
+      const matchedPurchases = Object.entries(PRODUCT_IDENTIFYERS.purchases)
+        .filter(([_, values]) => values.some((value) => revenuecatPurchaseKeys.includes(value)))
+        .map(([key]) => key)
 
-  //       if(!userHaveBfflKey){
-  //         const revCatProduct = customerInfo?.subscriptionsByProductIdentifier?.
-  //       }
+      setActiveSubscriptions(matchedSubscriptions)
+      setActivePurchases(matchedPurchases)
 
-  //       // console.log('bfflKey: ', bfflKey)
-  //       // if(user?.profile?.subscription?.options)
-  //     })
+      storage.set('activeSubscriptions', JSON.stringify(matchedSubscriptions))
+      storage.set('activePurchases', JSON.stringify(matchedPurchases))
+    }
 
-  //     console.log('revenuecatSubscriptionKeys: ', revenuecatSubscriptionKeys)
-  //     console.log('revenuecatPurchaseKeys: ', revenuecatPurchaseKeys)
-  //   }
+    fn()
+  }, [user, customerInfo, offerings])
 
-  //   fn()
-  // }, [user, customerInfo, offerings])
+  const refresh = () => setRefreshKey((prev) => prev + 1)
 
-  return <PaymentsContext.Provider value={{ purchase }}>{children}</PaymentsContext.Provider>
+  return <PaymentsContext.Provider value={{ purchase, refresh, activeSubscriptions, activePurchases }}>{children}</PaymentsContext.Provider>
 }
 
 export const usePayments = () => {

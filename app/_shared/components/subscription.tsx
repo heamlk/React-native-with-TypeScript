@@ -57,6 +57,7 @@ export default function Subscription() {
               )}
             </View>
           </View>
+
           {user?.profile?.subscription?.status === 'active' && (
             <>
               <View className='w-[100%] flex-row items-center justify-between'>
