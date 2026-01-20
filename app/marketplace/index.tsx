@@ -14,6 +14,8 @@ import { BlurView } from 'expo-blur'
 import IconBack from '@/app/_assets/icons/arrow-narrow-left.svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { usePayments } from '../_context/payments'
+import { useApi } from '../_context/api'
+import storage from '../_shared/storage/storage'
 
 export default function Marketplace() {
   const { purchase, refresh, activeSubscriptions, activePurchases } = usePayments()
@@ -22,6 +24,7 @@ export default function Marketplace() {
   const dimentions = useDimensions()
   const breakpoints = useBreakpoints()
   const { user, updateUser } = useUser()
+  const { api } = useApi()
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
@@ -215,6 +218,90 @@ export default function Marketplace() {
                 }}
               >
                 <Text>Test nsfw</Text>
+              </Pressable>
+
+              <Pressable
+                className='text-white'
+                onPress={async () => {
+                  api.post(
+                    'revenuecat/validate-purchase',
+                    {
+                      transaction_id: 'GPA.3366-9812-9203-98287',
+                      platform: Platform.OS,
+                      product_id: 'advanced_voices',
+                    },
+                    {
+                      headers: {
+                        'x-session-token': (storage.getString('session') as any) || '',
+                      },
+                    }
+                  )
+                }}
+              >
+                <Text>ANDROID Test advanced voices</Text>
+              </Pressable>
+
+              <Pressable
+                className='text-white'
+                onPress={async () => {
+                  api.post(
+                    'revenuecat/validate-purchase',
+                    {
+                      transaction_id: 'GPA.3368-8534-4959-52105',
+                      platform: Platform.OS,
+                      product_id: 'monthly_subscription',
+                    },
+                    {
+                      headers: {
+                        'x-session-token': (storage.getString('session') as any) || '',
+                      },
+                    }
+                  )
+                }}
+              >
+                <Text>ANDROID Test monthly subscription</Text>
+              </Pressable>
+
+              <Pressable
+                className='text-white'
+                onPress={async () => {
+                  api.post(
+                    'revenuecat/validate-purchase',
+                    {
+                      transaction_id: 'GPA.3378-5434-4301-57870',
+                      platform: Platform.OS,
+                      product_id: 'nsfw_capability',
+                    },
+                    {
+                      headers: {
+                        'x-session-token': (storage.getString('session') as any) || '',
+                      },
+                    }
+                  )
+                }}
+              >
+                <Text>ANDROID Test NSFW capabilities</Text>
+              </Pressable>
+
+              <Pressable
+                className='text-white'
+                onPress={async () => {
+                  api.post(
+                    'revenuecat/validate-purchase',
+                    {
+                      transaction_id: 'GPA.3317-3667-8389-31612',
+                      platform: Platform.OS,
+                      product_id: 'advanced_animation',
+                    },
+                    {
+                      headers: {
+                        'x-session-token': (storage.getString('session') as any) || '',
+                      },
+                    }
+                  )
+                }}
+              >
+                <Text>ANDROID Advanced animation</Text>
               </Pressable>
             </View>
 

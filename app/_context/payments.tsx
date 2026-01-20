@@ -8,10 +8,10 @@ import storage from '../_shared/storage/storage'
 
 export const PRODUCT_IDENTIFYERS = {
   subscription: {
-    additional_ai: ['subscription_monthly', 'prod_Py4Ja13mrS8EKZ', 'monthly_subscription:monthly-subscription'],
-    advanced_animation: ['test_advanced_animation', 'advanced_animation', 'advanced_animation:advanced-animation'],
-    nsfw_capability: ['test_nsfw_capability', 'nsfw_capability', 'nsfw_capability:nsfw_capability'],
-    text_2_voice: ['test_advanced_voices', 'prod_RLImEoMNQqKwcJ', 'advanced_voices:advanced-voices'],
+    additional_ai: ['subscription_monthly', 'prod_Py4Ja13mrS8EKZ', 'monthly_subscription'],
+    advanced_animation: ['test_advanced_animation', 'advanced_animation', 'advanced_animation'],
+    nsfw_capability: ['test_nsfw_capability', 'nsfw_capability', 'nsfw_capability'],
+    text_2_voice: ['test_advanced_voices', 'prod_RLImEoMNQqKwcJ', 'advanced_voices'],
   },
   purchases: {
     lifetime_subscription: ['lifetime_asd', 'prod_R8dMiUsbVeJ75e', 'lifetime'],
@@ -68,6 +68,9 @@ export default function PaymentsProvider({ children }: PaymentsProviderProps) {
     if (!customerInfo || !offerings) {
       return false
     }
+
+    console.log('purchase offering: ', offering)
+    console.log('purchase pkgIdentifier: ', pkgIdentifier)
 
     const selectedOffering = offerings?.all?.[offering]
     const selectedPackage = selectedOffering?.availablePackages?.find((pkg: any) => pkg?.identifier === pkgIdentifier)
