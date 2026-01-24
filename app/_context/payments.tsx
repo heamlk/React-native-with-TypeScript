@@ -6,19 +6,20 @@ import { PurchaseResult, Purchases as RevenuecatPurchases } from '@revenuecat/pu
 import { useApi } from './api'
 import storage from '../_shared/storage/storage'
 
+// Test Store -> Wev Billing -> Android -> IOS
 export const PRODUCT_IDENTIFYERS = {
   subscription: {
-    additional_ai: ['subscription_monthly', 'prod_Py4Ja13mrS8EKZ', 'monthly_subscription'],
-    advanced_animation: ['test_advanced_animation', 'advanced_animation', 'advanced_animation'],
-    nsfw_capability: ['test_nsfw_capability', 'nsfw_capability', 'nsfw_capability'],
-    text_2_voice: ['test_advanced_voices', 'prod_RLImEoMNQqKwcJ', 'advanced_voices'],
+    additional_ai: ['subscription_monthly', 'prod_Py4Ja13mrS8EKZ', 'monthly_subscription', 'monthly_subscription'],
+    advanced_animation: ['test_advanced_animation', 'advanced_animation', 'advanced_animation', 'advanced_animation'],
+    nsfw_capability: ['test_nsfw_capability', 'nsfw_capability', 'nsfw_capability', 'nsfw_capability'],
+    text_2_voice: ['test_advanced_voices', 'prod_RLImEoMNQqKwcJ', 'advanced_voices', 'advanced_voices'],
   },
   purchases: {
-    lifetime_subscription: ['lifetime_asd', 'prod_R8dMiUsbVeJ75e', 'lifetime'],
-    anime_universe: ['test_anime_universe', 'anime_universe', 'anime_universe'],
-    goth_universe: ['test_goth_universe', 'goth_universe', 'goth_universe'],
-    neon_universe: ['test_neon_glow_niverse', 'neon_glow_niverse', 'neon_glow_niverse'],
-    fashion_universe: ['test_fashion_universe', 'fashion_universe', 'fashion_universe'],
+    lifetime_subscription: ['lifetime_asd', 'prod_R8dMiUsbVeJ75e', 'lifetime', 'lifetime'],
+    anime_universe: ['test_anime_universe', 'anime_universe', 'anime_universe', 'anime_universe'],
+    goth_universe: ['test_goth_universe', 'goth_universe', 'goth_universe', 'goth_universe'],
+    neon_universe: ['test_neon_glow_niverse', 'neon_glow_niverse', 'neon_glow_niverse', 'neon_glow_universe'],
+    fashion_universe: ['test_fashion_universe', 'fashion_universe', 'fashion_universe', 'fashion_universe'],
   },
 }
 
@@ -95,7 +96,7 @@ export default function PaymentsProvider({ children }: PaymentsProviderProps) {
       console.log('transactionId: ', transactionId)
       console.log('--------------------------------')
 
-      api.post(
+      const req = await api.post(
         'revenuecat/validate-purchase',
         {
           transaction_id: transactionId,
@@ -108,6 +109,8 @@ export default function PaymentsProvider({ children }: PaymentsProviderProps) {
           },
         }
       )
+
+      console.log('purchase bffl api response: ', req)
 
       return transactionId
     } catch (e) {

@@ -9,11 +9,11 @@ import { usePopup } from '../_context/popup'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Linking, Platform } from 'react-native'
 
-export function openSubscriptions() {
+export function openMobileSubscriptions() {
   if (Platform.OS === 'ios') {
-    Linking.openURL('itms-apps://apps.apple.com/account/subscriptions')
+    Linking.openURL('https://apps.apple.com/account/subscriptions')
   } else if (Platform.OS === 'android') {
-    Linking.openURL('market://subscriptions')
+    Linking.openURL('https://play.google.com/store/account/subscriptions')
   }
 }
 
@@ -28,55 +28,64 @@ export default function SubscriptionPage() {
   const [fetchingSubscriptionBillingInfoUrl, setFetchingSubscriptionBillingInfoUrl] = useState<boolean | 'error'>(false)
 
   const handleUpdateSubscriptionOptionStatus = async ({ active, product_id }: { active: boolean; product_id: string }) => {
-    openSubscriptions()
-    // if (updatingSubscriptionOptionStatus) {
-    //   return
-    // }
-    // setUpdatingSubscriptionOptionStatus(product_id)
-    // try {
-    //   await api.postUpdateSubscriptionOptionStatus({ active, product_id })
-    //   await updateUser()
-    //   setUpdatingSubscriptionOptionStatus('')
-    // } catch (error) {
-    //   console.warn(error)
-    //   setUpdatingSubscriptionOptionStatus('')
-    // }
+    if (Platform.OS === 'web') {
+      if (updatingSubscriptionOptionStatus) {
+        return
+      }
+      setUpdatingSubscriptionOptionStatus(product_id)
+      try {
+        await api.postUpdateSubscriptionOptionStatus({ active, product_id })
+        await updateUser()
+        setUpdatingSubscriptionOptionStatus('')
+      } catch (error) {
+        console.warn(error)
+        setUpdatingSubscriptionOptionStatus('')
+      }
+    } else {
+      openMobileSubscriptions()
+    }
   }
 
   const handleChangeBillingInfo = async () => {
-    openSubscriptions()
-    // if (fetchingSubscriptionBillingInfoUrl === true) {
-    //   return
-    // }
-    // setFetchingSubscriptionBillingInfoUrl(true)
-    // try {
-    //   const req = await api.postGetManageSubscriptionUrl()
-    //   const data = req?.data
-    //   const url = data?.url
-    //   setFetchingSubscriptionBillingInfoUrl(false)
-    //   if (url) {
-    //     window.location.href = url
-    //   }
-    // } catch (error) {
-    //   console.warn(error)
-    //   setFetchingSubscriptionBillingInfoUrl('error')
-    // }
+    if (Platform.OS === 'web') {
+      if (fetchingSubscriptionBillingInfoUrl === true) {
+        return
+      }
+      setFetchingSubscriptionBillingInfoUrl(true)
+      try {
+        const req = await api.postGetManageSubscriptionUrl()
+        const data = req?.data
+        const url = data?.url
+        setFetchingSubscriptionBillingInfoUrl(false)
+        if (url) {
+          window.location.href = url
+        }
+      } catch (error) {
+        console.warn(error)
+        setFetchingSubscriptionBillingInfoUrl('error')
+      }
+    } else {
+      openMobileSubscriptions()
+    }
   }
 
   const handleCancelSubscription = async () => {
-    openSubscriptions()
-    // if (updatingSubscriptionStatus === true) {
-    //   return
-    // }
-    // setUpdatingSubscriptionStatus(true)
-    // try {
-    //   await api.postUpdateSubscriptionStatus({ active: false })
-    //   await updateUser()
-    //   setUpdatingSubscriptionStatus(false)
-    // } catch (error) {
-    //   console.warn(error)
-    //   setUpdatingSubscriptionStatus('error')
-    // }
+    if (Platform.OS === 'web') {
+      if (updatingSubscriptionStatus === true) {
+        return
+      }
+      setUpdatingSubscriptionStatus(true)
+      try {
+        await api.postUpdateSubscriptionStatus({ active: false })
+        await updateUser()
+        setUpdatingSubscriptionStatus(false)
+      } catch (error) {
+        console.warn(error)
+        setUpdatingSubscriptionStatus('error')
+      }
+    } else {
+      openMobileSubscriptions()
+    }
   }
 
   const handleCancelSubscriptionClick = () => {

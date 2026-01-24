@@ -208,7 +208,7 @@ export default function Marketplace() {
                   console.log('transaction: ', transaction)
                 }}
               >
-                <Text>Test lifetime</Text>
+                <Text className='text-[white]'>Test lifetime</Text>
               </Pressable>
               <Pressable
                 className='text-white'
@@ -217,7 +217,7 @@ export default function Marketplace() {
                   console.log('transaction: ', transaction)
                 }}
               >
-                <Text>Test nsfw</Text>
+                <Text className='text-[white]'>Test nsfw</Text>
               </Pressable>
 
               <Pressable
@@ -238,7 +238,7 @@ export default function Marketplace() {
                   )
                 }}
               >
-                <Text>ANDROID Test advanced voices</Text>
+                <Text className='text-[white]'>ANDROID Test advanced voices</Text>
               </Pressable>
 
               <Pressable
@@ -259,7 +259,7 @@ export default function Marketplace() {
                   )
                 }}
               >
-                <Text>ANDROID Test monthly subscription</Text>
+                <Text className='text-[white]'>ANDROID Test monthly subscription</Text>
               </Pressable>
 
               <Pressable
@@ -280,7 +280,7 @@ export default function Marketplace() {
                   )
                 }}
               >
-                <Text>ANDROID Test NSFW capabilities</Text>
+                <Text className='text-[white]'>ANDROID Test NSFW capabilities</Text>
               </Pressable>
 
               <Pressable
@@ -301,7 +301,7 @@ export default function Marketplace() {
                   )
                 }}
               >
-                <Text>ANDROID Advanced animation</Text>
+                <Text className='text-[white]'>ANDROID Advanced animation</Text>
               </Pressable>
             </View>
 

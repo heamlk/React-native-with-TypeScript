@@ -19,6 +19,7 @@ export default function DeeplinkProvider({ children }: DeeplinkProviderProps) {
       const { queryParams } = Linking.parse(url)
       if (queryParams?.code) {
         await auth.oAuthCodeExchange({ code: String(queryParams?.code) })
+        Platform.OS === 'web' ? router.push('/') : Linking.openURL('/')
       }
 
       if (queryParams?.auth_session) {
