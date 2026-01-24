@@ -102,7 +102,7 @@ export default function SubscriptionPage() {
           </Text>
           <View className='flex-row gap-[16px]'>
             <GradientPressable
-              className='flex-1 max-w-[150px] h-[48px] min-h-[48px]'
+              combinedClassname='flex-1 max-w-[150px] h-[48px] min-h-[48px]'
               type='dark'
               onPress={() => {
                 setPopup({ open: false })
@@ -113,7 +113,7 @@ export default function SubscriptionPage() {
                 Ok
               </Text>
             </GradientPressable>
-            <GradientPressable className='flex-1 max-w-[150px] h-[48px] min-h-[48px]' type='dark' onPress={() => setPopup({ open: false })}>
+            <GradientPressable combinedClassname='flex-1 max-w-[150px] h-[48px] min-h-[48px]' type='dark' onPress={() => setPopup({ open: false })}>
               <Text className='font-[600]' size='md' color='grey1_light2'>
                 Cancel
               </Text>
