@@ -246,6 +246,37 @@ export function LoginPage() {
         }),
   }
 
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [scrollEnabled, setScrollEnabled] = useState(true)
+
+  const isIndexActive = (index: number, current: number, length: number) => {
+    const prev2 = (current - 2 + length) % length
+    const prev1 = (current - 1 + length) % length
+    const next1 = (current + 1) % length
+    const next2 = (current + 2) % length
+
+    return index === current || index === prev1 || index === prev2 || index === next1 || index === next2
+  }
+
+  const SLIDE_COOLDOWN = 1000
+  const lastSlideAtRef = useRef(0)
+
+  const canSlide = () => {
+    const now = Date.now()
+    if (now - lastSlideAtRef.current < SLIDE_COOLDOWN) {
+      return false
+    }
+
+    lastSlideAtRef.current = now
+    setScrollEnabled(false)
+
+    setTimeout(() => {
+      setScrollEnabled(true)
+    }, SLIDE_COOLDOWN)
+
+    return true
+  }
+
   return (
     <View className='relative flex-1' style={{ paddingBottom: insets.bottom + 25 }}>
       <View className='tablet:flex-1 base:flex-col tablet:flex-row items-center tablet:justify-center base:gap-[20px] tablet:gap-[0px]'>
@@ -253,10 +284,22 @@ export function LoginPage() {
         <View className='base:w-full tablet:w-[768px] base:h-[290px] tablet:h-[576px] justify-between relative tablet:border-purple2/20 tablet:border-[2px] tablet:rounded-md'>
           {/* Carousel controls */}
           <View className='w-[144px] flex-row gap-[16px] absolute top-[40px] left-[40px] z-[50]'>
-            <Pressable className='w-[64] h-[64] items-center justify-center border-light1/40 border-[1px] rounded-[99999] pointer' onPress={() => carouselRef.current?.prev()}>
+            <Pressable
+              className='w-[64] h-[64] items-center justify-center border-light1/40 border-[1px] rounded-[99999] pointer'
+              onPress={() => {
+                if (!canSlide()) return
+                carouselRef.current?.prev()
+              }}
+            >
               <IconArrow style={{ transform: [{ rotate: '180deg' }] }} />
             </Pressable>
-            <Pressable className='w-[64] h-[64] items-center justify-center border-light1/40 border-[1px] rounded-[99999] pointer' onPress={() => carouselRef.current?.next()}>
+            <Pressable
+              className='w-[64] h-[64] items-center justify-center border-light1/40 border-[1px] rounded-[99999] pointer'
+              onPress={() => {
+                if (!canSlide()) return
+                carouselRef.current?.next()
+              }}
+            >
               <IconArrow />
             </Pressable>
           </View>
@@ -266,40 +309,53 @@ export function LoginPage() {
           <Carousel
             ref={carouselRef}
             loop
+            enabled={scrollEnabled}
             width={breakpoints === 'desktop' ? 768 : dimentions.deviceWidth}
             height={breakpoints === 'desktop' ? 576 : 290}
             autoPlay={true}
             data={carouselItems}
             autoPlayInterval={5000}
             scrollAnimationDuration={1000}
+            onSnapToItem={(index) => {
+              setActiveIndex(index)
+              canSlide()
+            }}
             renderItem={({ item, index }) => {
+              const shouldRenderVideo = isIndexActive(index, activeIndex, carouselItems.length)
+
               return (
-                <View
-                  className='relative z-[11] top-[0] left-[0] rounded-md'
-                  style={{
-                    ...videoSizeStyle,
-                  }}
-                >
-                  <Video
-                    source={item.videoUrl}
-                    style={{
-                      ...videoSizeStyle,
-                      ...borderRadiusStyle,
-                      position: 'absolute',
-                      left: 0,
-                      right: 0,
-                      zIndex: 10,
-                    }}
-                    videoStyle={{
-                      ...videoSizeStyle,
-                      ...borderRadiusStyle,
-                    }}
-                    useNativeControls={false}
-                    resizeMode={ResizeMode.COVER}
-                    isLooping
-                    shouldPlay
-                    isMuted
-                  />
+                <View className='relative z-[11]' style={videoSizeStyle}>
+                  {shouldRenderVideo ? (
+                    <Video
+                      source={item.videoUrl}
+                      style={{
+                        ...videoSizeStyle,
+                        ...borderRadiusStyle,
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        zIndex: 10,
+                      }}
+                      videoStyle={{
+                        ...videoSizeStyle,
+                        ...borderRadiusStyle,
+                      }}
+                      resizeMode={ResizeMode.COVER}
+                      isLooping
+                      shouldPlay
+                      isMuted
+                      useNativeControls={false}
+                    />
+                  ) : (
+                    <View
+                      style={{
+                        ...videoSizeStyle,
+                        ...borderRadiusStyle,
+                        backgroundColor: 'black',
+                      }}
+                    />
+                  )}
+
                   <Text className='font-[600] text-light1 absolute z-[12] bottom-[40px] left-[40px] pr-[50px]' size='2xl'>
                     {item.title}
                   </Text>
