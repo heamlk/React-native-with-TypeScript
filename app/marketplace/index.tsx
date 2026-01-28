@@ -135,7 +135,7 @@ export default function Marketplace() {
                           {popup?.product?.type === 'subscription' ? '/Month' : ''}
                         </Text>
 
-                        {(popup?.product?.id === 'additional_ai' && activePurchases.includes('lifetime_subscription')) || activePurchases.includes(popup?.product?.id) || activeSubscriptions.includes(popup?.product?.id) ? (
+                        {activePurchases.includes(popup?.product?.id) || activeSubscriptions.includes(popup?.product?.id) ? (
                           <Pressable className='h-[24px] self-start items-center justify-center px-[12px] rounded-[12px]' background='green1'>
                             <Text className='font-[600]' size='xs' color='light1_light2'>
                               ACTIVE

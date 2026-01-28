@@ -197,6 +197,9 @@ export default function PaymentsProvider({ children }: PaymentsProviderProps) {
 
       storage.set('activeSubscriptions', JSON.stringify(matchedSubscriptions))
       storage.set('activePurchases', JSON.stringify(matchedPurchases))
+
+      console.log('activeSubscriptions: ', activeSubscriptions)
+      console.log('activePurchases: ', activePurchases)
     }
 
     fn()

@@ -79,7 +79,8 @@ export default function NewFriendPage() {
     router.push(`/friend/edit/${friend?.id}`)
   }
 
-  const handleStartChatting = () => {
+  const handleStartChatting = async () => {
+    await api.postUpdateAnimationStatue({ companionId: friend?.id || '', enabled: true })
     router.push(`/friend/${friend?.id}`)
   }
 
