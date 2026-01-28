@@ -1,4 +1,4 @@
-import { Image, ImageBackground, Modal, Platform } from 'react-native'
+import { Image, ImageBackground, Modal } from 'react-native'
 import { GradientPressable, View, Text, getThemeBorder, Pressable, getThemeBackground } from '../_shared/components/reusable'
 import AuthenticatedLayout from '../_shared/layout/authenticatedLayout'
 import ImageMarketplace from '@/app/_assets/images/marketplace.jpg'
@@ -8,14 +8,13 @@ import useBreakpoints from '../_hooks/breakpoints'
 import { LinearGradient } from 'expo-linear-gradient'
 import themeVars from '../_styles/theme/themeVars'
 import { useEffect, useState } from 'react'
-import { MarketplaceProduct, SubscriptionOption } from '../_context/auth.types'
+import { MarketplaceProduct } from '../_context/auth.types'
 import { useUser } from '../_context/user'
 import { BlurView } from 'expo-blur'
 import IconBack from '@/app/_assets/icons/arrow-narrow-left.svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { usePayments } from '../_context/payments'
 import { useApi } from '../_context/api'
-import storage from '../_shared/storage/storage'
 
 export default function Marketplace() {
   const { purchase, refresh, activeSubscriptions, activePurchases } = usePayments()
@@ -200,113 +199,8 @@ export default function Marketplace() {
 
           {/* Market */}
           <View className='flex-1 gap-[64px] overflow-auto scrollbar-hide' style={breakpoints === 'phone' ? {} : { height: containerHeight - 230 - 24 }}>
-            <View>
-              <Pressable
-                className='text-white'
-                onPress={async () => {
-                  const transaction = await purchase({ offering: 'lifetime', pkgIdentifier: '$rc_lifetime' })
-                  console.log('transaction: ', transaction)
-                }}
-              >
-                <Text className='text-[white]'>Test lifetime</Text>
-              </Pressable>
-              <Pressable
-                className='text-white'
-                onPress={async () => {
-                  const transaction = await purchase({ offering: 'nsfw_capability', pkgIdentifier: '$rc_monthly' })
-                  console.log('transaction: ', transaction)
-                }}
-              >
-                <Text className='text-[white]'>Test nsfw</Text>
-              </Pressable>
-
-              <Pressable
-                className='text-white'
-                onPress={async () => {
-                  api.post(
-                    'revenuecat/validate-purchase',
-                    {
-                      transaction_id: 'GPA.3366-9812-9203-98287',
-                      platform: Platform.OS,
-                      product_id: 'advanced_voices',
-                    },
-                    {
-                      headers: {
-                        'x-session-token': (storage.getString('session') as any) || '',
-                      },
-                    }
-                  )
-                }}
-              >
-                <Text className='text-[white]'>ANDROID Test advanced voices</Text>
-              </Pressable>
-
-              <Pressable
-                className='text-white'
-                onPress={async () => {
-                  api.post(
-                    'revenuecat/validate-purchase',
-                    {
-                      transaction_id: 'GPA.3368-8534-4959-52105',
-                      platform: Platform.OS,
-                      product_id: 'monthly_subscription',
-                    },
-                    {
-                      headers: {
-                        'x-session-token': (storage.getString('session') as any) || '',
-                      },
-                    }
-                  )
-                }}
-              >
-                <Text className='text-[white]'>ANDROID Test monthly subscription</Text>
-              </Pressable>
-
-              <Pressable
-                className='text-white'
-                onPress={async () => {
-                  api.post(
-                    'revenuecat/validate-purchase',
-                    {
-                      transaction_id: 'GPA.3378-5434-4301-57870',
-                      platform: Platform.OS,
-                      product_id: 'nsfw_capability',
-                    },
-                    {
-                      headers: {
-                        'x-session-token': (storage.getString('session') as any) || '',
-                      },
-                    }
-                  )
-                }}
-              >
-                <Text className='text-[white]'>ANDROID Test NSFW capabilities</Text>
-              </Pressable>
-
-              <Pressable
-                className='text-white'
-                onPress={async () => {
-                  api.post(
-                    'revenuecat/validate-purchase',
-                    {
-                      transaction_id: 'GPA.3317-3667-8389-31612',
-                      platform: Platform.OS,
-                      product_id: 'advanced_animation',
-                    },
-                    {
-                      headers: {
-                        'x-session-token': (storage.getString('session') as any) || '',
-                      },
-                    }
-                  )
-                }}
-              >
-                <Text className='text-[white]'>ANDROID Advanced animation</Text>
-              </Pressable>
-            </View>
-
             {activeFilters.includes('monthly') || !activeFilters.includes('oneTime') ? (
-              <View className='base:gap-[16px] phone:gap-[24px]'>
+              <View className='flex-1 base:gap-[16px] phone:gap-[24px]'>
                 <Text className='font-[600]' color='grey1_light1' size='sm'>
                   MONTHLY SUBSCRIPTION
                 </Text>
@@ -375,8 +269,8 @@ export default function Marketplace() {
                                   <></>
                                 )}
                                 {product?.status === 'coming_soon' ? (
-                                  <View className='self-start h-[24px] items-center justify-center px-[12px] rounded-md' background='grey5_dark3'>
-                                    <Text className='font-[600] text-light1' size='xs' color='grey2_light2'>
+                                  <View className='self-start min-h-[24px] items-center justify-center px-[12px] rounded-md' background='grey5_dark3'>
+                                    <Text className='font-[600] text-light1 text-center' size='xs' color='grey2_light2'>
                                       COMING SOON
                                     </Text>
                                   </View>
@@ -397,12 +291,12 @@ export default function Marketplace() {
             )}
 
             {activeFilters.includes('oneTime') || !activeFilters.includes('monthly') ? (
-              <View className='base:gap-[16px] phone:gap-[24px]'>
+              <View className='flex-1 base:gap-[16px] phone:gap-[24px]'>
                 <Text className='font-[600]' color='grey1_light1' size='sm'>
                   ONE-TIME FEE
                 </Text>
 
-                <View className='flex-1 gap-[20px]'>
+                <View className='flex-col flex-1 gap-[20px]'>
                   {(() => {
                     const filteredProducts =
                       user?.products?.filter((product) => {
@@ -467,8 +361,8 @@ export default function Marketplace() {
                                 )}
 
                                 {product?.status === 'coming_soon' ? (
-                                  <View className='self-start h-[24px] items-center justify-center px-[12px] rounded-md' background='grey5_dark3'>
-                                    <Text className='font-[600] text-light1' size='xs' color='grey2_light2'>
+                                  <View className='self-start min-h-[24px] items-center justify-center px-[12px] rounded-md' background='grey5_dark3'>
+                                    <Text className='font-[600] text-light1 text-center' size='xs' color='grey2_light2'>
                                       COMING SOON
                                     </Text>
                                   </View>

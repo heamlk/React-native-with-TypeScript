@@ -33,6 +33,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useUser } from './_context/user'
 import { Redirect } from 'expo-router'
+import Soul from './_shared/components/Soul'
 
 export type HomeCarouselItemType = {
   videoUrl: string

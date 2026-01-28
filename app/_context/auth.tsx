@@ -82,7 +82,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         error: null,
       }
     } catch (error) {
-      console.warn(error)
+      console.warn('auth.tsx otp error: ', error)
       return {
         successful: false,
         data: null,
@@ -116,7 +116,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         error: null,
       }
     } catch (error) {
-      console.warn(error)
+      console.warn('auth.tsx otpVerify error: ', error)
       return {
         successful: false,
         data: null,

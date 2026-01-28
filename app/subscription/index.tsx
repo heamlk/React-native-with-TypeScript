@@ -102,7 +102,7 @@ export default function SubscriptionPage() {
           </Text>
           <View className='flex-row gap-[16px]'>
             <GradientPressable
-              combinedClassname='flex-1 max-w-[150px] h-[48px] min-h-[48px]'
+              combinedClassname='max-w-[150px] h-[48px] min-h-[48px]'
               type='dark'
               onPress={() => {
                 setPopup({ open: false })
@@ -113,7 +113,7 @@ export default function SubscriptionPage() {
                 Ok
               </Text>
             </GradientPressable>
-            <GradientPressable combinedClassname='flex-1 max-w-[150px] h-[48px] min-h-[48px]' type='dark' onPress={() => setPopup({ open: false })}>
+            <GradientPressable combinedClassname='max-w-[150px] h-[48px] min-h-[48px]' type='dark' onPress={() => setPopup({ open: false })}>
               <Text className='font-[600]' size='md' color='grey1_light2'>
                 Cancel
               </Text>
@@ -142,7 +142,7 @@ export default function SubscriptionPage() {
 
               <View className='gap-[6px]'>
                 <GradientPressable combinedClassname='h-[48px]' type='dark' onPress={handleChangeBillingInfo}>
-                  <Text className='font-[600]' size='md' color='grey1_light2'>
+                  <Text className='font-[600] text-center' size='md' color='grey1_light2'>
                     {fetchingSubscriptionBillingInfoUrl === true ? 'Loading...' : 'Change subscriptions billing information'}
                   </Text>
                 </GradientPressable>

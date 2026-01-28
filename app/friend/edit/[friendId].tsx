@@ -1,4 +1,4 @@
-import { getThemeColor, GradientPressable, Pressable, Text, TextInput, View } from '@/app/_shared/components/reusable'
+import { GradientPressable, Pressable, Text, TextInput, View } from '@/app/_shared/components/reusable'
 import Soul from '@/app/_shared/components/Soul'
 import AuthenticatedLayout from '@/app/_shared/layout/authenticatedLayout'
 import { BlurView } from 'expo-blur'

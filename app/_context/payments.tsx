@@ -70,8 +70,8 @@ export default function PaymentsProvider({ children }: PaymentsProviderProps) {
       return false
     }
 
-    console.log('purchase offering: ', offering)
-    console.log('purchase pkgIdentifier: ', pkgIdentifier)
+    // console.log('purchase offering: ', offering)
+    // console.log('purchase pkgIdentifier: ', pkgIdentifier)
 
     const selectedOffering = offerings?.all?.[offering]
     const selectedPackage = selectedOffering?.availablePackages?.find((pkg: any) => pkg?.identifier === pkgIdentifier)
@@ -91,10 +91,10 @@ export default function PaymentsProvider({ children }: PaymentsProviderProps) {
 
       const transactionId = Platform.OS === 'web' ? (purchase as PurchaseResult)?.storeTransaction?.storeTransactionId : (purchase as MakePurchaseResult)?.transaction?.transactionIdentifier
       const productId = Platform.OS === 'web' ? (purchase as PurchaseResult)?.storeTransaction?.productIdentifier : (purchase as MakePurchaseResult)?.transaction?.productIdentifier
-      console.log('--------------------------------')
-      console.log('purchase: ', purchase)
-      console.log('transactionId: ', transactionId)
-      console.log('--------------------------------')
+      // console.log('--------------------------------')
+      // console.log('purchase: ', purchase)
+      // console.log('transactionId: ', transactionId)
+      // console.log('--------------------------------')
 
       const req = await api.post(
         'revenuecat/validate-purchase',
@@ -110,7 +110,7 @@ export default function PaymentsProvider({ children }: PaymentsProviderProps) {
         }
       )
 
-      console.log('purchase bffl api response: ', req)
+      // console.log('purchase bffl api response: ', req)
 
       return transactionId
     } catch (e) {

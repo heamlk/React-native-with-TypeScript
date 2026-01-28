@@ -1,7 +1,7 @@
 import useDimensions from '@/app/_hooks/dimensions'
 import { View, Pressable, GradientPressable, Text } from '@/app/_shared/components/reusable'
 import Soul from '@/app/_shared/components/Soul'
-import { Image } from 'react-native'
+import { Image, Platform } from 'react-native'
 import ImageBackground from '@/app/_assets/images/background.jpg'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
@@ -73,10 +73,7 @@ export default function FriendPage() {
           start={{ x: 0.75, y: 0 }}
           end={{ x: 0, y: 1 }}
         >
-          <View className='w-[200px] h-[200px] phone:absolute left-[0px] right-[0px] phone:top-[-100px] mx-auto'>
-            <Soul width={200} height={200} soulSize={200} />
-          </View>
-
+          <View className='w-[200px] h-[200px] phone:absolute left-[0px] right-[0px] phone:top-[-100px] mx-auto'>{Platform.OS !== 'ios' && <Soul width={200} height={200} soulSize={200} />}</View>
           <View className='items-center gap-[55px]'>
             <View className='gap-[24px] w-[94%] phone:max-w-[85%]'>
               <Text className='text-center' color='grey2_light3' size='lg'>

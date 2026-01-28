@@ -206,7 +206,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
                       </Pressable>
                     )
                   })}
-                  <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'grey4_dark4' }) }}></View>
+                  {user?.companions?.length && user?.companions?.length > 0 && <View className='w-[100%] h-[1px]' style={{ backgroundColor: getThemeBorder({ theme, border: 'grey4_dark4' }) }}></View>}
                   <ThemeToggle />
                 </>
               ) : null}
