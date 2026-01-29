@@ -97,7 +97,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
             </Text>
             <View className='flex-row gap-[16px]'>
               <GradientPressable
-                combinedClassname='max-w-[150px] h-[48px] flex-1'
+                className='w-[120px] h-[48px]'
                 type='dark'
                 onPress={() => {
                   popup.setPopup({ open: false })
@@ -108,7 +108,7 @@ export default function AuthenticatedLayout({ children, keepMarginsOnMobile = fa
                   Ok
                 </Text>
               </GradientPressable>
-              <GradientPressable combinedClassname='max-w-[150px] h-[48px] flex-1' type='dark' onPress={() => popup.setPopup({ open: false })}>
+              <GradientPressable className='w-[120px] h-[48px]' type='dark' onPress={() => popup.setPopup({ open: false })}>
                 <Text className='font-[600]' size='md' color='grey1_light2'>
                   Cancel
                 </Text>
