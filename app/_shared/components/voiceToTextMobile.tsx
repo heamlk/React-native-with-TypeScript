@@ -1,6 +1,6 @@
-import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react'
+import { useState, useRef, useImperativeHandle, forwardRef } from 'react'
 import { Pressable } from 'react-native'
-import { Audio } from 'expo-av'
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av'
 import Tooltip from 'react-native-walkthrough-tooltip'
 import IconMicrophoneNew from '@/app/_assets/icons/ChatAudio.svg'
 import themeVars from '@/app/_styles/theme/themeVars'
@@ -27,29 +27,36 @@ const VoiceToText = forwardRef<VoiceToTextRef, Props>(({ onChange }, ref) => {
     return ''
   }
 
-  const handleStart = async () => {
-    stopAllAudio()
-
+  async function handleStart() {
     try {
-      setIsRecording(true)
+      const permission = await Audio.requestPermissionsAsync()
+      if (permission.status !== 'granted') {
+        console.warn('Microphone permission not granted')
+        return
+      }
 
-      await Audio.requestPermissionsAsync()
+      stopAllAudio()
+
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        shouldDuckAndroid: true,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        playThroughEarpieceAndroid: false,
+        staysActiveInBackground: true,
       })
 
-      const recording = new Audio.Recording()
-
-      await recording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY)
-      await recording.startAsync()
-
+      console.log('Started recording')
+      const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY)
       recordingRef.current = recording
-    } catch (e) {
-      console.error('Failed to start recording:', e)
+      setIsRecording(true)
+    } catch (err) {
+      console.log('Error recording: ', err)
       setIsRecording(false)
     }
   }
+
   const handleStop = async () => {
     if (!recordingRef.current) return
 
