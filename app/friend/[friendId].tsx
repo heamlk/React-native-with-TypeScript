@@ -217,6 +217,8 @@ export default function FriendIdPage() {
         voiceBase64Ref.current = ''
         const req = await api.postSendVoiceMessage({ companionId: friend?.id || '', audioBase64: base64 })
         const data = req?.data
+        console.log('req: ', req)
+        console.log('sending message')
 
         if (data !== 'OK') {
           console.warn('Failed to send voice message')
