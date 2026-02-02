@@ -63,6 +63,8 @@ export default function SubscriptionPage() {
       openPlatformPopup()
       return false
     }
+
+    return true
   }
 
   const handleUpdateSubscriptionOptionStatus = async ({ active, product_id, platform }: { active: boolean; product_id: string; platform: SubscriptionOption['platform'] }) => {
