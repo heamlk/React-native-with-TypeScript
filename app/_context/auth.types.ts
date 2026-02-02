@@ -58,6 +58,7 @@ export interface Subscription {
 export interface SubscriptionOption {
   cancel_at_period_end: boolean
   active_until: number
+  platform: 'web' | 'android' | 'ios' | null
 }
 
 export interface Purchase {

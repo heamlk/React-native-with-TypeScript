@@ -8,6 +8,7 @@ import { useApi } from '../_context/api'
 import { usePopup } from '../_context/popup'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Linking, Platform } from 'react-native'
+import { SubscriptionOption } from '../_context/auth.types'
 
 export function openMobileSubscriptions() {
   if (Platform.OS === 'ios') {
@@ -27,7 +28,46 @@ export default function SubscriptionPage() {
   const [updatingSubscriptionOptionStatus, setUpdatingSubscriptionOptionStatus] = useState<string>('')
   const [fetchingSubscriptionBillingInfoUrl, setFetchingSubscriptionBillingInfoUrl] = useState<boolean | 'error'>(false)
 
-  const handleUpdateSubscriptionOptionStatus = async ({ active, product_id }: { active: boolean; product_id: string }) => {
+  const openPlatformPopup = () => {
+    setPopup({
+      open: true,
+      maxWidth: 600,
+      content: (
+        <View className='gap-[24px]'>
+          <Text className='text-[24px] font-[600]' color='grey1_light1'>
+            Manage subscription
+          </Text>
+          <Text className='' size='md' color='grey1_light1'>
+            This subscription cannot be canceled or changed withing this app because it was purchased on another platform. To manage your subscription, please log in to your account where you made the purchase.
+          </Text>
+          <View className='flex-row gap-[16px]'>
+            <GradientPressable
+              className='w-[120px] h-[48px]'
+              type='dark'
+              onPress={() => {
+                setPopup({ open: false })
+              }}
+            >
+              <Text className='font-[600]' size='md' color='grey1_light2'>
+                Ok
+              </Text>
+            </GradientPressable>
+          </View>
+        </View>
+      ),
+    })
+  }
+
+  const subscriptionPlatformCheck = ({ platform }: { platform: SubscriptionOption['platform'] }) => {
+    if (Platform.OS !== platform) {
+      openPlatformPopup()
+      return false
+    }
+  }
+
+  const handleUpdateSubscriptionOptionStatus = async ({ active, product_id, platform }: { active: boolean; product_id: string; platform: SubscriptionOption['platform'] }) => {
+    if (!subscriptionPlatformCheck({ platform })) return
+
     if (Platform.OS === 'web') {
       if (updatingSubscriptionOptionStatus) {
         return
@@ -46,7 +86,9 @@ export default function SubscriptionPage() {
     }
   }
 
-  const handleChangeBillingInfo = async () => {
+  const handleChangeBillingInfo = async ({ platform }: { platform: SubscriptionOption['platform'] }) => {
+    if (!subscriptionPlatformCheck({ platform })) return
+
     if (Platform.OS === 'web') {
       if (fetchingSubscriptionBillingInfoUrl === true) {
         return
@@ -69,7 +111,9 @@ export default function SubscriptionPage() {
     }
   }
 
-  const handleCancelSubscription = async () => {
+  const handleCancelSubscription = async ({ platform }: { platform: SubscriptionOption['platform'] }) => {
+    if (!subscriptionPlatformCheck({ platform })) return
+
     if (Platform.OS === 'web') {
       if (updatingSubscriptionStatus === true) {
         return
@@ -88,7 +132,9 @@ export default function SubscriptionPage() {
     }
   }
 
-  const handleCancelSubscriptionClick = () => {
+  const handleCancelSubscriptionClick = ({ platform }: { platform: SubscriptionOption['platform'] }) => {
+    if (!subscriptionPlatformCheck({ platform })) return
+
     setPopup({
       open: true,
       maxWidth: 600,
@@ -106,7 +152,7 @@ export default function SubscriptionPage() {
               type='dark'
               onPress={() => {
                 setPopup({ open: false })
-                handleCancelSubscription()
+                handleCancelSubscription({ platform })
               }}
             >
               <Text className='font-[600]' size='md' color='grey1_light2'>
@@ -141,7 +187,7 @@ export default function SubscriptionPage() {
               <Subscription />
 
               <View className='gap-[6px]'>
-                <GradientPressable combinedClassname='h-[48px]' type='dark' onPress={handleChangeBillingInfo}>
+                <GradientPressable combinedClassname='h-[48px]' type='dark' onPress={() => handleChangeBillingInfo({ platform: user?.profile?.subscription?.options?.additional_ai?.platform || null })}>
                   <Text className='font-[600] text-center' size='md' color='grey1_light2'>
                     {fetchingSubscriptionBillingInfoUrl === true ? 'Loading...' : 'Change subscriptions billing information'}
                   </Text>
@@ -156,7 +202,7 @@ export default function SubscriptionPage() {
               </View>
 
               <View className='gap-[6px]'>
-                <GradientPressable combinedClassname='h-[48px]' type='dark' onPress={handleCancelSubscriptionClick}>
+                <GradientPressable combinedClassname='h-[48px]' type='dark' onPress={() => handleCancelSubscriptionClick({ platform: user?.profile?.subscription?.options?.additional_ai?.platform || null })}>
                   <Text className='font-[600]' size='md' color='grey1_light2'>
                     {updatingSubscriptionStatus === true ? 'Canceling...' : 'Cancel subscription'}
                   </Text>
@@ -180,6 +226,7 @@ export default function SubscriptionPage() {
             const product = user?.products?.find((product) => product.id === key)
             const active_until = value?.active_until
             const cancel_at_period_end = value?.cancel_at_period_end
+            const platform = value?.platform
 
             const active = active_until >= Math.floor(Date.now() / 1000)
 
@@ -232,7 +279,7 @@ export default function SubscriptionPage() {
                   </View>
                 </View>
 
-                <GradientPressable type='dark' className='h-[48px] items-center justicy-center rounded-[99999px]' combinedStyle={{ width: '100%' }} onPress={() => handleUpdateSubscriptionOptionStatus({ active: !cancel_at_period_end ? false : true, product_id: product?.id || '' })}>
+                <GradientPressable type='dark' className='h-[48px] items-center justicy-center rounded-[99999px]' combinedStyle={{ width: '100%' }} onPress={() => handleUpdateSubscriptionOptionStatus({ active: !cancel_at_period_end ? false : true, product_id: product?.id || '', platform })}>
                   <Text className='font-[600]' size='md' color='grey1_light2'>
                     {updatingSubscriptionOptionStatus === product?.id ? `${!cancel_at_period_end ? 'Disabling...' : 'Enabling...'}` : `${!cancel_at_period_end ? 'Disable' : 'Enable'} auto-renewal`}
                   </Text>
