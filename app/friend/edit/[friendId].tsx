@@ -125,13 +125,20 @@ export default function NewFriendPage() {
     }
   }
 
+  useEffect(() => {
+    console.log('availableAttributes: ', availableAttributes)
+  }, [availableAttributes])
+
+  useEffect(() => {
+    console.log('selectedAttributes: ', selectedAttributes)
+  }, [selectedAttributes])
+
   const handleGo = async () => {
     const keyNames: Record<string, string> = {
       age: 'Age',
       ancestral_region: 'Ancestral region',
       attire: 'Attire',
       eye_color: 'Eye color',
-      facial_hair: 'Facial hair',
       gender: 'Gender',
       hair_color: 'Hair color',
       hair_length: 'Hair length',
@@ -139,9 +146,14 @@ export default function NewFriendPage() {
       personality: 'Personality',
       skin_tone: 'Skin tone',
       universe: 'Universe',
+      ...(selectedAttributes?.gender === 'female' ? {} : { facial_hair: 'Facial hair' }),
     }
 
     const errors: string[] = []
+
+    if (selectedAttributes?.gender === 'female') {
+      delete availableAttributes?.facial_hair
+    }
 
     Object.entries(availableAttributes)?.map(([key, value]) => {
       if (['optional_attributes', 'politics'].includes(key)) return
@@ -239,7 +251,7 @@ export default function NewFriendPage() {
     const randomAge = Math.floor(Math.random() * (100 - 21 + 1)) + 21
     const randomHairColor = availableAttributes['hair_color'][getRandomNumber({ min: 0, max: availableAttributes['hair_color']?.length - 1 })]?.key
     const randomHairLength = availableAttributes['hair_length'][getRandomNumber({ min: 0, max: availableAttributes['hair_length']?.length - 1 })]?.key
-    const randomFacialHair = availableAttributes['facial_hair'][getRandomNumber({ min: 0, max: availableAttributes['facial_hair']?.length - 1 })]?.key
+    const randomFacialHair = randomGender !== 'female' ? availableAttributes['facial_hair'][getRandomNumber({ min: 0, max: availableAttributes['facial_hair']?.length - 1 })]?.key : null
     const randomSkinTone = availableAttributes['skin_tone'][getRandomNumber({ min: 0, max: availableAttributes['skin_tone']?.length - 1 })]?.key
     const randomEyeColor = availableAttributes['eye_color'][getRandomNumber({ min: 0, max: availableAttributes['eye_color']?.length - 1 })]?.key
     const randomAncestralRegion = availableAttributes['ancestral_region'][getRandomNumber({ min: 0, max: availableAttributes['ancestral_region']?.length - 1 })]?.key
@@ -253,12 +265,12 @@ export default function NewFriendPage() {
       age: String(randomAge),
       hair_color: randomHairColor,
       hair_length: randomHairLength,
-      facial_hair: randomFacialHair,
       skin_tone: randomSkinTone,
       eye_color: randomEyeColor,
       ancestral_region: randomAncestralRegion,
       attire: randomAttire,
       personality: randomPersonality,
+      ...(randomGender !== 'female' ? { facial_hair: randomFacialHair } : {}),
     })
     setValidationErrors([])
   }
@@ -554,13 +566,17 @@ export default function NewFriendPage() {
                   hair.
                 </Text>
 
-                <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
-                  I have{' '}
-                  <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'facial_hair', type: 'select' })}>
-                    <GetSelectedAttribute attribute='facial_hair' def='Facial' />
-                  </Pressable>{' '}
-                  hair.
-                </Text>
+                {selectedAttributes?.gender === 'female' ? (
+                  <></>
+                ) : (
+                  <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
+                    I have{' '}
+                    <Pressable onPress={(event) => handleSelectInputOpen({ event, attribute: 'facial_hair', type: 'select' })}>
+                      <GetSelectedAttribute attribute='facial_hair' def='Facial' />
+                    </Pressable>{' '}
+                    hair.
+                  </Text>
+                )}
 
                 <Text className='base:text-center phone:text-start base:text-[20px] phone:text-[24px] leading-[34px]' color='grey1_light1'>
                   a{' '}
