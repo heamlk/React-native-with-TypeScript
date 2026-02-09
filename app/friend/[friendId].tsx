@@ -824,7 +824,18 @@ export default function FriendIdPage() {
 
                 {messages?.map((message) => {
                   if (message?.role === 'companion' && message?.type === 'text') {
-                    return (
+                    return Platform.OS === 'web' ? (
+                      <View key={message?.content + message?.created_at} className='gap-[16px] flex-row'>
+                        <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] max-w-[44px] min-h-[44px] min-w-[44px] h-[44px] max-h-[44px] rounded-[9999px] mb-auto flex flex-1' />
+                        <View className='flex flex-1'>
+                          <GradientPressable combinedClassname='flex-1' containerClassname='mr-auto' className='py-[10px]' gradientClassname='' type='primary' isPressable={false}>
+                            <Text className='w-[auto] font-[500] ml-auto self-start shrink flex' size='md' color='light1'>
+                              {message?.content}
+                            </Text>
+                          </GradientPressable>
+                        </View>
+                      </View>
+                    ) : (
                       <View key={message?.content + message?.created_at} className='flex flex-1 gap-[16px] flex-row'>
                         <Image source={{ uri: friend?.profile_picture?.thumbnail }} className='w-[44px] max-w-[44px] min-h-[44px] min-w-[44px] h-[44px] max-h-[44px] rounded-[9999px] mb-auto flex flex-1' />
                         <View className='flex flex-1'>

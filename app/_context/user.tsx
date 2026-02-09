@@ -151,6 +151,7 @@ export default function UserProvider({ children }: UserProviderProps) {
     })
 
     api.socketState?.on('companion_is_typing', (event) => {
+      console.log('companion_is_typing event: ', event)
       setCompanionIsTyping(event)
     })
 
@@ -171,10 +172,35 @@ export default function UserProvider({ children }: UserProviderProps) {
       }
     })
 
+    api.socketState?.on('companion_update', (event) => {
+      console.log('companion_update event: ', event)
+    })
+
+    api.socketState?.on('companion_media_update', (event) => {
+      console.log('companion_media_update event: ', event)
+    })
+
+    api.socketState?.on('companion_emotion', (event) => {
+      console.log('companion_emotion event: ', event)
+    })
+
+    // new_chat_message: (eventData: { companion_id: string; message: ChatMessage; local_message_id?: string; audio?: Uint8Array }) => void
+    // companion_is_typing: (eventData: { companion_id: string; is_typing: boolean }) => void
+    // companion_update: (eventData: { companion: CompanionInfos }) => void
+    // companion_edit_error: () => void
+    // companion_deletion: (eventData: { companion_id: string }) => void
+    // companion_media_update: (eventData: { companion_id: string; images: any[] }) => void
+    // companion_emotion: (eventData: { companion_id: string; emotion: string }) => void
+    // customer_update: (eventData: { customer: CustomerProfile }) => void
+
     return () => {
       api.socketState?.off('customer_update')
       api.socketState?.off('companion_is_typing')
       api.socketState?.off('new_chat_message')
+
+      api.socketState?.off('companion_update')
+      api.socketState?.off('companion_media_update')
+      api.socketState?.off('companion_emotion')
     }
   }, [api.socketState?.active])
 
