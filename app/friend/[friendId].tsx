@@ -206,7 +206,7 @@ export default function FriendIdPage() {
     })
   }
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (event?: any) => {
     if (sendingMessage) {
       return
     }
@@ -274,6 +274,8 @@ export default function FriendIdPage() {
         console.warn('send message error: ', error)
       }
     }
+
+    event?.target?.focus()
   }
 
   const updateMedia = async () => {
@@ -892,7 +894,7 @@ export default function FriendIdPage() {
 
             {/* Input */}
             <View className='w-[100%] max-w-[640px] h-[60px] flex-row border-[1px] rounded-[31px] mx-auto mt-[24px] relative overflow-hidden' border='grey5_dark3' background='grey5_dark2'>
-              <TextInput className='text-[16px] flex-1 px-[24px] text-base' placeholder='Type a message…' color='grey1_light3' placeholderColor='grey1_light3' value={messageInput} onChangeText={setMessageInput} onSubmitEditing={handleSendMessage} returnKeyType='send' autoCorrect={true} />
+              <TextInput className='text-[16px] flex-1 px-[24px] text-base' placeholder='Type a message…' color='grey1_light3' placeholderColor='grey1_light3' value={messageInput} onChangeText={setMessageInput} onSubmitEditing={handleSendMessage} returnKeyType='send' autoCorrect={true} autoFocus={true} />
 
               <View className='h-full flex-row items-center gap-[12px] pr-[20px]'>
                 {Platform.OS === 'web' ? (
