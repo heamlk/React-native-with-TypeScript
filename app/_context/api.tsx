@@ -79,6 +79,7 @@ export type ApiContextType = {
   postUpdateNsfwSettings: ({ nsfw_status }: { nsfw_status: boolean }) => Promise<AxiosResponse<any, any, {}>>
   postSendVoiceMessage: ({ companionId, audioBase64 }: { companionId: string; audioBase64: string }) => Promise<AxiosResponse<any, any, {}>>
   getPingCompanion: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
+  generateCompanionEmotionsAnimations: ({ companionId }: { companionId: string }) => Promise<AxiosResponse<any, any, {}>>
 }
 
 const ApiContext = createContext<ApiContextType | null>(null)
@@ -540,6 +541,14 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const generateCompanionEmotionsAnimations = async ({ companionId }: { companionId: string }) => {
+    return await api.post(`companions/${companionId}/generate-emotions-animations`, null, {
+      headers: {
+        'x-session-token': (storage.getString('session') as any) || '',
+      },
+    })
+  }
+
   useEffect(() => {
     const newSocket = socket
     setSocketState(newSocket)
@@ -604,6 +613,7 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     postUpdateNsfwSettings,
     postSendVoiceMessage,
     getPingCompanion,
+    generateCompanionEmotionsAnimations,
   }
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>

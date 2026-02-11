@@ -80,6 +80,7 @@ export default function NewFriendPage() {
   }
 
   const handleStartChatting = async () => {
+    await api.generateCompanionEmotionsAnimations({ companionId: friend?.id || '' })
     await api.postUpdateAnimationStatue({ companionId: friend?.id || '', enabled: true })
     router.push(`/friend/${friend?.id}`)
   }
