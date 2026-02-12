@@ -24,7 +24,7 @@ import { useApi } from '../_context/api'
 import { usePopup } from '../_context/popup'
 import Soul from '../_shared/components/Soul'
 import VoiceToText from '../_shared/components/voiceToText'
-import type { ImageMedia } from '../_context/auth.types'
+import type { ImageMedia, CompanionInfos } from '../_context/auth.types'
 import { BlurView } from 'expo-blur'
 import Carousel, { type ICarouselInstance } from 'react-native-reanimated-carousel'
 import { resizeToFitScreen, scaleToFit } from '../_lib/utils'
@@ -48,11 +48,17 @@ export default function FriendIdPage() {
   const carouselRef = useRef<ICarouselInstance>(null)
   const carouselSmallRef = useRef<ICarouselInstance>(null)
   const voiceBase64Ref = useRef('')
+  const friendRef = useRef<CompanionInfos | undefined>(undefined)
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
 
   const [friend, setFriend] = useState(user?.companions?.find((obj) => obj?.id === friendId))
+  
+  // Keep friendRef in sync with friend state for use in socket handlers
+  useEffect(() => {
+    friendRef.current = friend
+  }, [friend])
   const [carouselData, setCarouselData] = useState({
     open: false,
     defaultIndex: 0,
@@ -396,19 +402,50 @@ export default function FriendIdPage() {
   }
 
   const handleCompanionEmotionEvent = async ({ companion_id, emotion }: { companion_id: string; emotion: string }) => {
-    if (companion_id !== friend?.id) {
+    const currentFriend = friendRef.current
+    if (companion_id !== currentFriend?.id) {
       return
     }
 
+    // Get the latest video URLs from the current friend state
+    const blinkUrl = currentFriend?.emotions_animations?.urls?.blink
+    const smileUrl = currentFriend?.emotions_animations?.urls?.smile
+
     if (emotion === 'blink') {
-      setNextVideo(() => blinkVideoUrl ?? '')
+      setNextVideo(() => blinkUrl ?? '')
     } else if (emotion === 'smile') {
-      setNextVideo(() => smileVideoUrl ?? '')
+      setNextVideo(() => smileUrl ?? '')
     }
   }
 
   const handleCompanionMediaUpdate = async ({ companion_id, images }: { companion_id: string; images: any[] }) => {
     updateMedia()
+  }
+
+  const handleCompanionUpdate = async ({ companion }: { companion: CompanionInfos }) => {
+    const currentFriend = friendRef.current
+    if (companion?.id !== currentFriend?.id) {
+      return
+    }
+
+    // Update the friend state with the new companion data
+    setFriend(companion)
+
+    // If emotions_animations URLs are now available, update the active video
+    if (companion?.emotions_animations?.urls?.blink) {
+      // Set active video if we don't have one, or if it's different from current
+      setActiveVideo((current: string | null) => {
+        if (!current && companion.emotions_animations?.urls?.blink) {
+          return companion.emotions_animations.urls.blink
+        }
+        return current
+      })
+    }
+
+    // Update emotionEnabled state if emotions_animations enabled status changed
+    if (companion?.emotions_animations?.enabled !== undefined) {
+      setEmotionEnabled(companion.emotions_animations.enabled)
+    }
   }
 
   useEffect(() => {
@@ -437,10 +474,14 @@ export default function FriendIdPage() {
     api.socketState?.on('companion_media_update', (event) => {
       handleCompanionMediaUpdate(event)
     })
+    api.socketState?.on('companion_update', (event) => {
+      handleCompanionUpdate(event)
+    })
 
     return () => {
       api.socketState?.off('companion_emotion')
       api.socketState?.off('companion_media_update')
+      api.socketState?.off('companion_update')
     }
   }, [])
 
