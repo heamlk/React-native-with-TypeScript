@@ -96,6 +96,7 @@ export default function FriendIdPage() {
   const [regeneratingAnimations, setRegeneratingAnimations] = useState(false)
   const regeneratingAnimationsRef = useRef(false)
   const animationContextMenuPositionRef = useRef<{ x: number; y: number } | null>(null)
+  const [cooldownUpdateTrigger, setCooldownUpdateTrigger] = useState(0)
 
   const blinkVideoUrl = friend?.emotions_animations?.urls?.blink
   const smileVideoUrl = friend?.emotions_animations?.urls?.smile
@@ -176,10 +177,10 @@ export default function FriendIdPage() {
     
     if (!lastRerunTimestamp) return true
     
-    const tenSecondsInMs = 10 * 1000
+    const oneHourInMs = 60 * 60 * 1000 // 1 hour
     const timeSinceLastRerun = Date.now() - parseInt(lastRerunTimestamp)
     
-    return timeSinceLastRerun >= tenSecondsInMs
+    return timeSinceLastRerun >= oneHourInMs
   }
 
   const getRerunCooldownRemaining = () => {
@@ -190,11 +191,11 @@ export default function FriendIdPage() {
     
     if (!lastRerunTimestamp) return 0
     
-    const tenSecondsInMs = 10 * 1000
+    const oneHourInMs = 60 * 60 * 1000 // 1 hour
     const timeSinceLastRerun = Date.now() - parseInt(lastRerunTimestamp)
-    const remaining = tenSecondsInMs - timeSinceLastRerun
+    const remaining = oneHourInMs - timeSinceLastRerun
     
-    return Math.max(0, Math.ceil(remaining / 1000)) // Return seconds remaining
+    return Math.max(0, Math.ceil(remaining / 1000 / 60)) // Return minutes remaining
   }
 
   const handleRerunAnimations = async () => {
@@ -612,6 +613,18 @@ export default function FriendIdPage() {
     }
   }, [])
 
+  // Update cooldown timer every minute when on cooldown
+  useEffect(() => {
+    if (!canRerunAnimations() && animationContextMenuOpen) {
+      const interval = setInterval(() => {
+        // Force re-render to update cooldown display
+        setCooldownUpdateTrigger((prev) => prev + 1)
+      }, 60000) // Update every minute
+
+      return () => clearInterval(interval)
+    }
+  }, [friend?.id, animationContextMenuOpen, cooldownUpdateTrigger])
+
   // Close context menu when clicking outside
   useEffect(() => {
     if (!animationContextMenuOpen) return
@@ -1019,7 +1032,7 @@ export default function FriendIdPage() {
                                     Regen Animation
                                   </Text>
                                   <Text className='font-[400]' size='sm' color='grey2_light3' style={{ marginTop: 2 }}>
-                                    {getRerunCooldownRemaining()} second{getRerunCooldownRemaining() !== 1 ? 's' : ''} cooldown remaining
+                                    {getRerunCooldownRemaining()} minute{getRerunCooldownRemaining() !== 1 ? 's' : ''} cooldown remaining
                                   </Text>
                                 </View>
                               </>
