@@ -203,21 +203,35 @@ export default function FriendIdPage() {
 
     try {
       setRegeneratingAnimations(true)
-      setAnimationContextMenuOpen(false)
+      // Keep menu open to show loading state
       
-      // Call the endpoint to regenerate animations
-      await api.generateCompanionEmotionsAnimations({ companionId: friend.id })
+      // Determine which animation is currently playing
+      let currentEmotion: string | undefined = undefined
+      if (activeVideo === blinkVideoUrl) {
+        currentEmotion = 'blink'
+      } else if (activeVideo === smileVideoUrl) {
+        currentEmotion = 'smile'
+      }
+      
+      // Call the endpoint to regenerate only the current animation
+      await api.generateCompanionEmotionsAnimations({ 
+        companionId: friend.id,
+        emotion: currentEmotion 
+      })
       
       // Store timestamp for rate limiting
       const lastRerunKey = `animation_rerun_${friend.id}`
       storage.set(lastRerunKey, Date.now().toString())
       
+      // Don't close menu or reset loading state here - wait for socket event
       // The companion_update event will be received via socket and update the UI
     } catch (error) {
-      console.warn('handleRerunAnimations error: ', error)
-    } finally {
+      console.error('handleRerunAnimations error: ', error)
       setRegeneratingAnimations(false)
+      setAnimationContextMenuOpen(false)
+      // TODO: Show user-friendly error message
     }
+    // Don't reset regeneratingAnimations in finally - wait for socket update
   }
 
   const handleAnimationContextMenu = (event?: any) => {
@@ -520,8 +534,23 @@ export default function FriendIdPage() {
         if (!current && companion.emotions_animations?.urls?.blink) {
           return companion.emotions_animations.urls.blink
         }
+        // If regenerating, update to the new URL for the current emotion
+        if (regeneratingAnimations) {
+          const currentEmotion = current === blinkVideoUrl ? 'blink' : current === smileVideoUrl ? 'smile' : null
+          if (currentEmotion === 'blink' && companion.emotions_animations?.urls?.blink) {
+            return companion.emotions_animations.urls.blink
+          } else if (currentEmotion === 'smile' && companion.emotions_animations?.urls?.smile) {
+            return companion.emotions_animations.urls.smile
+          }
+        }
         return current
       })
+    }
+
+    // Reset loading state and close menu when update is received
+    if (regeneratingAnimations) {
+      setRegeneratingAnimations(false)
+      setAnimationContextMenuOpen(false)
     }
 
     // Update emotionEnabled state if emotions_animations enabled status changed
