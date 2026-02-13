@@ -174,10 +174,10 @@ export default function FriendIdPage() {
     
     if (!lastRerunTimestamp) return true
     
-    const oneHourInMs = 60 * 60 * 1000
+    const tenSecondsInMs = 10 * 1000
     const timeSinceLastRerun = Date.now() - parseInt(lastRerunTimestamp)
     
-    return timeSinceLastRerun >= oneHourInMs
+    return timeSinceLastRerun >= tenSecondsInMs
   }
 
   const getRerunCooldownRemaining = () => {
@@ -188,11 +188,11 @@ export default function FriendIdPage() {
     
     if (!lastRerunTimestamp) return 0
     
-    const oneHourInMs = 60 * 60 * 1000
+    const tenSecondsInMs = 10 * 1000
     const timeSinceLastRerun = Date.now() - parseInt(lastRerunTimestamp)
-    const remaining = oneHourInMs - timeSinceLastRerun
+    const remaining = tenSecondsInMs - timeSinceLastRerun
     
-    return Math.max(0, Math.ceil(remaining / 1000 / 60)) // Return minutes remaining
+    return Math.max(0, Math.ceil(remaining / 1000)) // Return seconds remaining
   }
 
   const handleRerunAnimations = async () => {
@@ -944,8 +944,8 @@ export default function FriendIdPage() {
                           />
                         )}
                         <View 
-                          className={`${Platform.OS === 'web' ? 'fixed' : 'absolute'} z-[10000] rounded-lg border-[1px] overflow-hidden`}
-                          background='grey6_dark6' 
+                          className={`${Platform.OS === 'web' ? 'fixed' : 'absolute'} z-[10000] rounded-sm border-[1px] overflow-hidden`}
+                          background='grey6_dark7' 
                           border='grey5_dark3'
                           style={{
                             ...(Platform.OS === 'web' && animationContextMenuPositionRef.current && typeof window !== 'undefined' ? {
@@ -961,46 +961,43 @@ export default function FriendIdPage() {
                             shadowOpacity: 0.3,
                             shadowRadius: 12,
                             elevation: 12,
-                            minWidth: 220,
+                            minWidth: 200,
                           }}
                         >
-                          <GradientPressable
-                            className='px-[20px] py-[16px] flex-row items-center gap-[14px]'
-                            type={!canRerunAnimations() || regeneratingAnimations ? 'dark' : 'primary'}
+                          <Pressable
+                            className='px-[24px] py-[14px] flex-row items-center gap-[10px]'
+                            background='transparent'
                             onPress={handleRerunAnimations}
                             disabled={!canRerunAnimations() || regeneratingAnimations}
-                            isPressable={canRerunAnimations() && !regeneratingAnimations}
                           >
                             {regeneratingAnimations ? (
                               <>
                                 <ActivityIndicator size='small' color={themeVars.colors.purple1} />
-                                <Text className='font-[600]' size='sm' color='light1'>
+                                <Text className='font-[600]' size='md' color='grey1_light1'>
                                   Regenerating animations...
                                 </Text>
                               </>
                             ) : !canRerunAnimations() ? (
                               <>
-                                <View className='opacity-[0.5]'>
-                                  <IconRefresh width={20} height={20} />
-                                </View>
+                                <IconRefresh width={18} height={18} />
                                 <View className='flex-1'>
-                                  <Text className='font-[600]' size='sm' color='grey1_light2'>
+                                  <Text className='font-[600]' size='md' color='grey1_light1'>
                                     Rerun Animation
                                   </Text>
-                                  <Text className='font-[400]' size='xs' color='grey2_light3' style={{ marginTop: 4 }}>
-                                    {getRerunCooldownRemaining()} minute{getRerunCooldownRemaining() !== 1 ? 's' : ''} cooldown remaining
+                                  <Text className='font-[400]' size='sm' color='grey2_light3' style={{ marginTop: 2 }}>
+                                    {getRerunCooldownRemaining()} second{getRerunCooldownRemaining() !== 1 ? 's' : ''} cooldown remaining
                                   </Text>
                                 </View>
                               </>
                             ) : (
                               <>
-                                <IconRefresh width={20} height={20} />
-                                <Text className='font-[600]' size='sm' color='light1'>
+                                <IconRefresh width={18} height={18} />
+                                <Text className='font-[600]' size='md' color='grey1_light1'>
                                   Rerun Animation
                                 </Text>
                               </>
                             )}
-                          </GradientPressable>
+                          </Pressable>
                         </View>
                       </>
                     ) : null}
