@@ -958,15 +958,15 @@ export default function FriendIdPage() {
                               <>
                                 <ActivityIndicator size='small' color={themeVars.colors.purple1} />
                                 <Text className='font-[600]' size='md' color='grey1_light1'>
-                                  Regenerating animations...
+                                  Regenerating animation...
                                 </Text>
                               </>
                             ) : !canRerunAnimations() ? (
                               <>
-                                <IconRefresh width={18} height={18} />
+                                <IconAnimationToggle width={18} height={18} />
                                 <View className='flex-1'>
                                   <Text className='font-[600]' size='md' color='grey1_light1'>
-                                    Rerun Animation
+                                    Regen Animation
                                   </Text>
                                   <Text className='font-[400]' size='sm' color='grey2_light3' style={{ marginTop: 2 }}>
                                     {getRerunCooldownRemaining()} second{getRerunCooldownRemaining() !== 1 ? 's' : ''} cooldown remaining
@@ -975,9 +975,9 @@ export default function FriendIdPage() {
                               </>
                             ) : (
                               <>
-                                <IconRefresh width={18} height={18} />
+                                <IconAnimationToggle width={18} height={18} />
                                 <Text className='font-[600]' size='md' color='grey1_light1'>
-                                  Rerun Animation
+                                  Regen Animation
                                 </Text>
                               </>
                             )}
