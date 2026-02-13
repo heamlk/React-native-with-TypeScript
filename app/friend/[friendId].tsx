@@ -94,6 +94,7 @@ export default function FriendIdPage() {
   const [mediaBlurOpen, setMediaBlurOpen] = useState(false)
   const [animationContextMenuOpen, setAnimationContextMenuOpen] = useState(false)
   const [regeneratingAnimations, setRegeneratingAnimations] = useState(false)
+  const regeneratingAnimationsRef = useRef(false)
   const animationContextMenuPositionRef = useRef<{ x: number; y: number } | null>(null)
 
   const blinkVideoUrl = friend?.emotions_animations?.urls?.blink
@@ -203,6 +204,7 @@ export default function FriendIdPage() {
 
     try {
       setRegeneratingAnimations(true)
+      regeneratingAnimationsRef.current = true
       // Keep menu open to show loading state
       
       // Determine which animation is currently playing
@@ -211,6 +213,15 @@ export default function FriendIdPage() {
         currentEmotion = 'blink'
       } else if (activeVideo === smileVideoUrl) {
         currentEmotion = 'smile'
+      }
+      
+      // Only proceed if we can determine the current emotion
+      if (!currentEmotion) {
+        console.warn('Could not determine current animation emotion, aborting regeneration')
+        setRegeneratingAnimations(false)
+        regeneratingAnimationsRef.current = false
+        setAnimationContextMenuOpen(false)
+        return
       }
       
       // Call the endpoint to regenerate only the current animation
@@ -228,6 +239,7 @@ export default function FriendIdPage() {
     } catch (error) {
       console.error('handleRerunAnimations error: ', error)
       setRegeneratingAnimations(false)
+      regeneratingAnimationsRef.current = false
       setAnimationContextMenuOpen(false)
       // TODO: Show user-friendly error message
     }
@@ -524,18 +536,21 @@ export default function FriendIdPage() {
       return
     }
 
+    // Check if we're regenerating (use ref to avoid stale closure)
+    const isRegenerating = regeneratingAnimationsRef.current
+
     // Update the friend state with the new companion data
     setFriend(companion)
 
     // If emotions_animations URLs are now available, update the active video
-    if (companion?.emotions_animations?.urls?.blink) {
-      // Set active video if we don't have one, or if it's different from current
+    if (companion?.emotions_animations?.urls?.blink || companion?.emotions_animations?.urls?.smile) {
+      // Set active video if we don't have one, or if regenerating
       setActiveVideo((current: string | null) => {
         if (!current && companion.emotions_animations?.urls?.blink) {
           return companion.emotions_animations.urls.blink
         }
         // If regenerating, update to the new URL for the current emotion
-        if (regeneratingAnimations) {
+        if (isRegenerating) {
           const currentEmotion = current === blinkVideoUrl ? 'blink' : current === smileVideoUrl ? 'smile' : null
           if (currentEmotion === 'blink' && companion.emotions_animations?.urls?.blink) {
             return companion.emotions_animations.urls.blink
@@ -548,8 +563,9 @@ export default function FriendIdPage() {
     }
 
     // Reset loading state and close menu when update is received
-    if (regeneratingAnimations) {
+    if (isRegenerating) {
       setRegeneratingAnimations(false)
+      regeneratingAnimationsRef.current = false
       setAnimationContextMenuOpen(false)
     }
 
