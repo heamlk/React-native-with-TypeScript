@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Animated, Easing } from 'react-native'
+import { Animated, Easing, Platform } from 'react-native'
 import IconRegenAnimation from '@/app/_assets/icons/regenAnimation'
 import { useTheme } from '@/app/_context/theme'
 
@@ -73,6 +73,16 @@ export default function AnimatedRegenIcon({ width = 18, height = 18, isAnimating
         height,
         alignItems: 'center',
         justifyContent: 'center',
+        // Shadow/reflection effect
+        shadowColor: '#22c55e', // green shadow
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.6,
+        shadowRadius: 4,
+        elevation: 6, // Android shadow
+        // Web shadow/glow effect
+        ...(Platform.OS === 'web' && {
+          filter: 'drop-shadow(0 2px 4px rgba(34, 197, 94, 0.6)) drop-shadow(0 0 8px rgba(34, 197, 94, 0.4))',
+        }),
       }}
     >
       <IconRegenAnimation width={width} height={height} theme={theme} />

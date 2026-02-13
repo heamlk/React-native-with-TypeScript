@@ -4,7 +4,8 @@ import themeVars from '@/app/_styles/theme/themeVars'
 import Svg, { Path, Circle } from 'react-native-svg'
 
 const SvgComponent = ({ width = svgIconDefaultProps.width, height = svgIconDefaultProps.height, color = svgIconDefaultProps.color, theme, ...props }: SvgIconType & { theme?: ThemeType }) => {
-  const iconColor = color || (theme === 'light' ? themeVars.colors.grey1 : themeVars.colors.purple1)
+  // Use green color for regeneration icon
+  const iconColor = color || '#22c55e' // green-500
   
   return (
     <Svg {...props} width={width} height={height} viewBox='0 0 24 24' fill='none'>
