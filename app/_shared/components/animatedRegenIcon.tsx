@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Animated, Easing } from 'react-native'
-import IconAnimationToggle from '@/app/_assets/icons/animations-toggle.svg'
+import IconRegenAnimation from '@/app/_assets/icons/regenAnimation'
+import { useTheme } from '@/app/_context/theme'
 
 interface AnimatedRegenIconProps {
   width?: number
@@ -9,6 +10,7 @@ interface AnimatedRegenIconProps {
 }
 
 export default function AnimatedRegenIcon({ width = 18, height = 18, isAnimating = true }: AnimatedRegenIconProps) {
+  const { theme } = useTheme()
   const rotateAnim = useRef(new Animated.Value(0)).current
   const pulseAnim = useRef(new Animated.Value(1)).current
 
@@ -67,9 +69,13 @@ export default function AnimatedRegenIcon({ width = 18, height = 18, isAnimating
           { rotate },
           { scale: pulseAnim },
         ],
+        width,
+        height,
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <IconAnimationToggle width={width} height={height} />
+      <IconRegenAnimation width={width} height={height} theme={theme} />
     </Animated.View>
   )
 }

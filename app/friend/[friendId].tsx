@@ -950,21 +950,25 @@ export default function FriendIdPage() {
                           }}
                         >
                           <Pressable
-                            className='px-[24px] py-[14px] flex-row items-center gap-[10px]'
+                            className='px-[24px] py-[14px] flex-row items-center gap-[12px]'
                             background='transparent'
                             onPress={handleRerunAnimations}
                             disabled={!canRerunAnimations() || regeneratingAnimations}
                           >
                             {regeneratingAnimations ? (
                               <>
-                                <ActivityIndicator size='small' color={themeVars.colors.purple1} />
+                                <View className='items-center justify-center' style={{ width: 20, height: 20 }}>
+                                  <ActivityIndicator size='small' color={themeVars.colors.purple1} />
+                                </View>
                                 <Text className='font-[600]' size='md' color='grey1_light1'>
                                   Regenerating animation...
                                 </Text>
                               </>
                             ) : !canRerunAnimations() ? (
                               <>
-                                <AnimatedRegenIcon width={18} height={18} isAnimating={false} />
+                                <View className='items-center justify-center' style={{ width: 20, height: 20 }}>
+                                  <AnimatedRegenIcon width={18} height={18} isAnimating={false} />
+                                </View>
                                 <View className='flex-1'>
                                   <Text className='font-[600]' size='md' color='grey1_light1'>
                                     Regen Animation
@@ -976,7 +980,9 @@ export default function FriendIdPage() {
                               </>
                             ) : (
                               <>
-                                <AnimatedRegenIcon width={18} height={18} isAnimating={true} />
+                                <View className='items-center justify-center' style={{ width: 20, height: 20 }}>
+                                  <AnimatedRegenIcon width={18} height={18} isAnimating={true} />
+                                </View>
                                 <Text className='font-[600]' size='md' color='grey1_light1'>
                                   Regen Animation
                                 </Text>
