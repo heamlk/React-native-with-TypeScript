@@ -30,6 +30,7 @@ import Carousel, { type ICarouselInstance } from 'react-native-reanimated-carous
 import { resizeToFitScreen, scaleToFit } from '../_lib/utils'
 import VoiceToTextMobile from '../_shared/components/voiceToTextMobile'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import storage from '../_shared/storage/storage'
 
 export default function FriendIdPage() {
   const { theme } = useTheme()
@@ -89,6 +90,9 @@ export default function FriendIdPage() {
   >([])
   const [conversationMedia, setConversationMedia] = useState<ImageMedia[]>([])
   const [mediaBlurOpen, setMediaBlurOpen] = useState(false)
+  const [animationContextMenuOpen, setAnimationContextMenuOpen] = useState(false)
+  const [regeneratingAnimations, setRegeneratingAnimations] = useState(false)
+  const animationContextMenuPositionRef = useRef<{ x: number; y: number } | null>(null)
 
   const blinkVideoUrl = friend?.emotions_animations?.urls?.blink
   const smileVideoUrl = friend?.emotions_animations?.urls?.smile
@@ -141,6 +145,9 @@ export default function FriendIdPage() {
       return
     }
 
+    // Close context menu if open
+    setAnimationContextMenuOpen(false)
+
     try {
       setUpdatingEmotionsStatus(true)
       const req = await api.postUpdateAnimationStatue({ companionId: friend?.id || '', enabled: !emotionEnabled })
@@ -156,6 +163,89 @@ export default function FriendIdPage() {
       setUpdatingEmotionsStatus(false)
       console.warn('handleAnimationToggle error: ', error)
     }
+  }
+
+  const canRerunAnimations = () => {
+    if (!friend?.id) return false
+    
+    const lastRerunKey = `animation_rerun_${friend.id}`
+    const lastRerunTimestamp = storage.getString(lastRerunKey)
+    
+    if (!lastRerunTimestamp) return true
+    
+    const oneHourInMs = 60 * 60 * 1000
+    const timeSinceLastRerun = Date.now() - parseInt(lastRerunTimestamp)
+    
+    return timeSinceLastRerun >= oneHourInMs
+  }
+
+  const getRerunCooldownRemaining = () => {
+    if (!friend?.id) return 0
+    
+    const lastRerunKey = `animation_rerun_${friend.id}`
+    const lastRerunTimestamp = storage.getString(lastRerunKey)
+    
+    if (!lastRerunTimestamp) return 0
+    
+    const oneHourInMs = 60 * 60 * 1000
+    const timeSinceLastRerun = Date.now() - parseInt(lastRerunTimestamp)
+    const remaining = oneHourInMs - timeSinceLastRerun
+    
+    return Math.max(0, Math.ceil(remaining / 1000 / 60)) // Return minutes remaining
+  }
+
+  const handleRerunAnimations = async () => {
+    if (!friend?.id || regeneratingAnimations || !canRerunAnimations()) {
+      return
+    }
+
+    try {
+      setRegeneratingAnimations(true)
+      setAnimationContextMenuOpen(false)
+      
+      // Call the endpoint to regenerate animations
+      await api.generateCompanionEmotionsAnimations({ companionId: friend.id })
+      
+      // Store timestamp for rate limiting
+      const lastRerunKey = `animation_rerun_${friend.id}`
+      storage.set(lastRerunKey, Date.now().toString())
+      
+      // The companion_update event will be received via socket and update the UI
+    } catch (error) {
+      console.warn('handleRerunAnimations error: ', error)
+    } finally {
+      setRegeneratingAnimations(false)
+    }
+  }
+
+  const handleAnimationContextMenu = (event?: any) => {
+    // Only show menu if animations are enabled
+    if (!emotionEnabled || !friend?.emotions_animations?.enabled) {
+      return
+    }
+
+    if (Platform.OS === 'web' && event) {
+      // Prevent default context menu
+      if (event.preventDefault) {
+        event.preventDefault()
+      }
+      // Store position for menu placement
+      const clientX = event.nativeEvent?.clientX || event.clientX || 0
+      const clientY = event.nativeEvent?.clientY || event.clientY || 0
+      animationContextMenuPositionRef.current = {
+        x: clientX,
+        y: clientY,
+      }
+    } else {
+      // For mobile, position will be relative to button
+      animationContextMenuPositionRef.current = null
+    }
+    
+    setAnimationContextMenuOpen(true)
+  }
+
+  const handleCloseContextMenu = () => {
+    setAnimationContextMenuOpen(false)
   }
 
   const handleClear = async () => {
@@ -485,6 +575,29 @@ export default function FriendIdPage() {
     }
   }, [])
 
+  // Close context menu when clicking outside
+  useEffect(() => {
+    if (!animationContextMenuOpen) return
+
+    const handleClickOutside = () => {
+      setAnimationContextMenuOpen(false)
+    }
+
+    // Use setTimeout to avoid immediate closure
+    const timeoutId = setTimeout(() => {
+      if (Platform.OS === 'web') {
+        document.addEventListener('click', handleClickOutside)
+      }
+    }, 100)
+
+    return () => {
+      clearTimeout(timeoutId)
+      if (Platform.OS === 'web') {
+        document.removeEventListener('click', handleClickOutside)
+      }
+    }
+  }, [animationContextMenuOpen])
+
   useEffect(() => {
     viewRef?.current?.scrollToEnd({ animated: true })
   }, [messages, companionIsTyping])
@@ -789,20 +902,94 @@ export default function FriendIdPage() {
                 ) : null}
 
                 {blinkVideoUrl ? (
-                  <Pressable className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' background='black/50_dark1' onPress={handleAnimationToggle}>
-                    {emotionEnabled ? (
+                  <View className='relative'>
+                    <Pressable 
+                      className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' 
+                      background='black/50_dark1' 
+                      onPress={handleAnimationToggle}
+                      onLongPress={handleAnimationContextMenu}
+                      {...(Platform.OS === 'web' ? {
+                        onContextMenu: handleAnimationContextMenu
+                      } : {})}
+                    >
+                      {emotionEnabled ? (
+                        <>
+                          <IconAnimationToggle />
+                          <View className='border-[2px] rounded-[999px] absolute bottom-[-2px] right-[-2px]' border='transparent_dark1'>
+                            <IconChecked className='rounded-[999px]' />
+                          </View>
+                        </>
+                      ) : (
+                        <View className='opacity-[0.4]'>
+                          <IconAnimationToggle />
+                        </View>
+                      )}
+                    </Pressable>
+                    
+                    {/* Context Menu */}
+                    {animationContextMenuOpen && emotionEnabled && friend?.emotions_animations?.enabled ? (
                       <>
-                        <IconAnimationToggle />
-                        <View className='border-[2px] rounded-[999px] absolute bottom-[-2px] right-[-2px]' border='transparent_dark1'>
-                          <IconChecked className='rounded-[999px]' />
+                        {Platform.OS === 'web' ? (
+                          <Pressable 
+                            className='fixed top-0 left-0 right-0 bottom-0 z-[9999]' 
+                            style={{ position: 'fixed', backgroundColor: 'transparent' }}
+                            onPress={handleCloseContextMenu}
+                          />
+                        ) : (
+                          <Pressable 
+                            className='absolute top-0 left-0 right-0 bottom-0 z-[9999]' 
+                            style={{ backgroundColor: 'transparent' }}
+                            onPress={handleCloseContextMenu}
+                          />
+                        )}
+                        <View 
+                          className={`${Platform.OS === 'web' ? 'fixed' : 'absolute'} z-[10000] rounded-md border-[1px] min-w-[180px] py-[8px] shadow-lg`}
+                          background='grey6_dark6' 
+                          border='grey5_dark3'
+                          style={{
+                            ...(Platform.OS === 'web' && animationContextMenuPositionRef.current ? {
+                              position: 'fixed',
+                              left: `${animationContextMenuPositionRef.current.x}px`,
+                              top: `${animationContextMenuPositionRef.current.y}px`,
+                            } : {
+                              bottom: 50,
+                              right: 0,
+                            })
+                          }}
+                        >
+                          <Pressable
+                            className='px-[16px] py-[12px] flex-row items-center gap-[12px]'
+                            background='transparent'
+                            onPress={handleRerunAnimations}
+                            disabled={!canRerunAnimations() || regeneratingAnimations}
+                          >
+                            {regeneratingAnimations ? (
+                              <>
+                                <ActivityIndicator size='small' color={themeVars.colors.purple1} />
+                                <Text className='font-[500]' size='sm' color='grey1_light2'>
+                                  Regenerating...
+                                </Text>
+                              </>
+                            ) : !canRerunAnimations() ? (
+                              <>
+                                <IconAnimationToggle width={16} height={16} />
+                                <Text className='font-[500]' size='sm' color='grey2_light3'>
+                                  Rerun ({getRerunCooldownRemaining()}m cooldown)
+                                </Text>
+                              </>
+                            ) : (
+                              <>
+                                <IconAnimationToggle width={16} height={16} />
+                                <Text className='font-[500]' size='sm' color='grey1_light2'>
+                                  Rerun
+                                </Text>
+                              </>
+                            )}
+                          </Pressable>
                         </View>
                       </>
-                    ) : (
-                      <View className='opacity-[0.4]'>
-                        <IconAnimationToggle />
-                      </View>
-                    )}
-                  </Pressable>
+                    ) : null}
+                  </View>
                 ) : null}
 
                 <Pressable className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' background='black/50_dark1' onPress={handleClearClick}>
