@@ -230,16 +230,6 @@ export default function FriendIdPage() {
       if (event.preventDefault) {
         event.preventDefault()
       }
-      // Store position for menu placement (above the button)
-      const clientX = event.nativeEvent?.clientX || event.clientX || 0
-      const clientY = event.nativeEvent?.clientY || event.clientY || 0
-      animationContextMenuPositionRef.current = {
-        x: clientX,
-        y: clientY,
-      }
-    } else {
-      // For mobile, position will be relative to button (above)
-      animationContextMenuPositionRef.current = null
     }
     
     setAnimationContextMenuOpen(true)
@@ -944,18 +934,12 @@ export default function FriendIdPage() {
                           />
                         )}
                         <View 
-                          className={`${Platform.OS === 'web' ? 'fixed' : 'absolute'} z-[10000] rounded-sm border-[1px] overflow-hidden`}
+                          className='absolute z-[10000] rounded-sm border-[1px] overflow-hidden'
                           background='grey6_dark7' 
                           border='grey5_dark3'
                           style={{
-                            ...(Platform.OS === 'web' && animationContextMenuPositionRef.current && typeof window !== 'undefined' ? {
-                              position: 'fixed',
-                              left: `${animationContextMenuPositionRef.current.x + 10}px`,
-                              bottom: `${window.innerHeight - animationContextMenuPositionRef.current.y + 100}px`,
-                            } : {
-                              bottom: 100,
-                              right: 0,
-                            }),
+                            bottom: 50,
+                            right: 0,
                             shadowColor: theme === 'light' ? '#000' : '#000',
                             shadowOffset: { width: 0, height: 4 },
                             shadowOpacity: 0.3,
