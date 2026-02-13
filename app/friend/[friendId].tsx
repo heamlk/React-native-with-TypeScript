@@ -17,6 +17,7 @@ import IconClose from '@/app/_assets/icons/close'
 import IconMessage from '@/app/_assets/icons/message'
 import IconMedia from '@/app/_assets/icons/mediaIcon.svg'
 import IconRefresh from '@/app/_assets/icons/refresh.svg'
+import AnimatedRegenIcon from '../_shared/components/animatedRegenIcon'
 import themeVars from '../_styles/theme/themeVars'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTheme } from '../_context/theme'
@@ -963,7 +964,7 @@ export default function FriendIdPage() {
                               </>
                             ) : !canRerunAnimations() ? (
                               <>
-                                <IconAnimationToggle width={18} height={18} />
+                                <AnimatedRegenIcon width={18} height={18} isAnimating={false} />
                                 <View className='flex-1'>
                                   <Text className='font-[600]' size='md' color='grey1_light1'>
                                     Regen Animation
@@ -975,7 +976,7 @@ export default function FriendIdPage() {
                               </>
                             ) : (
                               <>
-                                <IconAnimationToggle width={18} height={18} />
+                                <AnimatedRegenIcon width={18} height={18} isAnimating={true} />
                                 <Text className='font-[600]' size='md' color='grey1_light1'>
                                   Regen Animation
                                 </Text>
