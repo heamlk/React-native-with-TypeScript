@@ -948,10 +948,10 @@ export default function FriendIdPage() {
                           background='grey6_dark6' 
                           border='grey5_dark3'
                           style={{
-                            ...(Platform.OS === 'web' && animationContextMenuPositionRef.current ? {
+                            ...(Platform.OS === 'web' && animationContextMenuPositionRef.current && typeof window !== 'undefined' ? {
                               position: 'fixed',
                               left: `${animationContextMenuPositionRef.current.x + 10}px`,
-                              top: `${animationContextMenuPositionRef.current.y - 80}px`,
+                              bottom: `${window.innerHeight - animationContextMenuPositionRef.current.y + 100}px`,
                             } : {
                               bottom: 100,
                               right: 0,
