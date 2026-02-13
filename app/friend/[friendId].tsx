@@ -16,6 +16,7 @@ import IconTrash from '@/app/_assets/icons/trash.svg'
 import IconClose from '@/app/_assets/icons/close'
 import IconMessage from '@/app/_assets/icons/message'
 import IconMedia from '@/app/_assets/icons/mediaIcon.svg'
+import IconRefresh from '@/app/_assets/icons/refresh.svg'
 import themeVars from '../_styles/theme/themeVars'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTheme } from '../_context/theme'
@@ -943,49 +944,63 @@ export default function FriendIdPage() {
                           />
                         )}
                         <View 
-                          className={`${Platform.OS === 'web' ? 'fixed' : 'absolute'} z-[10000] rounded-md border-[1px] min-w-[180px] py-[8px] shadow-lg`}
+                          className={`${Platform.OS === 'web' ? 'fixed' : 'absolute'} z-[10000] rounded-lg border-[1px] overflow-hidden`}
                           background='grey6_dark6' 
                           border='grey5_dark3'
                           style={{
                             ...(Platform.OS === 'web' && animationContextMenuPositionRef.current ? {
                               position: 'fixed',
-                              left: `${animationContextMenuPositionRef.current.x}px`,
-                              top: `${animationContextMenuPositionRef.current.y}px`,
+                              left: `${animationContextMenuPositionRef.current.x + 10}px`,
+                              top: `${animationContextMenuPositionRef.current.y + 10}px`,
                             } : {
                               bottom: 50,
                               right: 0,
-                            })
+                            }),
+                            shadowColor: theme === 'light' ? '#000' : '#000',
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.3,
+                            shadowRadius: 12,
+                            elevation: 12,
+                            minWidth: 220,
                           }}
                         >
-                          <Pressable
-                            className='px-[16px] py-[12px] flex-row items-center gap-[12px]'
-                            background='transparent'
+                          <GradientPressable
+                            className='px-[20px] py-[16px] flex-row items-center gap-[14px]'
+                            type={!canRerunAnimations() || regeneratingAnimations ? 'dark' : 'primary'}
                             onPress={handleRerunAnimations}
                             disabled={!canRerunAnimations() || regeneratingAnimations}
+                            isPressable={canRerunAnimations() && !regeneratingAnimations}
                           >
                             {regeneratingAnimations ? (
                               <>
                                 <ActivityIndicator size='small' color={themeVars.colors.purple1} />
-                                <Text className='font-[500]' size='sm' color='grey1_light2'>
-                                  Regenerating...
+                                <Text className='font-[600]' size='sm' color='light1'>
+                                  Regenerating animations...
                                 </Text>
                               </>
                             ) : !canRerunAnimations() ? (
                               <>
-                                <IconAnimationToggle width={16} height={16} />
-                                <Text className='font-[500]' size='sm' color='grey2_light3'>
-                                  Rerun ({getRerunCooldownRemaining()}m cooldown)
-                                </Text>
+                                <View className='opacity-[0.5]'>
+                                  <IconRefresh width={20} height={20} />
+                                </View>
+                                <View className='flex-1'>
+                                  <Text className='font-[600]' size='sm' color='grey1_light2'>
+                                    Rerun Animation
+                                  </Text>
+                                  <Text className='font-[400]' size='xs' color='grey2_light3' style={{ marginTop: 4 }}>
+                                    {getRerunCooldownRemaining()} minute{getRerunCooldownRemaining() !== 1 ? 's' : ''} cooldown remaining
+                                  </Text>
+                                </View>
                               </>
                             ) : (
                               <>
-                                <IconAnimationToggle width={16} height={16} />
-                                <Text className='font-[500]' size='sm' color='grey1_light2'>
-                                  Rerun
+                                <IconRefresh width={20} height={20} />
+                                <Text className='font-[600]' size='sm' color='light1'>
+                                  Rerun Animation
                                 </Text>
                               </>
                             )}
-                          </Pressable>
+                          </GradientPressable>
                         </View>
                       </>
                     ) : null}
