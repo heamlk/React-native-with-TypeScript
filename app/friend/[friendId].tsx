@@ -230,7 +230,7 @@ export default function FriendIdPage() {
       if (event.preventDefault) {
         event.preventDefault()
       }
-      // Store position for menu placement
+      // Store position for menu placement (above the button)
       const clientX = event.nativeEvent?.clientX || event.clientX || 0
       const clientY = event.nativeEvent?.clientY || event.clientY || 0
       animationContextMenuPositionRef.current = {
@@ -238,7 +238,7 @@ export default function FriendIdPage() {
         y: clientY,
       }
     } else {
-      // For mobile, position will be relative to button
+      // For mobile, position will be relative to button (above)
       animationContextMenuPositionRef.current = null
     }
     
@@ -951,9 +951,9 @@ export default function FriendIdPage() {
                             ...(Platform.OS === 'web' && animationContextMenuPositionRef.current ? {
                               position: 'fixed',
                               left: `${animationContextMenuPositionRef.current.x + 10}px`,
-                              top: `${animationContextMenuPositionRef.current.y + 10}px`,
+                              top: `${animationContextMenuPositionRef.current.y - 80}px`,
                             } : {
-                              bottom: 50,
+                              bottom: 100,
                               right: 0,
                             }),
                             shadowColor: theme === 'light' ? '#000' : '#000',
