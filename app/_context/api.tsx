@@ -541,8 +541,9 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  const generateCompanionEmotionsAnimations = async ({ companionId }: { companionId: string }) => {
-    return await api.post(`companions/${companionId}/generate-emotions-animations`, null, {
+  const generateCompanionEmotionsAnimations = async ({ companionId, emotion }: { companionId: string, emotion?: string }) => {
+    const params = emotion ? `?emotion=${emotion}` : ''
+    return await api.post(`companions/${companionId}/generate-emotions-animations${params}`, null, {
       headers: {
         'x-session-token': (storage.getString('session') as any) || '',
       },

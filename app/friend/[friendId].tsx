@@ -16,6 +16,8 @@ import IconTrash from '@/app/_assets/icons/trash.svg'
 import IconClose from '@/app/_assets/icons/close'
 import IconMessage from '@/app/_assets/icons/message'
 import IconMedia from '@/app/_assets/icons/mediaIcon.svg'
+import IconRefresh from '@/app/_assets/icons/refresh.svg'
+import AnimatedRegenIcon from '../_shared/components/animatedRegenIcon'
 import themeVars from '../_styles/theme/themeVars'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTheme } from '../_context/theme'
@@ -24,12 +26,13 @@ import { useApi } from '../_context/api'
 import { usePopup } from '../_context/popup'
 import Soul from '../_shared/components/Soul'
 import VoiceToText from '../_shared/components/voiceToText'
-import type { ImageMedia } from '../_context/auth.types'
+import type { ImageMedia, CompanionInfos } from '../_context/auth.types'
 import { BlurView } from 'expo-blur'
 import Carousel, { type ICarouselInstance } from 'react-native-reanimated-carousel'
 import { resizeToFitScreen, scaleToFit } from '../_lib/utils'
 import VoiceToTextMobile from '../_shared/components/voiceToTextMobile'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import storage from '../_shared/storage/storage'
 
 export default function FriendIdPage() {
   const { theme } = useTheme()
@@ -48,11 +51,17 @@ export default function FriendIdPage() {
   const carouselRef = useRef<ICarouselInstance>(null)
   const carouselSmallRef = useRef<ICarouselInstance>(null)
   const voiceBase64Ref = useRef('')
+  const friendRef = useRef<CompanionInfos | undefined>(undefined)
 
   const containerWidth = breakpoints === 'phone' ? dimentions.deviceWidth : dimentions.deviceWidth - 60 - 48 - 30
   const containerHeight = breakpoints === 'phone' ? dimentions.deviceHeight : dimentions.deviceHeight - 60 - 48 - 30
 
   const [friend, setFriend] = useState(user?.companions?.find((obj) => obj?.id === friendId))
+  
+  // Keep friendRef in sync with friend state for use in socket handlers
+  useEffect(() => {
+    friendRef.current = friend
+  }, [friend])
   const [carouselData, setCarouselData] = useState({
     open: false,
     defaultIndex: 0,
@@ -83,6 +92,11 @@ export default function FriendIdPage() {
   >([])
   const [conversationMedia, setConversationMedia] = useState<ImageMedia[]>([])
   const [mediaBlurOpen, setMediaBlurOpen] = useState(false)
+  const [animationContextMenuOpen, setAnimationContextMenuOpen] = useState(false)
+  const [regeneratingAnimations, setRegeneratingAnimations] = useState(false)
+  const regeneratingAnimationsRef = useRef(false)
+  const animationContextMenuPositionRef = useRef<{ x: number; y: number } | null>(null)
+  const [cooldownUpdateTrigger, setCooldownUpdateTrigger] = useState(0)
 
   const blinkVideoUrl = friend?.emotions_animations?.urls?.blink
   const smileVideoUrl = friend?.emotions_animations?.urls?.smile
@@ -135,6 +149,9 @@ export default function FriendIdPage() {
       return
     }
 
+    // Close context menu if open
+    setAnimationContextMenuOpen(false)
+
     try {
       setUpdatingEmotionsStatus(true)
       const req = await api.postUpdateAnimationStatue({ companionId: friend?.id || '', enabled: !emotionEnabled })
@@ -150,6 +167,104 @@ export default function FriendIdPage() {
       setUpdatingEmotionsStatus(false)
       console.warn('handleAnimationToggle error: ', error)
     }
+  }
+
+  const canRerunAnimations = () => {
+    if (!friend?.id) return false
+    
+    const lastRerunKey = `animation_rerun_${friend.id}`
+    const lastRerunTimestamp = storage.getString(lastRerunKey)
+    
+    if (!lastRerunTimestamp) return true
+    
+    const oneHourInMs = 60 * 60 * 1000 // 1 hour
+    const timeSinceLastRerun = Date.now() - parseInt(lastRerunTimestamp)
+    
+    return timeSinceLastRerun >= oneHourInMs
+  }
+
+  const getRerunCooldownRemaining = () => {
+    if (!friend?.id) return 0
+    
+    const lastRerunKey = `animation_rerun_${friend.id}`
+    const lastRerunTimestamp = storage.getString(lastRerunKey)
+    
+    if (!lastRerunTimestamp) return 0
+    
+    const oneHourInMs = 60 * 60 * 1000 // 1 hour
+    const timeSinceLastRerun = Date.now() - parseInt(lastRerunTimestamp)
+    const remaining = oneHourInMs - timeSinceLastRerun
+    
+    return Math.max(0, Math.ceil(remaining / 1000 / 60)) // Return minutes remaining
+  }
+
+  const handleRerunAnimations = async () => {
+    if (!friend?.id || regeneratingAnimations || !canRerunAnimations()) {
+      return
+    }
+
+    try {
+      setRegeneratingAnimations(true)
+      regeneratingAnimationsRef.current = true
+      // Keep menu open to show loading state
+      
+      // Determine which animation is currently playing
+      let currentEmotion: string | undefined = undefined
+      if (activeVideo === blinkVideoUrl) {
+        currentEmotion = 'blink'
+      } else if (activeVideo === smileVideoUrl) {
+        currentEmotion = 'smile'
+      }
+      
+      // Only proceed if we can determine the current emotion
+      if (!currentEmotion) {
+        console.warn('Could not determine current animation emotion, aborting regeneration')
+        setRegeneratingAnimations(false)
+        regeneratingAnimationsRef.current = false
+        setAnimationContextMenuOpen(false)
+        return
+      }
+      
+      // Call the endpoint to regenerate only the current animation
+      await api.generateCompanionEmotionsAnimations({ 
+        companionId: friend.id,
+        emotion: currentEmotion 
+      })
+      
+      // Store timestamp for rate limiting
+      const lastRerunKey = `animation_rerun_${friend.id}`
+      storage.set(lastRerunKey, Date.now().toString())
+      
+      // Don't close menu or reset loading state here - wait for socket event
+      // The companion_update event will be received via socket and update the UI
+    } catch (error) {
+      console.error('handleRerunAnimations error: ', error)
+      setRegeneratingAnimations(false)
+      regeneratingAnimationsRef.current = false
+      setAnimationContextMenuOpen(false)
+      // TODO: Show user-friendly error message
+    }
+    // Don't reset regeneratingAnimations in finally - wait for socket update
+  }
+
+  const handleAnimationContextMenu = (event?: any) => {
+    // Only show menu if animations are enabled
+    if (!emotionEnabled || !friend?.emotions_animations?.enabled) {
+      return
+    }
+
+    if (Platform.OS === 'web' && event) {
+      // Prevent default context menu
+      if (event.preventDefault) {
+        event.preventDefault()
+      }
+    }
+    
+    setAnimationContextMenuOpen(true)
+  }
+
+  const handleCloseContextMenu = () => {
+    setAnimationContextMenuOpen(false)
   }
 
   const handleClear = async () => {
@@ -396,19 +511,69 @@ export default function FriendIdPage() {
   }
 
   const handleCompanionEmotionEvent = async ({ companion_id, emotion }: { companion_id: string; emotion: string }) => {
-    if (companion_id !== friend?.id) {
+    const currentFriend = friendRef.current
+    if (companion_id !== currentFriend?.id) {
       return
     }
 
+    // Get the latest video URLs from the current friend state
+    const blinkUrl = currentFriend?.emotions_animations?.urls?.blink
+    const smileUrl = currentFriend?.emotions_animations?.urls?.smile
+
     if (emotion === 'blink') {
-      setNextVideo(() => blinkVideoUrl ?? '')
+      setNextVideo(() => blinkUrl ?? '')
     } else if (emotion === 'smile') {
-      setNextVideo(() => smileVideoUrl ?? '')
+      setNextVideo(() => smileUrl ?? '')
     }
   }
 
   const handleCompanionMediaUpdate = async ({ companion_id, images }: { companion_id: string; images: any[] }) => {
     updateMedia()
+  }
+
+  const handleCompanionUpdate = async ({ companion }: { companion: CompanionInfos }) => {
+    const currentFriend = friendRef.current
+    if (companion?.id !== currentFriend?.id) {
+      return
+    }
+
+    // Check if we're regenerating (use ref to avoid stale closure)
+    const isRegenerating = regeneratingAnimationsRef.current
+
+    // Update the friend state with the new companion data
+    setFriend(companion)
+
+    // If emotions_animations URLs are now available, update the active video
+    if (companion?.emotions_animations?.urls?.blink || companion?.emotions_animations?.urls?.smile) {
+      // Set active video if we don't have one, or if regenerating
+      setActiveVideo((current: string | null) => {
+        if (!current && companion.emotions_animations?.urls?.blink) {
+          return companion.emotions_animations.urls.blink
+        }
+        // If regenerating, update to the new URL for the current emotion
+        if (isRegenerating) {
+          const currentEmotion = current === blinkVideoUrl ? 'blink' : current === smileVideoUrl ? 'smile' : null
+          if (currentEmotion === 'blink' && companion.emotions_animations?.urls?.blink) {
+            return companion.emotions_animations.urls.blink
+          } else if (currentEmotion === 'smile' && companion.emotions_animations?.urls?.smile) {
+            return companion.emotions_animations.urls.smile
+          }
+        }
+        return current
+      })
+    }
+
+    // Reset loading state and close menu when update is received
+    if (isRegenerating) {
+      setRegeneratingAnimations(false)
+      regeneratingAnimationsRef.current = false
+      setAnimationContextMenuOpen(false)
+    }
+
+    // Update emotionEnabled state if emotions_animations enabled status changed
+    if (companion?.emotions_animations?.enabled !== undefined) {
+      setEmotionEnabled(companion.emotions_animations.enabled)
+    }
   }
 
   useEffect(() => {
@@ -437,12 +602,51 @@ export default function FriendIdPage() {
     api.socketState?.on('companion_media_update', (event) => {
       handleCompanionMediaUpdate(event)
     })
+    api.socketState?.on('companion_update', (event) => {
+      handleCompanionUpdate(event)
+    })
 
     return () => {
       api.socketState?.off('companion_emotion')
       api.socketState?.off('companion_media_update')
+      api.socketState?.off('companion_update')
     }
   }, [])
+
+  // Update cooldown timer every minute when on cooldown
+  useEffect(() => {
+    if (!canRerunAnimations() && animationContextMenuOpen) {
+      const interval = setInterval(() => {
+        // Force re-render to update cooldown display
+        setCooldownUpdateTrigger((prev) => prev + 1)
+      }, 60000) // Update every minute
+
+      return () => clearInterval(interval)
+    }
+  }, [friend?.id, animationContextMenuOpen, cooldownUpdateTrigger])
+
+  // Close context menu when clicking outside
+  useEffect(() => {
+    if (!animationContextMenuOpen) return
+
+    const handleClickOutside = () => {
+      setAnimationContextMenuOpen(false)
+    }
+
+    // Use setTimeout to avoid immediate closure
+    const timeoutId = setTimeout(() => {
+      if (Platform.OS === 'web') {
+        document.addEventListener('click', handleClickOutside)
+      }
+    }, 100)
+
+    return () => {
+      clearTimeout(timeoutId)
+      if (Platform.OS === 'web') {
+        document.removeEventListener('click', handleClickOutside)
+      }
+    }
+  }, [animationContextMenuOpen])
 
   useEffect(() => {
     viewRef?.current?.scrollToEnd({ animated: true })
@@ -748,20 +952,105 @@ export default function FriendIdPage() {
                 ) : null}
 
                 {blinkVideoUrl ? (
-                  <Pressable className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' background='black/50_dark1' onPress={handleAnimationToggle}>
-                    {emotionEnabled ? (
+                  <View className='relative'>
+                    <Pressable 
+                      className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' 
+                      background='black/50_dark1' 
+                      onPress={handleAnimationToggle}
+                      onLongPress={handleAnimationContextMenu}
+                      {...(Platform.OS === 'web' ? {
+                        onContextMenu: handleAnimationContextMenu
+                      } : {})}
+                    >
+                      {emotionEnabled ? (
+                        <>
+                          <IconAnimationToggle />
+                          <View className='border-[2px] rounded-[999px] absolute bottom-[-2px] right-[-2px]' border='transparent_dark1'>
+                            <IconChecked className='rounded-[999px]' />
+                          </View>
+                        </>
+                      ) : (
+                        <View className='opacity-[0.4]'>
+                          <IconAnimationToggle />
+                        </View>
+                      )}
+                    </Pressable>
+                    
+                    {/* Context Menu */}
+                    {animationContextMenuOpen && emotionEnabled && friend?.emotions_animations?.enabled ? (
                       <>
-                        <IconAnimationToggle />
-                        <View className='border-[2px] rounded-[999px] absolute bottom-[-2px] right-[-2px]' border='transparent_dark1'>
-                          <IconChecked className='rounded-[999px]' />
+                        {Platform.OS === 'web' ? (
+                          <Pressable 
+                            className='fixed top-0 left-0 right-0 bottom-0 z-[9999]' 
+                            style={{ position: 'fixed', backgroundColor: 'transparent' }}
+                            onPress={handleCloseContextMenu}
+                          />
+                        ) : (
+                          <Pressable 
+                            className='absolute top-0 left-0 right-0 bottom-0 z-[9999]' 
+                            style={{ backgroundColor: 'transparent' }}
+                            onPress={handleCloseContextMenu}
+                          />
+                        )}
+                        <View 
+                          className='absolute z-[10000] rounded-sm border-[1px] overflow-hidden'
+                          background='grey6_dark7' 
+                          border='grey5_dark3'
+                          style={{
+                            bottom: 50,
+                            right: 0,
+                            shadowColor: theme === 'light' ? '#000' : '#000',
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.3,
+                            shadowRadius: 12,
+                            elevation: 12,
+                            minWidth: 200,
+                          }}
+                        >
+                          <Pressable
+                            className='px-[24px] py-[14px] flex-row items-center gap-[12px]'
+                            background='transparent'
+                            onPress={handleRerunAnimations}
+                            disabled={!canRerunAnimations() || regeneratingAnimations}
+                          >
+                            {regeneratingAnimations ? (
+                              <>
+                                <View className='items-center justify-center' style={{ width: 20, height: 20 }}>
+                                  <ActivityIndicator size='small' color={themeVars.colors.purple1} />
+                                </View>
+                                <Text className='font-[600]' size='md' color='grey1_light1'>
+                                  Regenerating animation...
+                                </Text>
+                              </>
+                            ) : !canRerunAnimations() ? (
+                              <>
+                                <View className='items-center justify-center' style={{ width: 20, height: 20 }}>
+                                  <AnimatedRegenIcon width={18} height={18} isAnimating={false} />
+                                </View>
+                                <View className='flex-1'>
+                                  <Text className='font-[600]' size='md' color='grey1_light1'>
+                                    Regen Animation
+                                  </Text>
+                                  <Text className='font-[400]' size='sm' color='grey2_light3' style={{ marginTop: 2 }}>
+                                    {getRerunCooldownRemaining()} minute{getRerunCooldownRemaining() !== 1 ? 's' : ''} cooldown remaining
+                                  </Text>
+                                </View>
+                              </>
+                            ) : (
+                              <>
+                                <View className='items-center justify-center' style={{ width: 20, height: 20 }}>
+                                  <AnimatedRegenIcon width={18} height={18} isAnimating={true} />
+                                </View>
+                                <Text className='font-[600]' size='md' color='grey1_light1'>
+                                  Regen Animation
+                                </Text>
+                              </>
+                            )}
+                          </Pressable>
                         </View>
                       </>
-                    ) : (
-                      <View className='opacity-[0.4]'>
-                        <IconAnimationToggle />
-                      </View>
-                    )}
-                  </Pressable>
+                    ) : null}
+                  </View>
                 ) : null}
 
                 <Pressable className='w-[40px] h-[40px] rounded-[9999px] items-center justify-center relative' background='black/50_dark1' onPress={handleClearClick}>
