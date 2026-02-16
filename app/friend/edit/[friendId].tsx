@@ -248,7 +248,7 @@ export default function NewFriendPage() {
     const randomName = defaultNames?.[randomGender]?.[getRandomNumber({ min: 0, max: defaultNames?.[randomGender]?.length - 1 })]
 
     const randomUniverse = availableAttributes['universe'][getRandomNumber({ min: 0, max: availableAttributes['universe']?.length - 1 })]?.key
-    const randomAge = Math.floor(Math.random() * (100 - 21 + 1)) + 21
+    const randomAge = Math.floor(Math.random() * (45 - 21 + 1)) + 21
     const randomHairColor = availableAttributes['hair_color'][getRandomNumber({ min: 0, max: availableAttributes['hair_color']?.length - 1 })]?.key
     const randomHairLength = availableAttributes['hair_length'][getRandomNumber({ min: 0, max: availableAttributes['hair_length']?.length - 1 })]?.key
     const randomFacialHair = randomGender !== 'female' ? availableAttributes['facial_hair'][getRandomNumber({ min: 0, max: availableAttributes['facial_hair']?.length - 1 })]?.key : null
