@@ -579,7 +579,10 @@ export default function FriendIdPage() {
         }
         // If regenerating, update to the new URL for the current emotion
         if (isRegenerating) {
-          const currentEmotion = current === blinkVideoUrl ? 'blink' : current === smileVideoUrl ? 'smile' : null
+          const currentBlink = currentFriend?.emotions_animations?.urls?.blink
+          const currentSmile = currentFriend?.emotions_animations?.urls?.smile
+          const currentEmotion = current === currentBlink ? 'blink' : current === currentSmile ? 'smile' : null
+          
           if (currentEmotion === 'blink' && companion.emotions_animations?.urls?.blink) {
             return companion.emotions_animations.urls.blink
           } else if (currentEmotion === 'smile' && companion.emotions_animations?.urls?.smile) {
