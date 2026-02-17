@@ -342,6 +342,33 @@ export default function FriendIdPage() {
         console.warn('send message error: ', error)
       }
     } else if (messageInput) {
+      if (messageInput === 'BFFL.AI Emotion regen') {
+        setMessageInput('')
+        try {
+          // Determine which animation is currently playing to regenerate the correct one
+          let currentEmotion: string | undefined = undefined
+          if (activeVideo === blinkVideoUrl) {
+            currentEmotion = 'blink'
+          } else if (activeVideo === smileVideoUrl) {
+            currentEmotion = 'smile'
+          }
+
+          if (currentEmotion && friend?.id) {
+            setRegeneratingAnimations(true)
+            regeneratingAnimationsRef.current = true
+            await api.generateCompanionEmotionsAnimations({
+              companionId: friend.id,
+              emotion: currentEmotion,
+            })
+          }
+        } catch (error) {
+          console.warn('Secret code emotion regen error:', error)
+          setRegeneratingAnimations(false)
+          regeneratingAnimationsRef.current = false
+        }
+        return
+      }
+
       const message = messageInput
       const newMessages: any = [
         ...messages,
