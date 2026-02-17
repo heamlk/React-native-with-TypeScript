@@ -202,7 +202,7 @@ export default function UserProvider({ children }: UserProviderProps) {
       api.socketState?.off('companion_media_update')
       api.socketState?.off('companion_emotion')
     }
-  }, [api.socketState?.active])
+  }, [api.socketState])
 
   const value = { user, companionIsTyping, setUser, updateUser, getSubscriptionOption, isSubscriptionOptionActive, hasAdditionalAISubscription, friendLimitReached, friendLimitReachedDialog, isPurchaseActive }
 

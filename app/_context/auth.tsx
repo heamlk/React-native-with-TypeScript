@@ -126,6 +126,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const authenticate = async ({ next }: { next?: (user: UserType) => void }) => {
+    api.refreshSocket()
     const [loginRes, getProfileRes, getProductsRes, getAvailableInterestsRes] = await Promise.all([api.login(), api.getProfile(), api.getProducts(), api.getAvailableInterests()])
 
     const newUser: UserType = {
@@ -149,6 +150,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     storage.delete('user')
     storage.delete('activePurchases')
     storage.delete('activeSubscriptions')
+    api.refreshSocket()
   }
 
   // useEffect(() => {

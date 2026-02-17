@@ -73,16 +73,24 @@ export default function NewFriendPage() {
     return () => {
       api.socketState?.off('companion_update')
     }
-  }, [api.socketState?.active])
+  }, [api.socketState])
 
   const handleMakeChanges = () => {
     router.push(`/friend/edit/${friend?.id}`)
   }
 
   const handleStartChatting = async () => {
-    await api.generateCompanionEmotionsAnimations({ companionId: friend?.id || '' })
-    await api.postUpdateAnimationStatue({ companionId: friend?.id || '', enabled: true })
-    router.push(`/friend/${friend?.id}`)
+    if (!friend?.id) return
+    
+    try {
+      await api.generateCompanionEmotionsAnimations({ companionId: friend.id })
+      await api.postUpdateAnimationStatue({ companionId: friend.id, enabled: true })
+      router.push(`/friend/${friend.id}`)
+    } catch (error) {
+      console.warn('handleStartChatting error:', error)
+      // Still navigate even if animation generation fails, so the user isn't stuck
+      router.push(`/friend/${friend.id}`)
+    }
   }
 
   const handleRefreshImage = async () => {

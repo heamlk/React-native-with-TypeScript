@@ -400,7 +400,7 @@ export default function FriendIdPage() {
 
     try {
       setFetchingMedia(true)
-      const req = await api.getConversationMedia({ companionId: friend?.id || '' })
+      const req = await api.getConversationMedia({ companionId: friendRef.current?.id || '' })
       const data = req?.data
       setFetchingMedia(false)
 
@@ -611,7 +611,7 @@ export default function FriendIdPage() {
       api.socketState?.off('companion_media_update')
       api.socketState?.off('companion_update')
     }
-  }, [])
+  }, [api.socketState])
 
   // Update cooldown timer every minute when on cooldown
   useEffect(() => {
