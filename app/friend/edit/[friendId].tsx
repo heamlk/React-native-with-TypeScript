@@ -134,7 +134,7 @@ export default function NewFriendPage() {
   }, [selectedAttributes])
 
   const handleGo = async () => {
-    const isSubscribed = user?.profile?.is_subscribed
+    const isSubscribed = user?.profile?.is_subscribed || user?.profile?.lifetime_subscription
     if (friend?.id && !isSubscribed) {
       setPopup({
         open: true,
@@ -314,7 +314,7 @@ export default function NewFriendPage() {
   }
 
   const handleDelete = async () => {
-    const isSubscribed = user?.profile?.is_subscribed
+    const isSubscribed = user?.profile?.is_subscribed || user?.profile?.lifetime_subscription
     if (!isSubscribed) {
       setPopup({
         open: true,
