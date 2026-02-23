@@ -1,4 +1,4 @@
-import React, { createContext, Dispatch, SetStateAction, useContext, useEffect, useState, type ReactNode } from 'react'
+import React, { createContext, Dispatch, SetStateAction, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios'
 import storage from '../_shared/storage/storage'
 import { io, Socket } from 'socket.io-client'
@@ -19,6 +19,7 @@ export type ApiContextType = {
   api: AxiosInstance
   socketState: Socket<ServerToClientEvents> | null
   setSocketState: Dispatch<SetStateAction<Socket<ServerToClientEvents> | null>>
+  refreshSocket: () => void
   login: () => Promise<AxiosResponse<any, any, {}>>
   getProfile: () => Promise<AxiosResponse<any, any, {}>>
   getProducts: () => Promise<AxiosResponse<any, any, {}>>
@@ -86,18 +87,51 @@ const ApiContext = createContext<ApiContextType | null>(null)
 
 export default function ApiProvider({ children }: { children: ReactNode }) {
   const [socketState, setSocketState] = useState<Socket<ServerToClientEvents> | null>(null)
+  const socketRef = useRef<Socket<ServerToClientEvents> | null>(null)
 
   const api: AxiosInstance = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
   })
 
-  const socket: Socket = io(process.env.EXPO_PUBLIC_API_BASE_URL, {
-    auth: {
-      token: (storage.getString('session') as any) || '',
-    },
-    transports: ['websocket', 'polling'],
-    forceNew: true,
-  })
+  const refreshSocket = () => {
+    if (socketRef.current) {
+      socketRef.current.disconnect()
+    }
+
+    const newSocket: Socket = io(process.env.EXPO_PUBLIC_API_BASE_URL, {
+      auth: {
+        token: (storage.getString('session') as any) || '',
+      },
+      transports: ['websocket', 'polling'],
+      forceNew: true,
+    })
+
+    const handleError = (err: any) => {
+      console.group('Socket error details')
+      console.error(err)
+      console.log('Keys:', Object.keys(err))
+      console.dir(err, { depth: null })
+      // if (err?.message) console.log('Message:', err.message)
+      if (err?.description) console.log('Description:', err.description)
+      // if (err?.context) console.log('Context:', err.context)
+      console.groupEnd()
+    }
+
+    newSocket.on('connect_error', handleError)
+    newSocket.on('connect_timeout', handleError)
+    newSocket.on('error', handleError)
+
+    socketRef.current = newSocket
+    setSocketState(newSocket)
+  }
+
+  useEffect(() => {
+    refreshSocket()
+
+    return () => {
+      socketRef.current?.disconnect()
+    }
+  }, [])
 
   const login = async () => {
     return await api.post('login', null, {
@@ -550,38 +584,11 @@ export default function ApiProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  useEffect(() => {
-    const newSocket = socket
-    setSocketState(newSocket)
-
-    const handleError = (err: any) => {
-      console.group('Socket error details')
-      console.error(err)
-      console.log('Keys:', Object.keys(err))
-      console.dir(err, { depth: null })
-      // if (err?.message) console.log('Message:', err.message)
-      if (err?.description) console.log('Description:', err.description)
-      // if (err?.context) console.log('Context:', err.context)
-      console.groupEnd()
-    }
-
-    newSocket.on('connect_error', handleError)
-    newSocket.on('connect_timeout', handleError)
-    newSocket.on('error', handleError)
-
-    return () => {
-      newSocket.off('connect_error', handleError)
-      newSocket.off('connect_timeout', handleError)
-      newSocket.off('error', handleError)
-
-      newSocket.disconnect()
-    }
-  }, [])
-
   const value = {
     api,
     socketState,
     setSocketState,
+    refreshSocket,
     login,
     getProfile,
     getProducts,

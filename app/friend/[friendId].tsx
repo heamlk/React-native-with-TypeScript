@@ -342,6 +342,33 @@ export default function FriendIdPage() {
         console.warn('send message error: ', error)
       }
     } else if (messageInput) {
+      if (messageInput === 'BFFL.AI Emotion regen') {
+        setMessageInput('')
+        try {
+          // Determine which animation is currently playing to regenerate the correct one
+          let currentEmotion: string | undefined = undefined
+          if (activeVideo === blinkVideoUrl) {
+            currentEmotion = 'blink'
+          } else if (activeVideo === smileVideoUrl) {
+            currentEmotion = 'smile'
+          }
+
+          if (currentEmotion && friend?.id) {
+            setRegeneratingAnimations(true)
+            regeneratingAnimationsRef.current = true
+            await api.generateCompanionEmotionsAnimations({
+              companionId: friend.id,
+              emotion: currentEmotion,
+            })
+          }
+        } catch (error) {
+          console.warn('Secret code emotion regen error:', error)
+          setRegeneratingAnimations(false)
+          regeneratingAnimationsRef.current = false
+        }
+        return
+      }
+
       const message = messageInput
       const newMessages: any = [
         ...messages,
@@ -400,7 +427,7 @@ export default function FriendIdPage() {
 
     try {
       setFetchingMedia(true)
-      const req = await api.getConversationMedia({ companionId: friend?.id || '' })
+      const req = await api.getConversationMedia({ companionId: friendRef.current?.id || '' })
       const data = req?.data
       setFetchingMedia(false)
 
@@ -552,7 +579,10 @@ export default function FriendIdPage() {
         }
         // If regenerating, update to the new URL for the current emotion
         if (isRegenerating) {
-          const currentEmotion = current === blinkVideoUrl ? 'blink' : current === smileVideoUrl ? 'smile' : null
+          const currentBlink = currentFriend?.emotions_animations?.urls?.blink
+          const currentSmile = currentFriend?.emotions_animations?.urls?.smile
+          const currentEmotion = current === currentBlink ? 'blink' : current === currentSmile ? 'smile' : null
+          
           if (currentEmotion === 'blink' && companion.emotions_animations?.urls?.blink) {
             return companion.emotions_animations.urls.blink
           } else if (currentEmotion === 'smile' && companion.emotions_animations?.urls?.smile) {
@@ -611,7 +641,7 @@ export default function FriendIdPage() {
       api.socketState?.off('companion_media_update')
       api.socketState?.off('companion_update')
     }
-  }, [])
+  }, [api.socketState])
 
   // Update cooldown timer every minute when on cooldown
   useEffect(() => {

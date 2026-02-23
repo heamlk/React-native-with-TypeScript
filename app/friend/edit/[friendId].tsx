@@ -134,6 +134,44 @@ export default function NewFriendPage() {
   }, [selectedAttributes])
 
   const handleGo = async () => {
+    const isSubscribed = (user?.profile?.is_subscribed && user?.profile?.subscription) || user?.profile?.lifetime_subscription
+    if (friend?.id && !isSubscribed) {
+      setPopup({
+        open: true,
+        maxWidth: 600,
+        content: (
+          <View className='gap-[24px]'>
+            <Text className='text-[24px] font-[600]' color='grey1_light1'>
+              Subscription required
+            </Text>
+            <Text className='' size='md' color='grey1_light1'>
+              You need an active subscription to edit your friend. Please subscribe to continue.
+            </Text>
+            <View className='flex-row gap-[16px]'>
+              <GradientPressable
+                className='w-[150px] h-[48px]'
+                type='dark'
+                onPress={() => {
+                  setPopup({ open: false })
+                  router.push('/marketplace')
+                }}
+              >
+                <Text className='font-[600]' size='md' color='grey1_light2'>
+                  Go to Marketplace
+                </Text>
+              </GradientPressable>
+              <GradientPressable className='w-[150px] h-[48px]' type='dark' onPress={() => setPopup({ open: false })}>
+                <Text className='font-[600]' size='md' color='grey1_light2'>
+                  Cancel
+                </Text>
+              </GradientPressable>
+            </View>
+          </View>
+        ),
+      })
+      return
+    }
+
     const keyNames: Record<string, string> = {
       age: 'Age',
       ancestral_region: 'Ancestral region',
@@ -276,6 +314,44 @@ export default function NewFriendPage() {
   }
 
   const handleDelete = async () => {
+    const isSubscribed = (user?.profile?.is_subscribed && user?.profile?.subscription) || user?.profile?.lifetime_subscription
+    if (!isSubscribed) {
+      setPopup({
+        open: true,
+        maxWidth: 600,
+        content: (
+          <View className='gap-[24px]'>
+            <Text className='text-[24px] font-[600]' color='grey1_light1'>
+              Subscription required
+            </Text>
+            <Text className='' size='md' color='grey1_light1'>
+              You need an active subscription to delete your friend. Please subscribe to continue.
+            </Text>
+            <View className='flex-row gap-[16px]'>
+              <GradientPressable
+                className='w-[150px] h-[48px]'
+                type='dark'
+                onPress={() => {
+                  setPopup({ open: false })
+                  router.push('/marketplace')
+                }}
+              >
+                <Text className='font-[600]' size='md' color='grey1_light2'>
+                  Go to Marketplace
+                </Text>
+              </GradientPressable>
+              <GradientPressable className='w-[150px] h-[48px]' type='dark' onPress={() => setPopup({ open: false })}>
+                <Text className='font-[600]' size='md' color='grey1_light2'>
+                  Cancel
+                </Text>
+              </GradientPressable>
+            </View>
+          </View>
+        ),
+      })
+      return
+    }
+
     try {
       setSocketEvent('Deleting friend...')
 
@@ -386,7 +462,7 @@ export default function NewFriendPage() {
     return () => {
       api.socketState?.off('companion_update')
     }
-  }, [api.socketState?.active])
+  }, [api.socketState])
 
   useEffect(() => {
     if (friendId && friendId !== 'new') {
